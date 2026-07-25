@@ -1,6 +1,5 @@
 /**
- * Auth library placeholder.
- * Full JWT / refresh-token implementation goes here in Phase 1 (Auth).
+ * Auth library — role definitions, user type, and re-exports.
  */
 
 export type UserRole =
@@ -43,3 +42,10 @@ export function hasPermission(
 ): boolean {
   return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
 }
+
+// Re-export permissions helpers
+export { canAccess, canAccessAll, canAccessAny, getPermissions } from "./permissions";
+export type { Permission } from "./permissions";
+
+// Re-export token helpers
+export { accessToken, refreshToken, persistedUser, clearAllTokens, isSessionValid } from "./token";

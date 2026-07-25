@@ -1,0 +1,239 @@
+/**
+ * Dashboard feature — TanStack Query hooks
+ *
+ * All hooks use a consistent staleTime / refetchInterval for the dashboard.
+ * The overview hook fetches everything in one call; individual hooks
+ * allow granular refreshes and lazy loading.
+ */
+
+import { useQuery } from "@tanstack/react-query";
+import { dashboardApi } from "../api/dashboard-api";
+import type { DashboardQueryParams } from "../types";
+
+// ---------------------------------------------------------------------------
+// Query keys (stable references for invalidation)
+// ---------------------------------------------------------------------------
+
+export const dashboardKeys = {
+  all: ["dashboard"] as const,
+  overview: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "overview", params] as const,
+  stats: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "stats", params] as const,
+  charts: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "charts", params] as const,
+  activities: (limit?: number) =>
+    [...dashboardKeys.all, "activities", limit] as const,
+  notifications: (limit?: number) =>
+    [...dashboardKeys.all, "notifications", limit] as const,
+  pendingApprovals: () => [...dashboardKeys.all, "pending-approvals"] as const,
+  recentPurchaseOrders: (limit?: number) =>
+    [...dashboardKeys.all, "recent-purchase-orders", limit] as const,
+  recentGRNs: (limit?: number) =>
+    [...dashboardKeys.all, "recent-grns", limit] as const,
+  lowStock: (limit?: number) =>
+    [...dashboardKeys.all, "low-stock", limit] as const,
+  inventoryAlerts: () => [...dashboardKeys.all, "inventory-alerts"] as const,
+  recentAdjustments: (limit?: number) =>
+    [...dashboardKeys.all, "recent-adjustments", limit] as const,
+  pendingStockReleases: () =>
+    [...dashboardKeys.all, "pending-stock-releases"] as const,
+  officerDashboard: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "officer", params] as const,
+  storeKeeperDashboard: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "store-keeper", params] as const,
+};
+
+// ---------------------------------------------------------------------------
+// Shared config
+// ---------------------------------------------------------------------------
+
+const DASHBOARD_STALE_TIME = 1000 * 60 * 2; // 2 minutes (dashboard refreshes frequently)
+const DASHBOARD_REFETCH_INTERVAL = 1000 * 60 * 5; // background refetch every 5 min
+
+// ---------------------------------------------------------------------------
+// useDashboard — full admin overview bundle
+// ---------------------------------------------------------------------------
+
+export function useDashboard(params?: DashboardQueryParams) {
+  return useQuery({
+    queryKey: dashboardKeys.overview(params),
+    queryFn: () => dashboardApi.getOverview(params),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useDashboardStats — KPI numbers
+// ---------------------------------------------------------------------------
+
+export function useDashboardStats(params?: DashboardQueryParams) {
+  return useQuery({
+    queryKey: dashboardKeys.stats(params),
+    queryFn: () => dashboardApi.getStats(params),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useDashboardCharts — chart data
+// ---------------------------------------------------------------------------
+
+export function useDashboardCharts(params?: DashboardQueryParams) {
+  return useQuery({
+    queryKey: dashboardKeys.charts(params),
+    queryFn: () => dashboardApi.getCharts(params),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useRecentActivities
+// ---------------------------------------------------------------------------
+
+export function useRecentActivities(limit = 10) {
+  return useQuery({
+    queryKey: dashboardKeys.activities(limit),
+    queryFn: () => dashboardApi.getActivities({ limit }),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useDashboardNotifications
+// ---------------------------------------------------------------------------
+
+export function useDashboardNotifications(limit = 5) {
+  return useQuery({
+    queryKey: dashboardKeys.notifications(limit),
+    queryFn: () => dashboardApi.getNotifications({ limit }),
+    staleTime: 1000 * 60, // 1 minute — notifications should refresh quickly
+    refetchInterval: 1000 * 60 * 2,
+    refetchOnWindowFocus: true,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// usePendingApprovals
+// ---------------------------------------------------------------------------
+
+export function usePendingApprovals() {
+  return useQuery({
+    queryKey: dashboardKeys.pendingApprovals(),
+    queryFn: dashboardApi.getPendingApprovals,
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useRecentPurchaseOrders
+// ---------------------------------------------------------------------------
+
+export function useRecentPurchaseOrders(limit = 5) {
+  return useQuery({
+    queryKey: dashboardKeys.recentPurchaseOrders(limit),
+    queryFn: () => dashboardApi.getRecentPurchaseOrders({ limit }),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useRecentGRNs
+// ---------------------------------------------------------------------------
+
+export function useRecentGRNs(limit = 5) {
+  return useQuery({
+    queryKey: dashboardKeys.recentGRNs(limit),
+    queryFn: () => dashboardApi.getRecentGRNs({ limit }),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useLowStockItems
+// ---------------------------------------------------------------------------
+
+export function useLowStockItems(limit = 10) {
+  return useQuery({
+    queryKey: dashboardKeys.lowStock(limit),
+    queryFn: () => dashboardApi.getLowStockItems({ limit }),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useInventoryAlerts
+// ---------------------------------------------------------------------------
+
+export function useInventoryAlerts() {
+  return useQuery({
+    queryKey: dashboardKeys.inventoryAlerts(),
+    queryFn: dashboardApi.getInventoryAlerts,
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useRecentAdjustments
+// ---------------------------------------------------------------------------
+
+export function useRecentAdjustments(limit = 5) {
+  return useQuery({
+    queryKey: dashboardKeys.recentAdjustments(limit),
+    queryFn: () => dashboardApi.getRecentAdjustments({ limit }),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// usePendingStockReleases
+// ---------------------------------------------------------------------------
+
+export function usePendingStockReleases() {
+  return useQuery({
+    queryKey: dashboardKeys.pendingStockReleases(),
+    queryFn: dashboardApi.getPendingStockReleases,
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useOfficerDashboard — officer-scoped bundle
+// ---------------------------------------------------------------------------
+
+export function useOfficerDashboard(params?: DashboardQueryParams) {
+  return useQuery({
+    queryKey: dashboardKeys.officerDashboard(params),
+    queryFn: () => dashboardApi.getOfficerDashboard(params),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useStoreKeeperDashboard — store keeper bundle
+// ---------------------------------------------------------------------------
+
+export function useStoreKeeperDashboard(params?: DashboardQueryParams) {
+  return useQuery({
+    queryKey: dashboardKeys.storeKeeperDashboard(params),
+    queryFn: () => dashboardApi.getStoreKeeperDashboard(params),
+    staleTime: DASHBOARD_STALE_TIME,
+    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+}

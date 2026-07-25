@@ -62,3 +62,35 @@ export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 export { Badge, badgeVariants } from "./badge";
 export { Toaster } from "./toaster";
 export { useToast, toast } from "./use-toast";
+export { Textarea } from "./textarea";
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+} from "./select";
+export { Checkbox } from "./checkbox";
+export { RadioGroup, RadioGroupItem } from "./radio-group";
+export { Switch } from "./switch";
+export { Separator } from "./separator";
+export { ScrollArea, ScrollBar } from "./scroll-area";
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from "./popover";
+export { Progress } from "./progress";
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
+export {
+  Command,
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandShortcut,
+  CommandSeparator,
+} from "./command";

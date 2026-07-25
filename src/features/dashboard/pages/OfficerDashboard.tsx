@@ -1,0 +1,128 @@
+"use client";
+
+/**
+ * OfficerDashboard — procurement officer / warehouse manager view.
+ */
+
+import * as React from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { PageHeader } from "@/components/common/page-header";
+import { PageContainer } from "@/components/common/page-container";
+import {
+  useDashboardStats,
+  useDashboardCharts,
+  useDashboardNotifications,
+  useRecentPurchaseOrders,
+  useRecentGRNs,
+  dashboardKeys,
+} from "../hooks/use-dashboard";
+import { OfficerKpiCards } from "../components/kpi-cards/OfficerKpiCards";
+import {
+  MonthlyPurchaseOrdersChart,
+  GrnTrendChart,
+} from "../components/charts/DashboardCharts";
+import { RecentPurchaseOrdersWidget } from "../components/widgets/RecentPurchaseOrdersWidget";
+import { RecentGRNsWidget } from "../components/widgets/RecentGRNsWidget";
+import { NotificationsWidget } from "../components/widgets/NotificationsWidget";
+import { OfficerQuickActions } from "../components/widgets/QuickActions";
+import { DashboardFilters } from "../components/filters/DashboardFilters";
+import type { DashboardQueryParams } from "../types";
+
+type Period = NonNullable<DashboardQueryParams["period"]>;
+
+export function OfficerDashboard() {
+  const [period, setPeriod] = React.useState<Period>("30d");
+  const queryClient = useQueryClient();
+
+  const params: DashboardQueryParams = { period };
+
+  const statsQuery = useDashboardStats(params);
+  const chartsQuery = useDashboardCharts(params);
+  const notificationsQuery = useDashboardNotifications(5);
+  const purchaseOrdersQuery = useRecentPurchaseOrders(8);
+  const grnsQuery = useRecentGRNs(5);
+
+  const isRefreshing =
+    statsQuery.isFetching || chartsQuery.isFetching;
+
+  function handleRefresh() {
+    queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+  }
+
+  return (
+    <PageContainer>
+      {/* Header */}
+      <PageHeader
+        title="Dashboard"
+        description="Procurement and receiving overview"
+        actions={
+          <DashboardFilters
+            period={period}
+            onPeriodChange={setPeriod}
+            onRefresh={handleRefresh}
+            isRefreshing={isRefreshing}
+          />
+        }
+      />
+
+      {/* KPI Cards */}
+      <section aria-labelledby="kpi-section-heading">
+        <h2 id="kpi-section-heading" className="sr-only">
+          Key Performance Indicators
+        </h2>
+        <OfficerKpiCards
+          stats={statsQuery.data}
+          loading={statsQuery.isLoading}
+        />
+      </section>
+
+      {/* Quick Actions */}
+      <OfficerQuickActions />
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <MonthlyPurchaseOrdersChart
+          data={chartsQuery.data?.monthly_purchase_orders}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+        />
+        <GrnTrendChart
+          data={chartsQuery.data?.monthly_stock_releases}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+        />
+      </div>
+
+      {/* Purchase Orders + GRNs */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <RecentPurchaseOrdersWidget
+          orders={purchaseOrdersQuery.data}
+          loading={purchaseOrdersQuery.isLoading}
+          error={purchaseOrdersQuery.error}
+          onRetry={() => purchaseOrdersQuery.refetch()}
+          title="My Purchase Orders"
+        />
+        <RecentGRNsWidget
+          grns={grnsQuery.data}
+          loading={grnsQuery.isLoading}
+          error={grnsQuery.error}
+          onRetry={() => grnsQuery.refetch()}
+          title="Pending GRNs"
+        />
+      </div>
+
+      {/* Notifications */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <NotificationsWidget
+          notifications={notificationsQuery.data?.items}
+          unreadCount={notificationsQuery.data?.unread_count}
+          loading={notificationsQuery.isLoading}
+          error={notificationsQuery.error}
+          onRetry={() => notificationsQuery.refetch()}
+        />
+      </div>
+    </PageContainer>
+  );
+}

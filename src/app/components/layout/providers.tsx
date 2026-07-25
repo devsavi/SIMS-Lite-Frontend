@@ -6,6 +6,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { makeQueryClient } from "@/lib/query/query-client";
 import { Toaster } from "@/app/components/ui/toaster";
+import { SessionProvider } from "./session-provider";
 
 // Stable client across renders (avoids React 18 strict-mode double-invoke issue)
 let browserQueryClient: ReturnType<typeof makeQueryClient> | undefined;
@@ -36,7 +37,9 @@ export function Providers({ children }: ProvidersProps) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
         <Toaster />
         {process.env.NODE_ENV === "development" && (
           <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />

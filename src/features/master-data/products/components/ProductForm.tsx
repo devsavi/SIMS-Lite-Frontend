@@ -1,0 +1,350 @@
+"use client";
+
+/**
+ * ProductForm — reusable create/edit form for products.
+ * Uses dependent dropdowns populated from API via TanStack Query.
+ */
+
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { productSchema, type ProductFormValues } from "../../schemas";
+import { useCategories } from "../../hooks/use-categories";
+import { useBrands } from "../../hooks/use-brands";
+import { useUoms } from "../../hooks/use-uoms";
+import { useSuppliers } from "../../hooks/use-suppliers";
+import { Button } from "@/app/components/ui/button";
+import { Switch } from "@/app/components/ui/switch";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/app/components/ui/form";
+import {
+  TextField,
+  TextareaField,
+  NumberField,
+  SearchableSelectField,
+} from "@/components/common/form-fields";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
+import { isApiError } from "@/lib/api/client";
+import type { Category, Brand, UnitOfMeasure, Supplier } from "../../types";
+
+interface ProductFormProps {
+  defaultValues?: Partial<ProductFormValues>;
+  editingId?: string;
+  onSubmit: (values: ProductFormValues) => Promise<void>;
+  onCancel: () => void;
+  error?: unknown;
+  isPending?: boolean;
+}
+
+/**
+ * ProductForm — create or edit a product.
+ * Populates Category, Brand, UoM, and Supplier dropdowns from the API.
+ */
+export function ProductForm({
+  defaultValues,
+  editingId,
+  onSubmit,
+  onCancel,
+  error,
+  isPending,
+}: ProductFormProps) {
+  // Load dropdown options
+  const { data: categoriesData } = useCategories({ page: 1, page_size: 200, is_active: true });
+  const { data: brandsData } = useBrands({ page: 1, page_size: 200, is_active: true });
+  const { data: uomsData } = useUoms({ page: 1, page_size: 200, is_active: true });
+  const { data: suppliersData } = useSuppliers({ page: 1, page_size: 200, is_active: true });
+
+  const categoryOptions = React.useMemo(
+    () => (categoriesData?.data ?? []).map((c: Category) => ({ label: c.name, value: c.id })),
+    [categoriesData]
+  );
+
+  const brandOptions = React.useMemo(
+    () => (brandsData?.data ?? []).map((b: Brand) => ({ label: b.name, value: b.id })),
+    [brandsData]
+  );
+
+  const uomOptions = React.useMemo(
+    () =>
+      (uomsData?.data ?? []).map((u: UnitOfMeasure) => ({
+        label: `${u.name} (${u.symbol})`,
+        value: u.id,
+      })),
+    [uomsData]
+  );
+
+  const supplierOptions = React.useMemo(
+    () =>
+      (suppliersData?.data ?? []).map((s: Supplier) => ({
+        label: s.company_name,
+        value: s.id,
+      })),
+    [suppliersData]
+  );
+
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      sku: "",
+      barcode: "",
+      description: "",
+      category_id: null,
+      brand_id: null,
+      uom_id: null,
+      supplier_id: null,
+      min_stock_level: 0,
+      is_active: true,
+      ...defaultValues,
+    },
+  });
+
+  const apiError = error && isApiError(error) ? error : null;
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-6">
+        {/* API error banner */}
+        {apiError && (
+          <div
+            role="alert"
+            className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            {apiError.message}
+          </div>
+        )}
+
+        {/* --- Identity --- */}
+        <section aria-label="Product identity" className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Identity
+          </h3>
+          <TextField
+            control={form.control}
+            name="name"
+            label="Product Name"
+            placeholder="e.g. USB-C Cable 2m"
+            required
+            autoComplete="off"
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <TextField
+              control={form.control}
+              name="sku"
+              label="SKU"
+              placeholder="e.g. USB-C-2M-BLK"
+              required
+              autoComplete="off"
+              description="Stock Keeping Unit — must be unique."
+            />
+            <TextField
+              control={form.control}
+              name="barcode"
+              label="Barcode"
+              placeholder="e.g. 012345678901"
+              autoComplete="off"
+            />
+          </div>
+          <TextareaField
+            control={form.control}
+            name="description"
+            label="Description"
+            placeholder="Optional product description"
+            rows={3}
+          />
+        </section>
+
+        {/* --- Classification --- */}
+        <section aria-label="Product classification" className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Classification
+          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Category */}
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
+                    value={field.value ?? "__none__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {categoryOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Brand */}
+            <FormField
+              control={form.control}
+              name="brand_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Brand</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
+                    value={field.value ?? "__none__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select brand" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {brandOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* UoM */}
+            <FormField
+              control={form.control}
+              name="uom_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unit of Measure</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
+                    value={field.value ?? "__none__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select UoM" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {uomOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Supplier */}
+            <FormField
+              control={form.control}
+              name="supplier_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Supplier</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
+                    value={field.value ?? "__none__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select supplier" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {supplierOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </section>
+
+        {/* --- Inventory --- */}
+        <section aria-label="Inventory settings" className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Inventory
+          </h3>
+          <NumberField
+            control={form.control}
+            name="min_stock_level"
+            label="Minimum Stock Level"
+            placeholder="0"
+            min={0}
+            description="Alert will trigger when stock falls below this level."
+          />
+        </section>
+
+        {/* Active toggle */}
+        <FormField
+          control={form.control}
+          name="is_active"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <FormLabel className="text-sm font-medium">Active</FormLabel>
+                <FormDescription className="text-xs">
+                  Inactive products will not appear in inventory and purchase order forms.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  aria-label="Product active status"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+            {editingId ? "Save Changes" : "Create Product"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
