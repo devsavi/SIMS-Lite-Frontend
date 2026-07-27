@@ -139,6 +139,10 @@ const OFFICER_PERMISSIONS: Permission[] = [
 
 const STORE_KEEPER_PERMISSIONS: Permission[] = [
   "dashboard.view",
+  "purchase_orders.view",
+  "grn.view",
+  "grn.create",
+  "grn.edit",
   "inventory.view",
   "inventory.adjust",
   "inventory.transfer",

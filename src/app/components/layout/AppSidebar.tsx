@@ -79,13 +79,13 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "Purchase Orders",
-    href: "/purchase-orders",
+    href: "/procurement/purchase-orders",
     icon: ShoppingCart,
     permissions: ["purchase_orders.view"],
   },
   {
     label: "GRN",
-    href: "/grn",
+    href: "/procurement/grns",
     icon: ClipboardList,
     permissions: ["grn.view"],
   },

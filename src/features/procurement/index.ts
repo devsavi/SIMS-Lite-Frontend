@@ -1,3 +1,2 @@
-/**
- * Procurement feature — Phase 6
- */
+export * from "./purchase-orders";
+export * from "./grns";
