@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
 import { categoriesApi } from "../api/categories-api";
 import { categoryKeys } from "./query-keys";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { CreateCategoryRequest, UpdateCategoryRequest, ListParams } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -18,6 +19,7 @@ export function useCategories(params?: ListParams) {
   return useQuery({
     queryKey: categoryKeys.list(params),
     queryFn: () => categoriesApi.list(params),
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 
@@ -30,6 +32,7 @@ export function useCategory(id: string | null) {
     queryKey: categoryKeys.detail(id ?? ""),
     queryFn: () => categoriesApi.getById(id!),
     enabled: !!id,
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 

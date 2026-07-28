@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import {
   fetchPurchaseOrders,
   fetchPurchaseOrderById,
@@ -26,6 +27,7 @@ export function usePurchaseOrders(filters: POFilters = {}) {
     queryKey: PO_QUERY_KEYS.list(filters),
     queryFn: () => fetchPurchaseOrders(filters),
     placeholderData: (previousData) => previousData,
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -34,6 +36,7 @@ export function usePurchaseOrder(id: string) {
     queryKey: PO_QUERY_KEYS.detail(id),
     queryFn: () => fetchPurchaseOrderById(id),
     enabled: Boolean(id),
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 

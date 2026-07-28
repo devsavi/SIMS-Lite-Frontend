@@ -65,17 +65,17 @@ export function SearchInput({
     }
   }, [debouncedValue, onSearch]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (!isControlled) setLocalValue(val);
     onChange?.(val);
-  }
+  }, [isControlled, onChange]);
 
-  function handleClear() {
+  const handleClear = React.useCallback(() => {
     if (!isControlled) setLocalValue("");
     onChange?.("");
     onSearch?.("");
-  }
+  }, [isControlled, onChange, onSearch]);
 
   return (
     <div className={cn("relative flex items-center", className)}>

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { inventoryApi } from "../api/inventory-api";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type {
   InventoryFilterParams,
   LedgerFilterParams,
@@ -22,7 +23,7 @@ export function useInventoryList(params?: InventoryFilterParams) {
   return useQuery({
     queryKey: inventoryKeys.list(params),
     queryFn: () => inventoryApi.getInventoryList(params),
-    staleTime: 1000 * 60, // 1 minute
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -30,7 +31,7 @@ export function useInventorySummary() {
   return useQuery({
     queryKey: inventoryKeys.summary(),
     queryFn: () => inventoryApi.getInventorySummary(),
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -38,7 +39,7 @@ export function useInventoryValuation() {
   return useQuery({
     queryKey: inventoryKeys.valuation(),
     queryFn: () => inventoryApi.getInventoryValuation(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -47,6 +48,7 @@ export function useInventoryDetail(productId: string) {
     queryKey: inventoryKeys.detail(productId),
     queryFn: () => inventoryApi.getInventoryByProductId(productId),
     enabled: Boolean(productId),
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -54,7 +56,7 @@ export function useInventoryLedger(params?: LedgerFilterParams) {
   return useQuery({
     queryKey: inventoryKeys.ledger(params),
     queryFn: () => inventoryApi.getLedgerEntries(params),
-    staleTime: 1000 * 30, // 30 seconds
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -63,6 +65,7 @@ export function useProductLedger(productId: string, page = 1, size = 10) {
     queryKey: inventoryKeys.productLedger(productId, page, size),
     queryFn: () => inventoryApi.getLedgerByProduct(productId, page, size),
     enabled: Boolean(productId),
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 

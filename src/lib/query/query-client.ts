@@ -15,6 +15,32 @@ function shouldRetry(failureCount: number, error: unknown): boolean {
   return failureCount < 2;
 }
 
+/**
+ * Standardised caching tiers for enterprise performance:
+ * - MASTER_DATA: Static reference data (Categories, Brands, UOMs, Suppliers)
+ * - DASHBOARD: Executive summaries & metrics
+ * - LIVE_DATA: Inventory, releases, stock adjustments
+ * - USER_PROFILE: Current user session, permissions
+ */
+export const QUERY_CACHE_TIMES = {
+  MASTER_DATA: {
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 30,    // 30 minutes
+  },
+  DASHBOARD: {
+    staleTime: 1000 * 60 * 5,  // 5 minutes
+    gcTime: 1000 * 60 * 15,    // 15 minutes
+  },
+  LIVE_DATA: {
+    staleTime: 1000 * 60 * 2,  // 2 minutes
+    gcTime: 1000 * 60 * 10,    // 10 minutes
+  },
+  USER_PROFILE: {
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30,    // 30 minutes
+  },
+} as const;
+
 // ---------------------------------------------------------------------------
 // Default query / mutation options
 // ---------------------------------------------------------------------------
@@ -22,11 +48,12 @@ function shouldRetry(failureCount: number, error: unknown): boolean {
 const queryClientConfig: QueryClientConfig = {
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 10,   // 10 minutes (formerly cacheTime)
+      staleTime: QUERY_CACHE_TIMES.LIVE_DATA.staleTime,
+      gcTime: QUERY_CACHE_TIMES.LIVE_DATA.gcTime,
       retry: shouldRetry,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
+      refetchOnMount: false,
     },
     mutations: {
       retry: false,

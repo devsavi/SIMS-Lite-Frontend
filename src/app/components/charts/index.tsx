@@ -70,10 +70,10 @@ export interface BaseChartProps {
 }
 
 // ---------------------------------------------------------------------------
-// LineChart
+// LineChart (Memoised)
 // ---------------------------------------------------------------------------
 
-export function LineChart({
+export const LineChart = React.memo(function LineChart({
   data,
   height = 300,
   dataKeys,
@@ -135,13 +135,13 @@ export function LineChart({
       </ResponsiveContainer>
     </div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
-// BarChart
+// BarChart (Memoised)
 // ---------------------------------------------------------------------------
 
-export function BarChart({
+export const BarChart = React.memo(function BarChart({
   data,
   height = 300,
   dataKeys,
@@ -195,13 +195,13 @@ export function BarChart({
       </ResponsiveContainer>
     </div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
-// AreaChart
+// AreaChart (Memoised)
 // ---------------------------------------------------------------------------
 
-export function AreaChart({
+export const AreaChart = React.memo(function AreaChart({
   data,
   height = 300,
   dataKeys,
@@ -270,10 +270,10 @@ export function AreaChart({
       </ResponsiveContainer>
     </div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
-// PieChart
+// PieChart (Memoised)
 // ---------------------------------------------------------------------------
 
 export interface PieChartDataPoint {
@@ -291,7 +291,7 @@ export interface PieChartProps {
   className?: string;
 }
 
-export function PieChart({
+export const PieChart = React.memo(function PieChart({
   data,
   height = 300,
   colors = CHART_COLORS,
@@ -333,18 +333,18 @@ export function PieChart({
       </ResponsiveContainer>
     </div>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // DonutChart (PieChart with inner radius)
 // ---------------------------------------------------------------------------
 
-export function DonutChart(props: Omit<PieChartProps, "innerRadius">) {
+export const DonutChart = React.memo(function DonutChart(props: Omit<PieChartProps, "innerRadius">) {
   return <PieChart {...props} innerRadius={60} />;
-}
+});
 
 // ---------------------------------------------------------------------------
-// KpiCard
+// KpiCard (Memoised)
 // ---------------------------------------------------------------------------
 
 export interface KpiCardProps {
@@ -361,11 +361,8 @@ export interface KpiCardProps {
 
 /**
  * KpiCard — compact metric display card.
- *
- * @example
- * <KpiCard label="Monthly Revenue" value="$48,250" trend={{ value: 8.4, label: "vs last month" }} />
  */
-export function KpiCard({
+export const KpiCard = React.memo(function KpiCard({
   label,
   value,
   trend,
@@ -411,4 +408,4 @@ export function KpiCard({
       </div>
     </div>
   );
-}
+});

@@ -8,12 +8,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
 import { suppliersApi } from "../api/suppliers-api";
 import { supplierKeys } from "./query-keys";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { CreateSupplierRequest, UpdateSupplierRequest, ListParams } from "../types";
 
 export function useSuppliers(params?: ListParams) {
   return useQuery({
     queryKey: supplierKeys.list(params),
     queryFn: () => suppliersApi.list(params),
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 
@@ -22,6 +24,7 @@ export function useSupplier(id: string | null) {
     queryKey: supplierKeys.detail(id ?? ""),
     queryFn: () => suppliersApi.getById(id!),
     enabled: !!id,
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 

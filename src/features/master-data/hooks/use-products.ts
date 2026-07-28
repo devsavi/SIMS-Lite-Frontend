@@ -8,12 +8,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
 import { productsApi } from "../api/products-api";
 import { productKeys } from "./query-keys";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { CreateProductRequest, UpdateProductRequest, ProductListParams } from "../types";
 
 export function useProducts(params?: ProductListParams) {
   return useQuery({
     queryKey: productKeys.list(params),
     queryFn: () => productsApi.list(params),
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 
@@ -22,6 +24,7 @@ export function useProduct(id: string | null) {
     queryKey: productKeys.detail(id ?? ""),
     queryFn: () => productsApi.getById(id!),
     enabled: !!id,
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 

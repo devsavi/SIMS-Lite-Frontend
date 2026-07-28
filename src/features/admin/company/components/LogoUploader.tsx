@@ -9,16 +9,40 @@ interface LogoUploaderProps {
   isUploading: boolean;
 }
 
+import { sanitizeFilename } from "@/lib/security/sanitizer";
+
 export function LogoUploader({ currentLogoUrl, onUploadLogo, isUploading }: LogoUploaderProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [successMsg, setSuccessMsg] = React.useState(false);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMsg(null);
     const file = e.target.files?.[0];
     if (!file) return;
-    await onUploadLogo(file);
-    setSuccessMsg(true);
-    setTimeout(() => setSuccessMsg(false), 3000);
+
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    if (file.size > MAX_SIZE) {
+      setErrorMsg("File size exceeds 2MB limit.");
+      return;
+    }
+
+    const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/svg+xml", "image/webp"];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setErrorMsg("Invalid file type. Allowed: PNG, JPEG, SVG, WEBP.");
+      return;
+    }
+
+    const safeName = sanitizeFilename(file.name);
+    const safeFile = safeName !== file.name ? new File([file], safeName, { type: file.type }) : file;
+
+    try {
+      await onUploadLogo(safeFile);
+      setSuccessMsg(true);
+      setTimeout(() => setSuccessMsg(false), 3000);
+    } catch {
+      setErrorMsg("Failed to upload logo.");
+    }
   };
 
   return (
@@ -64,6 +88,12 @@ export function LogoUploader({ currentLogoUrl, onUploadLogo, isUploading }: Logo
             <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-in fade-in">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Logo updated
+            </span>
+          )}
+
+          {errorMsg && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive animate-in fade-in">
+              {errorMsg}
             </span>
           )}
         </div>

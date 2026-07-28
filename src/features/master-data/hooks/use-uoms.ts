@@ -8,12 +8,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
 import { uomsApi } from "../api/uoms-api";
 import { uomKeys } from "./query-keys";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { CreateUomRequest, UpdateUomRequest, ListParams } from "../types";
 
 export function useUoms(params?: ListParams) {
   return useQuery({
     queryKey: uomKeys.list(params),
     queryFn: () => uomsApi.list(params),
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 
@@ -22,6 +24,7 @@ export function useUom(id: string | null) {
     queryKey: uomKeys.detail(id ?? ""),
     queryFn: () => uomsApi.getById(id!),
     enabled: !!id,
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 

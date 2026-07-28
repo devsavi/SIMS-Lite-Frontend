@@ -25,7 +25,7 @@ interface ReportChartsProps {
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
-export function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
+export const ReportCharts = React.memo(function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
   if (loading) {
     return (
       <div className="bg-card border border-border rounded-none p-6 mb-6 shadow-sm flex items-center justify-center h-64">
@@ -110,4 +110,4 @@ export function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
       )}
     </div>
   );
-}
+});

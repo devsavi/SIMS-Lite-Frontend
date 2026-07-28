@@ -104,6 +104,22 @@ export function SessionProvider({ children }: SessionProviderProps) {
     }
 
     restoreSession();
+
+    // Multi-tab session synchronization listener
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "__sims_rt__" && !e.newValue) {
+        // Logged out in another tab
+        useAuthStore.getState().clearSession();
+        if (typeof window !== "undefined") {
+          window.location.replace("/login");
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!hydrated) {

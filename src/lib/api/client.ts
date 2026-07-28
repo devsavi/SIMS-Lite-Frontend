@@ -82,11 +82,10 @@ export const tokenStore = {
 };
 
 // ---------------------------------------------------------------------------
-// Axios instance
-// ---------------------------------------------------------------------------
+import { env } from "@/lib/env";
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: env.apiUrl || process.env.NEXT_PUBLIC_API_URL,
   timeout: 30_000,
   headers: {
     "Content-Type": "application/json",
@@ -98,19 +97,24 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor — attach JWT when available
 // ---------------------------------------------------------------------------
 
+import { logApiPerformance } from "@/lib/monitoring/performance-logger";
+
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = _getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Attach timing marker
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (config as any)._startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
     return config;
   },
   (error: unknown) => Promise.reject(error)
 );
 
 // ---------------------------------------------------------------------------
-// Response interceptor — handle 401 with token refresh
+// Response interceptor — handle 401 with token refresh & log latency
 // ---------------------------------------------------------------------------
 
 let _isRefreshing = false;
@@ -131,7 +135,21 @@ function processRefreshQueue(token: string | null, error?: unknown) {
 }
 
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // Log API response timing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const startTime = (response.config as any)._startTime;
+    if (startTime) {
+      const durationMs = (typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime;
+      logApiPerformance({
+        url: response.config.url ?? "",
+        method: response.config.method ?? "get",
+        durationMs,
+        status: response.status,
+      });
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;

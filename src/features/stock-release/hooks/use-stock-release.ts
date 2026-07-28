@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { stockReleaseApi } from "../api/stock-release-api";
 import { stockReleaseKeys } from "./stock-release-keys";
 import { toast } from "@/app/components/ui/use-toast";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type {
   StockReleaseFilterParams,
   CreateStockReleasePayload,
@@ -17,7 +18,7 @@ export function useStockReleaseList(params?: StockReleaseFilterParams) {
   return useQuery({
     queryKey: stockReleaseKeys.list(params),
     queryFn: () => stockReleaseApi.getStockReleases(params),
-    staleTime: 1000 * 30, // 30 seconds
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -29,6 +30,7 @@ export function useStockReleaseDetail(id: string) {
     queryKey: stockReleaseKeys.detail(id),
     queryFn: () => stockReleaseApi.getStockReleaseById(id),
     enabled: Boolean(id),
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 

@@ -169,6 +169,44 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
 }
 
 // ---------------------------------------------------------------------------
+// DataTableRow (Memoised for performance)
+// ---------------------------------------------------------------------------
+
+interface DataTableRowProps<TData> {
+  row: Row<TData>;
+  hasSelection: boolean;
+}
+
+const DataTableRow = React.memo(function DataTableRow<TData>({
+  row,
+  hasSelection,
+}: DataTableRowProps<TData>) {
+  return (
+    <TableRow
+      key={row.id}
+      data-state={row.getIsSelected() ? "selected" : undefined}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === " " && hasSelection) {
+          e.preventDefault();
+          row.toggleSelected();
+        }
+      }}
+      className={cn(
+        "transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:bg-muted/60",
+        row.getIsSelected() && "bg-primary/5 hover:bg-primary/10"
+      )}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <TableCell key={cell.id}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+}) as <TData>(props: DataTableRowProps<TData>) => React.ReactElement;
+
+// ---------------------------------------------------------------------------
 // DataTable
 // ---------------------------------------------------------------------------
 
@@ -392,27 +430,11 @@ export function DataTable<TData>({
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <DataTableRow
                   key={row.id}
-                  data-state={row.getIsSelected() ? "selected" : undefined}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === " " && hasSelection) {
-                      e.preventDefault();
-                      row.toggleSelected();
-                    }
-                  }}
-                  className={cn(
-                    "transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:bg-muted/60",
-                    row.getIsSelected() && "bg-primary/5 hover:bg-primary/10"
-                  )}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                  row={row}
+                  hasSelection={hasSelection}
+                />
               ))
             )}
           </TableBody>

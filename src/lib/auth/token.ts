@@ -124,6 +124,11 @@ export function clearAllTokens(): void {
   accessToken.clear();
   refreshToken.clear();
   persistedUser.clear();
+  try {
+    localStorage.removeItem("sims-session");
+  } catch {
+    // ignore
+  }
 }
 
 export function isSessionValid(): boolean {

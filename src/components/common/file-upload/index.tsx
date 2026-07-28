@@ -62,6 +62,8 @@ function formatBytes(bytes: number): string {
  *   onFilesAccepted={handleUpload}
  * />
  */
+import { sanitizeFilename } from "@/lib/security/sanitizer";
+
 export function FileUpload({
   accept,
   maxSize = DEFAULT_MAX_SIZE,
@@ -83,7 +85,14 @@ export function FileUpload({
     disabled,
     onDropAccepted: (accepted) => {
       setRejectionErrors([]);
-      onFilesAccepted?.(accepted);
+      const sanitizedFiles = accepted.map((f) => {
+        const safeName = sanitizeFilename(f.name);
+        if (safeName !== f.name) {
+          return new File([f], safeName, { type: f.type, lastModified: f.lastModified });
+        }
+        return f;
+      });
+      onFilesAccepted?.(sanitizedFiles);
     },
     onDropRejected: (rejections) => {
       const errors = rejections.flatMap((r) =>

@@ -8,6 +8,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../api/dashboard-api";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { DashboardQueryParams } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -48,7 +49,8 @@ export const dashboardKeys = {
 // Shared config
 // ---------------------------------------------------------------------------
 
-const DASHBOARD_STALE_TIME = 1000 * 60 * 2; // 2 minutes (dashboard refreshes frequently)
+const DASHBOARD_STALE_TIME = QUERY_CACHE_TIMES.DASHBOARD.staleTime;
+const DASHBOARD_GC_TIME = QUERY_CACHE_TIMES.DASHBOARD.gcTime;
 const DASHBOARD_REFETCH_INTERVAL = 1000 * 60 * 5; // background refetch every 5 min
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,7 @@ export function useDashboard(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.overview(params),
     queryFn: () => dashboardApi.getOverview(params),
     staleTime: DASHBOARD_STALE_TIME,
+    gcTime: DASHBOARD_GC_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
     refetchOnWindowFocus: true,
   });
@@ -74,6 +77,7 @@ export function useDashboardStats(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.stats(params),
     queryFn: () => dashboardApi.getStats(params),
     staleTime: DASHBOARD_STALE_TIME,
+    gcTime: DASHBOARD_GC_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
     refetchOnWindowFocus: true,
   });
@@ -88,6 +92,7 @@ export function useDashboardCharts(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.charts(params),
     queryFn: () => dashboardApi.getCharts(params),
     staleTime: DASHBOARD_STALE_TIME,
+    gcTime: DASHBOARD_GC_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }

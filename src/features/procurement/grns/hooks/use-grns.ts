@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import {
   fetchGRNs,
   fetchGRNById,
@@ -22,6 +23,7 @@ export function useGRNs(filters: GRNFilters = {}) {
     queryKey: GRN_QUERY_KEYS.list(filters),
     queryFn: () => fetchGRNs(filters),
     placeholderData: (previousData) => previousData,
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 
@@ -30,6 +32,7 @@ export function useGRN(id: string) {
     queryKey: GRN_QUERY_KEYS.detail(id),
     queryFn: () => fetchGRNById(id),
     enabled: Boolean(id),
+    ...QUERY_CACHE_TIMES.LIVE_DATA,
   });
 }
 

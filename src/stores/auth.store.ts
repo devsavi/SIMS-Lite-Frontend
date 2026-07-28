@@ -17,6 +17,9 @@ import { canAccess, getPermissions, type Permission } from "@/lib/auth/permissio
 import type { UserRole, AuthUser } from "@/lib/auth";
 import { authApi } from "@/features/auth/api/auth-api";
 
+import { useSessionStore } from "./session.store";
+import { useNotificationsStore } from "./notifications.store";
+
 // ---------------------------------------------------------------------------
 // State shape
 // ---------------------------------------------------------------------------
@@ -58,6 +61,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     const role = user.role as UserRole;
     const permissions = getPermissions(role);
 
+    useSessionStore.getState().setUser(user);
+
     set({
       user,
       role,
@@ -82,6 +87,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     clearAllTokens();
     getQueryClient().clear();
+    useSessionStore.getState().clearSession();
+    useNotificationsStore.getState().clearAll();
 
     set({
       user: null,
@@ -100,6 +107,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   // -----------------------------------------------------------------------
   setUser: (user) => {
     const role = user.role as UserRole;
+    useSessionStore.getState().setUser(user);
     set({
       user,
       role,
@@ -113,6 +121,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   clearSession: () => {
     clearAllTokens();
     getQueryClient().clear();
+    useSessionStore.getState().clearSession();
+    useNotificationsStore.getState().clearAll();
     set({
       user: null,
       role: null,

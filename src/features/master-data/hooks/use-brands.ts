@@ -8,12 +8,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/app/components/ui/use-toast";
 import { brandsApi } from "../api/brands-api";
 import { brandKeys } from "./query-keys";
+import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { CreateBrandRequest, UpdateBrandRequest, ListParams } from "../types";
 
 export function useBrands(params?: ListParams) {
   return useQuery({
     queryKey: brandKeys.list(params),
     queryFn: () => brandsApi.list(params),
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 
@@ -22,6 +24,7 @@ export function useBrand(id: string | null) {
     queryKey: brandKeys.detail(id ?? ""),
     queryFn: () => brandsApi.getById(id!),
     enabled: !!id,
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
 

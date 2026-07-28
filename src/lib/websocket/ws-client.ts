@@ -152,6 +152,12 @@ export class WsClient {
     return () => this.statusHandlers.delete(handler);
   }
 
+  /** Clear all event & status handlers (useful on logout / unmount). */
+  removeAllListeners(): void {
+    this.eventHandlers.clear();
+    this.statusHandlers.clear();
+  }
+
   get status(): WsStatus {
     return this._status;
   }
