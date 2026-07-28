@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/app/components/ui/skeleton";
 import { GRNDetail } from "@/features/procurement/grns/components/GRNDetail";
 import {
   useGRN,

@@ -25,8 +25,8 @@ export interface SuccessResponse<T> {
   message?: string;
 }
 
-const INVENTORY_BASE = "/api/v1/inventory";
-const LEDGER_BASE = "/api/v1/inventory-ledger";
+const INVENTORY_BASE = "/inventory";
+const LEDGER_BASE = "/inventory-ledger";
 const ADJUSTMENT_BASE = "/api/v1/stock-adjustments";
 
 export const inventoryApi = {

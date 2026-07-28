@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/app/components/ui/skeleton";
 import { PurchaseOrderDetail } from "@/features/procurement/purchase-orders/components/PurchaseOrderDetail";
 import {
   usePurchaseOrder,

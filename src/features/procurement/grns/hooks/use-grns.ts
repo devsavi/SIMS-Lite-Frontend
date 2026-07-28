@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/app/components/ui/use-toast";
 import {
   fetchGRNs,
   fetchGRNById,
@@ -21,7 +21,7 @@ export function useGRNs(filters: GRNFilters = {}) {
   return useQuery({
     queryKey: GRN_QUERY_KEYS.list(filters),
     queryFn: () => fetchGRNs(filters),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -40,14 +40,20 @@ export function useCreateGRN() {
     mutationFn: (data: CreateGRNRequest) => createGRN(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: GRN_QUERY_KEYS.lists() });
-      toast.success(
-        variables.isDraft
+      toast({
+        title: "GRN Created",
+        description: variables.isDraft
           ? "GRN draft saved"
-          : "Goods Received Note created successfully"
-      );
+          : "Goods Received Note created successfully",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to create GRN");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to create GRN",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -60,10 +66,18 @@ export function useSubmitGRN() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: GRN_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: GRN_QUERY_KEYS.detail(data.id) });
-      toast.success("GRN submitted for approval");
+      toast({
+        title: "GRN Submitted",
+        description: "GRN submitted for approval",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to submit GRN");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to submit GRN",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -80,10 +94,18 @@ export function useApproveGRN() {
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
-      toast.success("GRN approved! Inventory levels updated.");
+      toast({
+        title: "GRN Approved",
+        description: "GRN approved! Inventory levels updated.",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to approve GRN");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to approve GRN",
+        variant: "destructive",
+      });
     },
   });
 }

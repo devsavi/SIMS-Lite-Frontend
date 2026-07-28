@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { PurchaseOrderForm } from "@/features/procurement/purchase-orders/components/PurchaseOrderForm";
 import { useCreatePurchaseOrder } from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
 import type { PurchaseOrderFormValues } from "@/features/procurement/purchase-orders/schemas/po.schema";
-import { useSuppliers } from "@/features/suppliers/hooks/use-suppliers";
-import { useProducts } from "@/features/products/hooks/use-products";
+import { useSuppliers } from "@/features/master-data/hooks/use-suppliers";
+import { useProducts } from "@/features/master-data/hooks/use-products";
 
 export default function NewPurchaseOrderPage() {
   const router = useRouter();
@@ -54,8 +54,8 @@ export default function NewPurchaseOrderPage() {
       </div>
 
       <PurchaseOrderForm
-        suppliers={suppliersList}
-        products={productsList}
+        suppliers={suppliersList.map((s: any) => ({ id: s.id, name: s.name || s.company_name || s.supplier_name || "" }))}
+        products={productsList.map((p: any) => ({ id: p.id, name: p.name || p.product_name || "", sku: p.sku || "" }))}
         onSubmit={handleSubmit}
         isLoading={createMutation.isPending}
       />

@@ -4,7 +4,7 @@ import * as React from "react";
 import { usePurchaseOrders } from "@/features/procurement/purchase-orders";
 import { PurchaseOrderTable } from "@/features/procurement/purchase-orders/components/PurchaseOrderTable";
 import type { POFilters } from "@/features/procurement/purchase-orders/types";
-import { useSuppliers } from "@/features/suppliers/hooks/use-suppliers";
+import { useSuppliers } from "@/features/master-data/hooks/use-suppliers";
 
 export default function PurchaseOrdersPage() {
   const [filters, setFilters] = React.useState<POFilters>({
@@ -43,7 +43,7 @@ export default function PurchaseOrdersPage() {
         filters={filters}
         onFilterChange={handleFilterChange}
         onRefresh={refetch}
-        suppliers={suppliersList}
+        suppliers={suppliersList.map((s: any) => ({ id: s.id, name: s.name || s.company_name || s.supplier_name || "" }))}
       />
     </div>
   );

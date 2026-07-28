@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/app/components/ui/use-toast";
 import {
   fetchPurchaseOrders,
   fetchPurchaseOrderById,
@@ -25,7 +25,7 @@ export function usePurchaseOrders(filters: POFilters = {}) {
   return useQuery({
     queryKey: PO_QUERY_KEYS.list(filters),
     queryFn: () => fetchPurchaseOrders(filters),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -44,14 +44,20 @@ export function useCreatePurchaseOrder() {
     mutationFn: (data: CreatePORequest) => createPurchaseOrder(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.lists() });
-      toast.success(
-        variables.isDraft
+      toast({
+        title: "Purchase Order Created",
+        description: variables.isDraft
           ? "Purchase order draft saved"
-          : "Purchase order created successfully"
-      );
+          : "Purchase order created successfully",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to create purchase order");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to create purchase order",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -65,10 +71,18 @@ export function useUpdatePurchaseOrder() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.detail(data.id) });
-      toast.success("Purchase order updated successfully");
+      toast({
+        title: "Purchase Order Updated",
+        description: "Purchase order updated successfully",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to update purchase order");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to update purchase order",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -81,10 +95,18 @@ export function useSubmitPurchaseOrder() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.detail(data.id) });
-      toast.success("Purchase order submitted for approval");
+      toast({
+        title: "Purchase Order Submitted",
+        description: "Purchase order submitted for approval",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to submit purchase order");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to submit purchase order",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -97,10 +119,18 @@ export function useApprovePurchaseOrder() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.detail(data.id) });
-      toast.success("Purchase order approved successfully");
+      toast({
+        title: "Purchase Order Approved",
+        description: "Purchase order approved successfully",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to approve purchase order");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to approve purchase order",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -114,10 +144,18 @@ export function useRejectPurchaseOrder() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.detail(data.id) });
-      toast.success("Purchase order rejected");
+      toast({
+        title: "Purchase Order Rejected",
+        description: "Purchase order rejected",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to reject purchase order");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to reject purchase order",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -131,10 +169,18 @@ export function useCancelPurchaseOrder() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.detail(data.id) });
-      toast.success("Purchase order cancelled");
+      toast({
+        title: "Purchase Order Cancelled",
+        description: "Purchase order cancelled",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to cancel purchase order");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to cancel purchase order",
+        variant: "destructive",
+      });
     },
   });
 }
@@ -146,10 +192,18 @@ export function useResendPOEmail() {
     mutationFn: (id: string) => resendPOEmail(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.detail(id) });
-      toast.success("Purchase order notification email resent");
+      toast({
+        title: "Email Resent",
+        description: "Purchase order notification email resent",
+        variant: "success",
+      });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to resend email notification");
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to resend email notification",
+        variant: "destructive",
+      });
     },
   });
 }

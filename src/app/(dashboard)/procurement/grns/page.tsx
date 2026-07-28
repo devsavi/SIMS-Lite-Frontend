@@ -4,7 +4,7 @@ import * as React from "react";
 import { useGRNs } from "@/features/procurement/grns";
 import { GRNTable } from "@/features/procurement/grns/components/GRNTable";
 import type { GRNFilters } from "@/features/procurement/grns/types";
-import { useSuppliers } from "@/features/suppliers/hooks/use-suppliers";
+import { useSuppliers } from "@/features/master-data/hooks/use-suppliers";
 
 export default function GoodsReceivedNotesPage() {
   const [filters, setFilters] = React.useState<GRNFilters>({
@@ -45,7 +45,7 @@ export default function GoodsReceivedNotesPage() {
         filters={filters}
         onFilterChange={handleFilterChange}
         onRefresh={refetch}
-        suppliers={suppliersList}
+        suppliers={suppliersList.map((s: any) => ({ id: s.id, name: s.name || s.company_name || s.supplier_name || "" }))}
       />
     </div>
   );
