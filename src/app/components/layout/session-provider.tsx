@@ -12,19 +12,9 @@ import * as React from "react";
 import { useAuthStore, initAuthClient } from "@/stores/auth.store";
 import { accessToken, refreshToken, persistedUser } from "@/lib/auth/token";
 import { authApi } from "@/features/auth/api/auth-api";
+import { userReadToAuthUser } from "@/features/auth/utils";
 import type { AuthUser } from "@/lib/auth";
-import type { UserRead } from "@/features/auth/types";
-
-function userReadToAuthUser(u: UserRead): AuthUser {
-  const roleName = u.roles?.[0]?.name ?? "viewer";
-  return {
-    id: u.id,
-    name: u.full_name || `${u.first_name} ${u.last_name}`.trim() || u.email,
-    email: u.email,
-    role: roleName as AuthUser["role"],
-    avatar: undefined,
-  };
-}
+import { NotificationsProvider } from "@/features/notifications";
 
 // Module-level flag — survives client-side navigations (unlike component state)
 let _sessionRestored = false;
@@ -61,9 +51,9 @@ export function SessionProvider({ children }: SessionProviderProps) {
         // Restore user from persisted storage if store is empty
         const storeUser = useAuthStore.getState().user;
         if (!storeUser) {
-          const stored = persistedUser.get<UserRead>();
+          const stored = persistedUser.get<AuthUser>();
           if (stored && stored.id) {
-            useAuthStore.getState().login(userReadToAuthUser(stored), {
+            useAuthStore.getState().login(stored, {
               accessToken: accessToken.get()!,
               refreshToken: rt,
               expiresIn: 900,
@@ -75,40 +65,42 @@ export function SessionProvider({ children }: SessionProviderProps) {
         return;
       }
 
+      let refreshFailed = false;
+
       try {
         // Exchange refresh token for a new token pair
         const tokenRes = await authApi.refreshToken({ refresh_token: rt });
         accessToken.set(tokenRes.access_token, tokenRes.expires_in);
         refreshToken.set(tokenRes.refresh_token); // rotation
 
-        // Try persisted user first (avoids an extra network call)
-        const stored = persistedUser.get<UserRead>();
-        if (stored && stored.id && stored.email) {
-          useAuthStore.getState().login(userReadToAuthUser(stored), {
+        // Always fetch a fresh profile after token refresh — ensures role/permission
+        // changes on the server are reflected immediately and avoids stale localStorage.
+        try {
+          const user = await authApi.me();
+          useAuthStore.getState().login(userReadToAuthUser(user), {
             accessToken: tokenRes.access_token,
             refreshToken: tokenRes.refresh_token,
             expiresIn: tokenRes.expires_in,
           });
-        } else {
-          // Fallback: fetch fresh profile from /auth/me
-          try {
-            const user = await authApi.me();
-            useAuthStore.getState().login(userReadToAuthUser(user), {
-              accessToken: tokenRes.access_token,
-              refreshToken: tokenRes.refresh_token,
-              expiresIn: tokenRes.expires_in,
-            });
-          } catch {
-            useAuthStore.getState().clearSession();
-          }
+        } catch {
+          // Profile fetch failed — session is unusable
+          refreshFailed = true;
         }
       } catch {
-        // Refresh failed — clear everything and redirect to login
-        useAuthStore.getState().clearSession();
-      } finally {
-        _sessionRestored = true;
-        setHydrated(true);
+        // Refresh token expired or invalid
+        refreshFailed = true;
       }
+
+      if (refreshFailed) {
+        useAuthStore.getState().clearSession();
+        _sessionRestored = true;
+        // Keep showing spinner while navigating — don't call setHydrated
+        window.location.replace("/login");
+        return;
+      }
+
+      _sessionRestored = true;
+      setHydrated(true);
     }
 
     restoreSession();
@@ -125,5 +117,6 @@ export function SessionProvider({ children }: SessionProviderProps) {
     );
   }
 
-  return <>{children}</>;
+  return <NotificationsProvider>{children}</NotificationsProvider>;
 }
+

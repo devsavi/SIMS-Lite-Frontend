@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Bell, Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
 import { UserMenu } from "./UserMenu";
-import { useNotificationsStore } from "@/stores/notifications.store";
 import { useAppTheme } from "@/hooks/use-theme";
 import { Button } from "@/app/components/ui/button";
 import {
@@ -12,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
+import { NotificationBell } from "@/features/notifications";
 
 function ThemeToggle() {
   const { setTheme, resolvedTheme, mounted } = useAppTheme();
@@ -53,28 +53,6 @@ function ThemeToggle() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-function NotificationBell() {
-  const unreadCount = useNotificationsStore((s) => s.unreadCount);
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
-      className="relative h-8 w-8"
-      // onClick to open notifications panel — Phase 9
-    >
-      <Bell className="h-4 w-4" />
-      {unreadCount > 0 && (
-        <span
-          aria-hidden="true"
-          className="absolute right-1.5 top-1.5 flex h-2 w-2 items-center justify-center bg-destructive"
-        />
-      )}
-    </Button>
   );
 }
 

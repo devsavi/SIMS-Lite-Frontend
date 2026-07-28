@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { Trash2, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/app/components/ui/button";

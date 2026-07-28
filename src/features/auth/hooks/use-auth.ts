@@ -8,24 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import { authApi } from "../api/auth-api";
-import type { UserRead } from "../types";
-import type { AuthUser } from "@/lib/auth";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function userReadToAuthUser(u: UserRead): AuthUser {
-  // Backend uses roles[] array; pick the first role name as the primary role.
-  const roleName = u.roles?.[0]?.name ?? "viewer";
-  return {
-    id: u.id,
-    name: u.full_name || `${u.first_name} ${u.last_name}`.trim() || u.email,
-    email: u.email,
-    role: roleName as AuthUser["role"],
-    avatar: undefined,
-  };
-}
+import { userReadToAuthUser } from "../utils";
 
 // ---------------------------------------------------------------------------
 // useLogin

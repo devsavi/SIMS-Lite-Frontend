@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { DataTable } from "@/components/common/data-table";
 import { getReleaseTableColumns } from "./ReleaseTableColumns";

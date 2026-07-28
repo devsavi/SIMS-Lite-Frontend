@@ -135,11 +135,13 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
+      _skipAuthRetry?: boolean;
     };
     const normalisedError = normaliseError(error);
 
-    // If 401 and we haven't already retried this request
-    if (normalisedError.status === 401 && !originalRequest._retry) {
+    // If 401 and we haven't already retried this request,
+    // and this isn't a request that should bypass refresh (e.g. the refresh endpoint itself)
+    if (normalisedError.status === 401 && !originalRequest._retry && !originalRequest._skipAuthRetry) {
       if (_isRefreshing) {
         // Queue requests while refresh is in-flight
         return new Promise((resolve, reject) => {

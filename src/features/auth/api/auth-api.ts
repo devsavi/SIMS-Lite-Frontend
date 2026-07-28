@@ -53,9 +53,15 @@ export const authApi = {
    * POST /auth/refresh
    * Exchanges a valid refresh token for a new token pair.
    * Field name is refresh_token (snake_case) per backend schema.
+   *
+   * Uses _skipAuthRetry to prevent the response interceptor from attempting
+   * another token refresh when this call itself returns 401 (expired RT).
    */
   refreshToken: async (data: RefreshTokenRequest): Promise<TokenResponse> => {
-    const res = await post<SuccessResponse<TokenResponse>>(`${AUTH}/refresh`, data);
+    const res = await post<SuccessResponse<TokenResponse>>(`${AUTH}/refresh`, data, {
+      // @ts-expect-error — custom flag read by the response interceptor
+      _skipAuthRetry: true,
+    });
     return res.data;
   },
 
