@@ -68,7 +68,7 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
   if (!isAuthorized) {
     return (
       <PageContainer>
-        <div className="my-12 p-8 bg-destructive/10 border border-destructive/30 rounded-lg text-center space-y-4 max-w-lg mx-auto">
+        <div className="my-12 p-8 bg-destructive/10 border border-destructive/30 rounded-none text-center space-y-4 max-w-lg mx-auto">
           <ShieldAlert className="h-12 w-12 text-destructive mx-auto" />
           <h2 className="text-xl font-bold text-destructive">Access Denied</h2>
           <p className="text-sm text-muted-foreground">
@@ -102,7 +102,7 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
             <button
               type="button"
               onClick={() => setIsPrintOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-input bg-background hover:bg-accent text-foreground rounded-md transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-input bg-background hover:bg-accent text-foreground rounded-none transition-colors"
             >
               <Printer className="h-3.5 w-3.5" />
               Print
@@ -111,7 +111,7 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
             <button
               type="button"
               onClick={() => setIsExportOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-none hover:bg-primary/90 transition-colors"
             >
               <Download className="h-3.5 w-3.5" />
               Export
@@ -136,13 +136,13 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
 
       {/* Error state */}
       {isError && (
-        <div className="my-6 p-6 bg-destructive/10 border border-destructive/30 rounded-lg text-center space-y-3">
+        <div className="my-6 p-6 bg-destructive/10 border border-destructive/30 rounded-none text-center space-y-3">
           <ShieldAlert className="h-6 w-6 text-destructive mx-auto" />
           <h4 className="text-sm font-semibold text-destructive">Failed to load report data</h4>
           <button
             type="button"
             onClick={() => refetch()}
-            className="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md"
+            className="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-none"
           >
             Retry
           </button>

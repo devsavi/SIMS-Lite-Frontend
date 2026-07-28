@@ -1,4 +1,4 @@
-import { NotificationCenterPage } from "@/features/notifications";
+import { NotificationCenterPage } from "@/features/notifications/pages/NotificationCenterPage";
 
 export const metadata = {
   title: "Notifications — SIMS Lite",

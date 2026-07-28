@@ -39,7 +39,7 @@ export function ReportSettingsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-none border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <h3 className="text-base font-semibold text-foreground">Reporting & Export Settings</h3>
@@ -61,7 +61,7 @@ export function ReportSettingsForm({
           <select
             value={formData.defaultExportFormat}
             onChange={(e) => handleChange("defaultExportFormat", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="excel">Microsoft Excel (.xlsx)</option>
             <option value="csv">Comma-Separated Values (.csv)</option>
@@ -74,7 +74,7 @@ export function ReportSettingsForm({
           <select
             value={formData.pageSize}
             onChange={(e) => handleChange("pageSize", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="A4">A4 (210 x 297 mm)</option>
             <option value="LETTER">US Letter (8.5 x 11 in)</option>
@@ -88,7 +88,7 @@ export function ReportSettingsForm({
               id="includeHeaderLogo"
               checked={formData.includeHeaderLogo}
               onChange={(e) => handleChange("includeHeaderLogo", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="includeHeaderLogo" className="font-medium cursor-pointer">
               Embed company logo header on generated PDFs and printouts
@@ -101,7 +101,7 @@ export function ReportSettingsForm({
               id="scheduledReportsEnabled"
               checked={formData.scheduledReportsEnabled}
               onChange={(e) => handleChange("scheduledReportsEnabled", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="scheduledReportsEnabled" className="font-medium cursor-pointer">
               Enable automated scheduled email reports generator
@@ -114,7 +114,7 @@ export function ReportSettingsForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-none bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isSubmitting ? "Saving..." : "Save Report Settings"}

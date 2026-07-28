@@ -90,7 +90,7 @@ export function DateRangePicker({
                   onChange?.(undefined);
                 }
               }}
-              className="ml-auto rounded-sm hover:text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              className="ml-auto rounded-none hover:text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </span>

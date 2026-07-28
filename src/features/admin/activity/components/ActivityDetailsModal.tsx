@@ -16,7 +16,7 @@ export function ActivityDetailsModal({ entry, isOpen, onClose }: ActivityDetails
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-lg border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-lg rounded-none border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="flex items-center gap-2 text-base font-semibold">
             <Activity className="h-5 w-5 text-primary" />
@@ -26,7 +26,7 @@ export function ActivityDetailsModal({ entry, isOpen, onClose }: ActivityDetails
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded p-1 text-muted-foreground hover:bg-accent"
+            className="rounded-none p-1 text-muted-foreground hover:bg-accent"
           >
             <X className="h-4 w-4" />
           </button>
@@ -54,7 +54,7 @@ export function ActivityDetailsModal({ entry, isOpen, onClose }: ActivityDetails
 
           <div>
             <span className="text-xs font-sans text-muted-foreground block mb-1">Payload & Context Details</span>
-            <pre className="rounded bg-muted p-3 overflow-x-auto text-[11px] text-foreground border border-border leading-relaxed">
+            <pre className="rounded-none bg-muted p-3 overflow-x-auto text-[11px] text-foreground border border-border leading-relaxed">
               {JSON.stringify(entry.details || { action: entry.action }, null, 2)}
             </pre>
           </div>
@@ -64,7 +64,7 @@ export function ActivityDetailsModal({ entry, isOpen, onClose }: ActivityDetails
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md bg-secondary px-4 py-1.5 text-xs font-medium hover:bg-secondary/80"
+            className="rounded-none bg-secondary px-4 py-1.5 text-xs font-medium hover:bg-secondary/80"
           >
             Close
           </button>

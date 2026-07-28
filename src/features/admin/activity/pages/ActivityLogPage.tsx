@@ -62,7 +62,7 @@ export function ActivityLogPage() {
               type="button"
               disabled={filters.page! <= 1}
               onClick={() => setFilters({ ...filters, page: filters.page! - 1 })}
-              className="rounded border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+              className="rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
             >
               Previous
             </button>
@@ -73,7 +73,7 @@ export function ActivityLogPage() {
               type="button"
               disabled={(data?.page || 1) >= (data?.totalPages || 1)}
               onClick={() => setFilters({ ...filters, page: filters.page! + 1 })}
-              className="rounded border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+              className="rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
             >
               Next
             </button>

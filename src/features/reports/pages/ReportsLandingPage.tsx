@@ -46,31 +46,31 @@ export function ReportsLandingPage() {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="h-56 bg-card border border-border rounded-lg p-5 animate-pulse space-y-4"
+              className="h-56 bg-card border border-border rounded-none p-5 animate-pulse space-y-4"
             >
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-muted rounded-lg" />
+                <div className="h-10 w-10 bg-muted rounded-none" />
                 <div className="space-y-2 flex-1">
-                  <div className="h-4 w-28 bg-muted rounded" />
-                  <div className="h-3 w-16 bg-muted rounded" />
+                  <div className="h-4 w-28 bg-muted rounded-none" />
+                  <div className="h-3 w-16 bg-muted rounded-none" />
                 </div>
               </div>
-              <div className="h-10 w-full bg-muted rounded" />
-              <div className="h-8 w-full bg-muted rounded pt-4" />
+              <div className="h-10 w-full bg-muted rounded-none" />
+              <div className="h-8 w-full bg-muted rounded-none pt-4" />
             </div>
           ))}
         </div>
       )}
 
       {isError && (
-        <div className="my-8 p-6 bg-destructive/10 border border-destructive/30 rounded-lg text-center space-y-3">
+        <div className="my-8 p-6 bg-destructive/10 border border-destructive/30 rounded-none text-center space-y-3">
           <ShieldAlert className="h-8 w-8 text-destructive mx-auto" />
           <h3 className="text-base font-semibold text-destructive">Failed to Load Reports Metadata</h3>
           <p className="text-xs text-muted-foreground">An error occurred while fetching the available reports catalog.</p>
           <button
             type="button"
             onClick={() => refetch()}
-            className="px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            className="px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-none hover:bg-primary/90"
           >
             Retry
           </button>
@@ -78,7 +78,7 @@ export function ReportsLandingPage() {
       )}
 
       {!isLoading && !isError && visibleReports.length === 0 && (
-        <div className="my-8 p-8 bg-card border border-border rounded-lg text-center space-y-2">
+        <div className="my-8 p-8 bg-card border border-border rounded-none text-center space-y-2">
           <BarChart2 className="h-10 w-10 text-muted-foreground mx-auto" />
           <h3 className="text-base font-semibold text-foreground">No Permitted Reports Available</h3>
           <p className="text-xs text-muted-foreground">Your user role standard permission level does not grant access to report views.</p>

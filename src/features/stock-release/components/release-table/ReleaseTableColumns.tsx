@@ -114,7 +114,7 @@ export function getReleaseTableColumns({
         const items = row.original.items || [];
         const count = row.original.total_items ?? items.length;
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-medium bg-muted">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-none text-xs font-mono font-medium bg-muted">
             {count} {count === 1 ? "item" : "items"}
           </span>
         );

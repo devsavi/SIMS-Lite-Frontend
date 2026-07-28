@@ -50,7 +50,7 @@ export function TestConnectionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-md rounded-none border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="flex items-center gap-2 text-base font-semibold">
             <Send className="h-5 w-5 text-primary" />
@@ -60,7 +60,7 @@ export function TestConnectionModal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded p-1 text-muted-foreground hover:bg-accent"
+            className="rounded-none p-1 text-muted-foreground hover:bg-accent"
           >
             <X className="h-4 w-4" />
           </button>
@@ -74,7 +74,7 @@ export function TestConnectionModal({
               required
               value={recipientEmail}
               onChange={(e) => setRecipientEmail(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               placeholder="e.g. admin@simslite.com"
             />
             {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
@@ -82,7 +82,7 @@ export function TestConnectionModal({
 
           {result && (
             <div
-              className={`rounded-md p-3.5 border text-xs flex items-start gap-2.5 ${
+              className={`rounded-none p-3.5 border text-xs flex items-start gap-2.5 ${
                 result.success
                   ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300"
                   : "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300"
@@ -107,14 +107,14 @@ export function TestConnectionModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-input bg-background px-4 py-2 font-medium hover:bg-accent"
+              className="rounded-none border border-input bg-background px-4 py-2 font-medium hover:bg-accent"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={isTesting}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-none bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               <Send className="h-3.5 w-3.5" />
               {isTesting ? "Testing Connection..." : "Send Test Email"}

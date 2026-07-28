@@ -44,8 +44,8 @@ export function CompanyProfilePage() {
 
         {isLoading || !profile ? (
           <div className="space-y-4 animate-pulse">
-            <div className="h-32 rounded-lg bg-muted"></div>
-            <div className="h-96 rounded-lg bg-muted"></div>
+            <div className="h-32 rounded-none bg-muted"></div>
+            <div className="h-96 rounded-none bg-muted"></div>
           </div>
         ) : (
           <div className="space-y-6 max-w-4xl">

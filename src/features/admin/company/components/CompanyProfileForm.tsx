@@ -55,7 +55,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-none border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <h3 className="text-base font-semibold text-foreground">Organization Identity</h3>
@@ -65,7 +65,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
         </div>
 
         {savedSuccess && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-none bg-emerald-100 dark:bg-emerald-950/60 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
             <CheckCircle2 className="h-4 w-4" /> Changes saved
           </span>
         )}
@@ -79,7 +79,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -90,7 +90,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.businessRegistrationNumber}
             onChange={(e) => setFormData({ ...formData, businessRegistrationNumber: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -100,7 +100,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             type="text"
             value={formData.taxRegistrationNumber}
             onChange={(e) => setFormData({ ...formData, taxRegistrationNumber: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -111,7 +111,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -122,7 +122,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -132,7 +132,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             type="url"
             value={formData.website}
             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="https://example.com"
           />
         </div>
@@ -144,7 +144,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -155,7 +155,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.city}
             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -166,7 +166,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.state}
             onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -177,7 +177,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.postalCode}
             onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -188,7 +188,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
             required
             value={formData.country}
             onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -197,7 +197,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
           <select
             value={formData.currency}
             onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="USD">USD — US Dollar ($)</option>
             <option value="EUR">EUR — Euro (€)</option>
@@ -213,7 +213,7 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-none bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isSubmitting ? "Saving Company Profile..." : "Save Company Profile"}

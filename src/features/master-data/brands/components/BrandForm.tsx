@@ -61,7 +61,7 @@ export function BrandForm({ defaultValues, editingId, onSubmit, onCancel, error,
           control={form.control}
           name="is_active"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
+            <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
               <div>
                 <FormLabel className="text-sm font-medium">Active</FormLabel>
                 <FormDescription className="text-xs">Inactive brands will not appear in product forms.</FormDescription>

@@ -342,7 +342,7 @@ export function AppSidebar() {
             type="button"
             aria-label="Close navigation"
             onClick={() => setMobileOpen(false)}
-            className="rounded-sm p-1 text-sidebar-foreground hover:bg-sidebar-accent md:hidden"
+            className="rounded-none p-1 text-sidebar-foreground hover:bg-sidebar-accent md:hidden"
           >
             <X className="h-4 w-4" />
           </button>
@@ -352,7 +352,7 @@ export function AppSidebar() {
             type="button"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             onClick={toggle}
-            className="hidden rounded-sm p-1 text-sidebar-foreground hover:bg-sidebar-accent md:block"
+            className="hidden rounded-none p-1 text-sidebar-foreground hover:bg-sidebar-accent md:block"
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -405,7 +405,7 @@ export function AppSidebar() {
         aria-label="Open navigation menu"
         onClick={() => setMobileOpen(true)}
         className={cn(
-          "fixed left-4 top-4 z-20 rounded-sm p-1.5 text-foreground",
+          "fixed left-4 top-4 z-20 rounded-none p-1.5 text-foreground",
           "bg-card border border-border shadow-sm",
           "md:hidden",
           isMobileOpen && "hidden"

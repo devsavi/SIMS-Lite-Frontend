@@ -40,7 +40,7 @@ export function GeneralSettingsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-none border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <h3 className="text-base font-semibold text-foreground">General Application Settings</h3>
@@ -64,7 +64,7 @@ export function GeneralSettingsForm({
             required
             value={formData.siteName}
             onChange={(e) => handleChange("siteName", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -75,7 +75,7 @@ export function GeneralSettingsForm({
             required
             value={formData.supportEmail}
             onChange={(e) => handleChange("supportEmail", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -87,7 +87,7 @@ export function GeneralSettingsForm({
             max={480}
             value={formData.sessionTimeoutMinutes}
             onChange={(e) => handleChange("sessionTimeoutMinutes", Number(e.target.value))}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -96,7 +96,7 @@ export function GeneralSettingsForm({
           <select
             value={formData.timeZone}
             onChange={(e) => handleChange("timeZone", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="UTC">UTC — Coordinated Universal Time</option>
             <option value="America/New_York">EST — Eastern Standard Time</option>
@@ -111,7 +111,7 @@ export function GeneralSettingsForm({
           <select
             value={formData.dateFormat}
             onChange={(e) => handleChange("dateFormat", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="YYYY-MM-DD">YYYY-MM-DD (ISO standard)</option>
             <option value="DD/MM/YYYY">DD/MM/YYYY (UK / International)</option>
@@ -120,13 +120,13 @@ export function GeneralSettingsForm({
         </div>
 
         <div className="sm:col-span-2 pt-2">
-          <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20 p-4">
+          <div className="flex items-center gap-2 rounded-none border border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20 p-4">
             <input
               type="checkbox"
               id="maintenanceMode"
               checked={formData.maintenanceMode}
               onChange={(e) => handleChange("maintenanceMode", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <div>
               <label htmlFor="maintenanceMode" className="text-sm font-semibold text-foreground cursor-pointer">
@@ -144,7 +144,7 @@ export function GeneralSettingsForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-none bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isSubmitting ? "Saving..." : "Save General Settings"}

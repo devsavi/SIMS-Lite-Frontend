@@ -19,7 +19,7 @@ export function AuditTrailFilters({ filters, onFilterChange }: AuditTrailFilters
           placeholder="Search audit records by entity, ID, or user..."
           value={filters.search || ""}
           onChange={(e) => onFilterChange({ ...filters, search: e.target.value, page: 1 })}
-          className="w-full rounded-md border border-input bg-background pl-9 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="w-full rounded-none border border-input bg-background pl-9 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
 
@@ -28,7 +28,7 @@ export function AuditTrailFilters({ filters, onFilterChange }: AuditTrailFilters
           value={filters.entity || "ALL"}
           onChange={(e) => onFilterChange({ ...filters, entity: e.target.value, page: 1 })}
           aria-label="Filter by entity"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <option value="ALL">All Entities</option>
           <option value="User">User</option>
@@ -43,7 +43,7 @@ export function AuditTrailFilters({ filters, onFilterChange }: AuditTrailFilters
           value={filters.action || "ALL"}
           onChange={(e) => onFilterChange({ ...filters, action: e.target.value as AuditAction | "ALL", page: 1 })}
           aria-label="Filter by action"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <option value="ALL">All Actions</option>
           <option value="CREATE">CREATE</option>

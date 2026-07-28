@@ -27,7 +27,7 @@ export function ReleaseFilterPanel({
   isRefreshing = false,
 }: ReleaseFilterPanelProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-4 rounded-xl border border-border shadow-xs">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card p-4 rounded-none border border-border shadow-xs">
       <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
         {/* Search input */}
         <div className="w-full sm:w-72">
@@ -67,7 +67,7 @@ export function ReleaseFilterPanel({
           <input
             type="date"
             aria-label="From date"
-            className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 rounded-none border border-input bg-transparent px-3 py-1 text-xs shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
             value={filters.from_date ?? ""}
             onChange={(e) =>
               onFilterChange({ from_date: e.target.value || undefined, page: 1 })
@@ -77,7 +77,7 @@ export function ReleaseFilterPanel({
           <input
             type="date"
             aria-label="To date"
-            className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 rounded-none border border-input bg-transparent px-3 py-1 text-xs shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
             value={filters.to_date ?? ""}
             onChange={(e) =>
               onFilterChange({ to_date: e.target.value || undefined, page: 1 })

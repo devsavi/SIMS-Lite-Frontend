@@ -119,7 +119,7 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
           control={form.control}
           name="is_active"
           render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
+            <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
               <div>
                 <FormLabel className="text-sm font-medium">Active</FormLabel>
                 <FormDescription className="text-xs">Inactive suppliers cannot be used in new purchase orders.</FormDescription>

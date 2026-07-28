@@ -73,7 +73,7 @@ function AlertSkeleton() {
     <div className="space-y-0">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="flex items-start gap-3 px-6 py-3">
-          <div className="mt-0.5 h-4 w-4 shrink-0 animate-pulse bg-muted rounded-full" />
+          <div className="mt-0.5 h-4 w-4 shrink-0 animate-pulse bg-muted rounded-none" />
           <div className="flex-1 space-y-1.5">
             <div className="h-4 w-32 animate-pulse bg-muted" />
             <div className="h-3 w-48 animate-pulse bg-muted" />

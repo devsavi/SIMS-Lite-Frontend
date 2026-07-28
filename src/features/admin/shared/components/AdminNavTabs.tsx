@@ -47,7 +47,7 @@ export function AdminNavTabs() {
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-t-md",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none",
               isActive
                 ? "border-primary text-primary font-semibold bg-muted/30"
                 : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"

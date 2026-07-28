@@ -120,7 +120,7 @@ export function ProductsPage() {
       accessorKey: "sku",
       header: "SKU",
       cell: ({ row }) => (
-        <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+        <code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">
           {row.original.sku}
         </code>
       ),
@@ -158,7 +158,7 @@ export function ProductsPage() {
         const uom = row.original.uom;
         if (!uom) return <span className="text-muted-foreground">—</span>;
         return (
-          <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+          <code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">
             {uom.symbol}
           </code>
         );

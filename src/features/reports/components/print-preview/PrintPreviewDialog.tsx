@@ -36,7 +36,7 @@ export function PrintPreviewDialog({
       aria-labelledby="print-preview-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto"
     >
-      <div className="bg-card text-card-foreground border border-border rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col my-auto">
+      <div className="bg-card text-card-foreground border border-border rounded-none shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col my-auto">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 border-b border-border print:hidden">
           <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export function PrintPreviewDialog({
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-none hover:bg-primary/90 transition-colors"
             >
               <Printer className="h-3.5 w-3.5" />
               Print
@@ -57,7 +57,7 @@ export function PrintPreviewDialog({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-muted-foreground hover:text-foreground rounded-md transition-colors"
+              className="p-1.5 text-muted-foreground hover:text-foreground rounded-none transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -86,7 +86,7 @@ export function PrintPreviewDialog({
 
           {/* Printable Summary block */}
           {summary && (
-            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-muted/30 border border-gray-200 dark:border-border rounded-md text-xs">
+            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-muted/30 border border-gray-200 dark:border-border rounded-none text-xs">
               <div>
                 <span className="text-gray-500 uppercase text-[10px] block font-bold">Total Records</span>
                 <span className="text-sm font-bold text-gray-900 dark:text-foreground">{summary.totalRecords}</span>

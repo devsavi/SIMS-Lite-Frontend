@@ -39,8 +39,8 @@ export function PermissionGuard({
 
   if (!hasAccess) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-border bg-card p-8 text-center shadow-sm">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
+      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-none border border-border bg-card p-8 text-center shadow-sm">
+        <div className="flex h-16 w-16 items-center justify-center rounded-none bg-destructive/10 text-destructive mb-4">
           <ShieldAlert className="h-8 w-8" />
         </div>
         <h2 className="text-xl font-bold text-foreground">Access Restricted</h2>
@@ -51,7 +51,7 @@ export function PermissionGuard({
         <div className="mt-6 flex items-center gap-3">
           <Link
             href={fallbackUrl}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex items-center gap-2 rounded-none bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard

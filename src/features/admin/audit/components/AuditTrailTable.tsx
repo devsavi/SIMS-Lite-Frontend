@@ -27,7 +27,7 @@ export function AuditTrailTable({ records, isLoading, onViewDiff }: AuditTrailTa
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+    <div className="overflow-x-auto rounded-none border border-border bg-card shadow-sm">
       <table className="w-full text-left text-sm text-foreground">
         <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
           <tr>
@@ -43,12 +43,12 @@ export function AuditTrailTable({ records, isLoading, onViewDiff }: AuditTrailTa
           {isLoading ? (
             Array.from({ length: 5 }).map((_, idx) => (
               <tr key={idx} className="animate-pulse">
-                <td className="px-4 py-3"><div className="h-4 w-28 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-5 w-16 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-40 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-muted"></div></td>
-                <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-28 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-32 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-5 w-16 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-40 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-32 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded-none bg-muted"></div></td>
               </tr>
             ))
           ) : records.length === 0 ? (
@@ -68,14 +68,14 @@ export function AuditTrailTable({ records, isLoading, onViewDiff }: AuditTrailTa
                   <div className="text-xs font-mono text-muted-foreground">ID: {rec.entityId}</div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", getActionBadgeClass(rec.action))}>
+                  <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-semibold", getActionBadgeClass(rec.action))}>
                     {rec.action}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
                     {rec.changedFields.map((field) => (
-                      <span key={field} className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-mono text-foreground border border-border">
+                      <span key={field} className="rounded-none bg-muted px-1.5 py-0.5 text-[11px] font-mono text-foreground border border-border">
                         {field}
                       </span>
                     ))}
@@ -91,7 +91,7 @@ export function AuditTrailTable({ records, isLoading, onViewDiff }: AuditTrailTa
                     onClick={() => onViewDiff(rec)}
                     title="View Field Diffs"
                     aria-label={`View audit diff for ${rec.entity} ${rec.entityId}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex items-center gap-1.5 rounded-none border border-input bg-background px-2.5 py-1 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <FileCode className="h-3.5 w-3.5 text-primary" />
                     Inspect Diff

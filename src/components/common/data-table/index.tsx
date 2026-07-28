@@ -319,14 +319,14 @@ export function DataTable<TData>({
       )}
 
       {/* Table */}
-      <div className="overflow-auto border border-border">
+      <div className="relative overflow-auto border border-border rounded-none max-h-[70vh]">
         <Table aria-label={caption}>
           {caption && (
             <caption className="sr-only">{caption}</caption>
           )}
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur-xs border-b border-border shadow-xs">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-muted/50 hover:bg-muted/50">
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   const canSort = header.column.getCanSort();
                   const sorted = header.column.getIsSorted();
@@ -336,7 +336,7 @@ export function DataTable<TData>({
                       key={header.id}
                       style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                       className={cn(
-                        "whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+                        "whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground py-3",
                         canSort && "cursor-pointer select-none"
                       )}
                       aria-sort={
@@ -353,7 +353,7 @@ export function DataTable<TData>({
                         <button
                           type="button"
                           onClick={header.column.getToggleSortingHandler()}
-                          className="flex items-center gap-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          className="flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none px-1 py-0.5"
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           <SortIcon direction={sorted} />
@@ -395,8 +395,16 @@ export function DataTable<TData>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() ? "selected" : undefined}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === " " && hasSelection) {
+                      e.preventDefault();
+                      row.toggleSelected();
+                    }
+                  }}
                   className={cn(
-                    row.getIsSelected() && "bg-primary/5"
+                    "transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:bg-muted/60",
+                    row.getIsSelected() && "bg-primary/5 hover:bg-primary/10"
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (

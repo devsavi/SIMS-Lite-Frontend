@@ -22,8 +22,8 @@ export function LogoUploader({ currentLogoUrl, onUploadLogo, isUploading }: Logo
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 rounded-lg border border-border bg-card p-6 shadow-sm">
-      <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/40 relative overflow-hidden">
+    <div className="flex flex-col sm:flex-row items-center gap-6 rounded-none border border-border bg-card p-6 shadow-sm">
+      <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-none border-2 border-dashed border-border bg-muted/40 relative overflow-hidden">
         {currentLogoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -54,7 +54,7 @@ export function LogoUploader({ currentLogoUrl, onUploadLogo, isUploading }: Logo
             type="button"
             disabled={isUploading}
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             <Upload className="h-3.5 w-3.5" />
             {isUploading ? "Uploading..." : "Upload Logo"}

@@ -58,7 +58,7 @@ export function StockReleaseStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full border shadow-xs transition-colors",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-none border shadow-xs transition-colors",
         config.bg,
         config.text,
         config.border,

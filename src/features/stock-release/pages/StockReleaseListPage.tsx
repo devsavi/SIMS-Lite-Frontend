@@ -155,7 +155,7 @@ export function StockReleaseListPage() {
               <p className="text-xs text-muted-foreground font-medium">Total Releases</p>
               <h3 className="text-2xl font-bold text-foreground mt-1">{totalRows}</h3>
             </div>
-            <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+            <div className="p-2.5 rounded-none bg-primary/10 text-primary">
               <ArrowUpFromLine className="h-5 w-5" />
             </div>
           </CardContent>
@@ -169,7 +169,7 @@ export function StockReleaseListPage() {
                 {pendingCount}
               </h3>
             </div>
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
+            <div className="p-2.5 rounded-none bg-amber-500/10 text-amber-600">
               <Clock className="h-5 w-5" />
             </div>
           </CardContent>
@@ -183,7 +183,7 @@ export function StockReleaseListPage() {
                 {approvedCount}
               </h3>
             </div>
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600">
+            <div className="p-2.5 rounded-none bg-emerald-500/10 text-emerald-600">
               <CheckCircle2 className="h-5 w-5" />
             </div>
           </CardContent>
@@ -197,7 +197,7 @@ export function StockReleaseListPage() {
                 {totalQtyReleased}
               </h3>
             </div>
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600">
+            <div className="p-2.5 rounded-none bg-blue-500/10 text-blue-600">
               <PackageCheck className="h-5 w-5" />
             </div>
           </CardContent>

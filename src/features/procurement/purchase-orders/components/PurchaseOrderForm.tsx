@@ -113,7 +113,7 @@ export function PurchaseOrderForm({
   return (
     <form className="space-y-6">
       {/* Header Fields */}
-      <div className="grid gap-6 rounded-md border p-4 sm:grid-cols-2">
+      <div className="grid gap-6 rounded-none border p-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="supplierId">Supplier *</Label>
           <Select
@@ -174,7 +174,7 @@ export function PurchaseOrderForm({
           <p className="text-xs text-rose-500">{errors.items.root.message}</p>
         )}
 
-        <div className="rounded-md border bg-card">
+        <div className="rounded-none border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -270,7 +270,7 @@ export function PurchaseOrderForm({
         </div>
 
         {/* Grand Total Bar */}
-        <div className="flex justify-end rounded-md border bg-muted/40 p-4">
+        <div className="flex justify-end rounded-none border bg-muted/40 p-4">
           <div className="text-right">
             <span className="text-sm font-medium text-muted-foreground mr-4">
               Estimated Total Amount:

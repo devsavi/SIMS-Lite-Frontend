@@ -107,7 +107,7 @@ export function StatusBadge({
     >
       {dot && (
         <span
-          className={cn("h-1.5 w-1.5 rounded-full", dotClass)}
+          className={cn("h-1.5 w-1.5 rounded-none", dotClass)}
           aria-hidden="true"
         />
       )}

@@ -155,16 +155,16 @@ export function PurchaseOrderDetail({
       </div>
 
       {/* Lifecycle Timeline */}
-      <div className="rounded-lg border bg-card p-4">
+      <div className="rounded-none border bg-card p-4">
         <h2 className="text-sm font-semibold mb-3 text-muted-foreground">
           Workflow Lifecycle
         </h2>
         {po.status === "REJECTED" ? (
-          <div className="rounded border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
+          <div className="rounded-none border border-rose-200 bg-rose-50 p-3 text-rose-700 text-sm">
             This purchase order was <strong>REJECTED</strong>.
           </div>
         ) : po.status === "CANCELLED" ? (
-          <div className="rounded border border-amber-200 bg-amber-50 p-3 text-amber-700 text-sm">
+          <div className="rounded-none border border-amber-200 bg-amber-50 p-3 text-amber-700 text-sm">
             This purchase order was <strong>CANCELLED</strong>.
           </div>
         ) : (
@@ -177,7 +177,7 @@ export function PurchaseOrderDetail({
                 <div key={step.key} className="flex-1 flex items-center">
                   <div className="flex flex-col items-center">
                     <div
-                      className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                      className={`h-8 w-8 rounded-none flex items-center justify-center text-xs font-bold ${
                         isCurrent
                           ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
                           : isPassed
@@ -201,7 +201,7 @@ export function PurchaseOrderDetail({
                   </div>
                   {idx < timelineSteps.length - 1 && (
                     <div
-                      className={`h-1 flex-1 mx-2 rounded ${
+                      className={`h-1 flex-1 mx-2 rounded-none ${
                         idx < currentStepIndex
                           ? "bg-emerald-500"
                           : "bg-slate-200 dark:bg-slate-800"
@@ -217,13 +217,13 @@ export function PurchaseOrderDetail({
 
       {/* General Details Summary */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">Supplier</p>
           <p className="text-base font-semibold mt-1">
             {po.supplierName || po.supplierId}
           </p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">
             Expected Delivery Date
           </p>
@@ -233,7 +233,7 @@ export function PurchaseOrderDetail({
               : "N/A"}
           </p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">Total Amount</p>
           <p className="text-xl font-bold text-primary mt-1">
             ${po.totalAmount.toFixed(2)}
@@ -242,7 +242,7 @@ export function PurchaseOrderDetail({
       </div>
 
       {po.notes && (
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Notes / Instructions
           </h3>
@@ -255,7 +255,7 @@ export function PurchaseOrderDetail({
       {/* Line Items Table */}
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Ordered Line Items</h3>
-        <div className="rounded-md border bg-card">
+        <div className="rounded-none border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -297,7 +297,7 @@ export function PurchaseOrderDetail({
       {po.activityLog && po.activityLog.length > 0 && (
         <div className="space-y-2 pt-4">
           <h3 className="text-lg font-semibold">Audit Trail & Activity Log</h3>
-          <div className="rounded-md border bg-card p-4 space-y-3">
+          <div className="rounded-none border bg-card p-4 space-y-3">
             {po.activityLog.map((log) => (
               <div
                 key={log.id}

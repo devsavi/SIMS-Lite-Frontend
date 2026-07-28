@@ -98,14 +98,14 @@ export function GRNForm({
   return (
     <form className="space-y-6">
       {/* Header PO Selection */}
-      <div className="grid gap-6 rounded-md border p-4 sm:grid-cols-2">
+      <div className="grid gap-6 rounded-none border p-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="purchaseOrderId">Select Approved Purchase Order *</Label>
           <select
             id="purchaseOrderId"
             value={selectedPO?.id || ""}
             onChange={(e) => onPOSelect?.(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">-- Choose Approved PO --</option>
             {approvedPOs.map((po) => (
@@ -165,7 +165,7 @@ export function GRNForm({
             </Button>
           </div>
 
-          <div className="rounded-md border bg-card">
+          <div className="rounded-none border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>

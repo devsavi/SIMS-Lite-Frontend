@@ -18,11 +18,11 @@ function ListSkeleton() {
     <div className="divide-y divide-border border border-border">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="flex gap-3 px-4 py-3">
-          <div className="mt-0.5 h-7 w-7 shrink-0 animate-pulse rounded-full bg-muted" />
+          <div className="mt-0.5 h-7 w-7 shrink-0 animate-pulse rounded-none bg-muted" />
           <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-48 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-72 animate-pulse rounded bg-muted" />
-            <div className="h-2.5 w-24 animate-pulse rounded bg-muted" />
+            <div className="h-3.5 w-48 animate-pulse rounded-none bg-muted" />
+            <div className="h-3 w-72 animate-pulse rounded-none bg-muted" />
+            <div className="h-2.5 w-24 animate-pulse rounded-none bg-muted" />
           </div>
         </div>
       ))}

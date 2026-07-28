@@ -171,7 +171,7 @@ export function StockReleaseForm({
               <label className="text-xs font-semibold text-muted-foreground">
                 Release Summary
               </label>
-              <div className="h-9 flex items-center justify-between px-3 rounded-md bg-muted/40 border text-xs">
+              <div className="h-9 flex items-center justify-between px-3 rounded-none bg-muted/40 border text-xs">
                 <span className="text-muted-foreground">Total Line Items: {fields.length}</span>
                 <span className="font-semibold text-foreground font-mono">
                   Total Released Qty: {totalQuantity}
@@ -235,7 +235,7 @@ export function StockReleaseForm({
         </CardHeader>
         <CardContent className="space-y-4">
           {form.formState.errors.items?.root && (
-            <div className="p-3 bg-destructive/10 text-destructive text-xs rounded-lg font-medium flex items-center gap-2">
+            <div className="p-3 bg-destructive/10 text-destructive text-xs rounded-none font-medium flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <span>{form.formState.errors.items.root.message}</span>
             </div>

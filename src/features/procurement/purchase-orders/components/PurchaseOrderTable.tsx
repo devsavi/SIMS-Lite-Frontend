@@ -155,7 +155,7 @@ export function PurchaseOrderTable({
       </div>
 
       {/* Main Table */}
-      <div className="rounded-md border bg-card">
+      <div className="rounded-none border bg-card">
         <Table>
           <TableHeader>
             <TableRow>

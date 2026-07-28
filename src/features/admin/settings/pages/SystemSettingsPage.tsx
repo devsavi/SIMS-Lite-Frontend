@@ -64,16 +64,16 @@ export function SystemSettingsPage() {
         <AdminNavTabs />
 
         {isLoading || !config ? (
-          <div className="h-96 animate-pulse rounded-lg bg-muted"></div>
+          <div className="h-96 animate-pulse rounded-none bg-muted"></div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Section Sidebar Navigation */}
-            <div className="space-y-1 rounded-lg border border-border bg-card p-2 shadow-sm h-fit">
+            <div className="space-y-1 rounded-none border border-border bg-card p-2 shadow-sm h-fit">
               <button
                 type="button"
                 onClick={() => handleSectionClick("general")}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-xs font-semibold transition-colors text-left",
+                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
                   activeSection === "general"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -87,7 +87,7 @@ export function SystemSettingsPage() {
                 type="button"
                 onClick={() => handleSectionClick("inventory")}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-xs font-semibold transition-colors text-left",
+                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
                   activeSection === "inventory"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -101,7 +101,7 @@ export function SystemSettingsPage() {
                 type="button"
                 onClick={() => handleSectionClick("procurement")}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-xs font-semibold transition-colors text-left",
+                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
                   activeSection === "procurement"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -115,7 +115,7 @@ export function SystemSettingsPage() {
                 type="button"
                 onClick={() => handleSectionClick("notifications")}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-xs font-semibold transition-colors text-left",
+                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
                   activeSection === "notifications"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -129,7 +129,7 @@ export function SystemSettingsPage() {
                 type="button"
                 onClick={() => handleSectionClick("reports")}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-xs font-semibold transition-colors text-left",
+                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
                   activeSection === "reports"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"

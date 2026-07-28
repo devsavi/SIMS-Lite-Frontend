@@ -50,7 +50,7 @@ export function EmailConfigForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-sm max-w-4xl">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-none border border-border bg-card p-6 shadow-sm max-w-4xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border pb-4">
         <div>
           <h3 className="text-base font-semibold text-foreground">SMTP Gateway & Sender Credentials</h3>
@@ -68,7 +68,7 @@ export function EmailConfigForm({
           <button
             type="button"
             onClick={onOpenTestModal}
-            className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex items-center gap-2 rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Send className="h-3.5 w-3.5" />
             Test Connection
@@ -84,7 +84,7 @@ export function EmailConfigForm({
             required
             value={formData.smtpHost}
             onChange={(e) => setFormData({ ...formData, smtpHost: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="e.g. smtp.mailgun.org or smtp.office365.com"
           />
         </div>
@@ -98,7 +98,7 @@ export function EmailConfigForm({
             max={65535}
             value={formData.smtpPort}
             onChange={(e) => setFormData({ ...formData, smtpPort: Number(e.target.value) })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="587 or 465"
           />
         </div>
@@ -108,7 +108,7 @@ export function EmailConfigForm({
           <select
             value={formData.encryptionType}
             onChange={(e) => setFormData({ ...formData, encryptionType: e.target.value as EncryptionType })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="TLS">STARTTLS / TLS (Recommended — Port 587)</option>
             <option value="SSL">SSL / Implicit (Port 465)</option>
@@ -123,7 +123,7 @@ export function EmailConfigForm({
             required
             value={formData.smtpUser}
             onChange={(e) => setFormData({ ...formData, smtpUser: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -136,7 +136,7 @@ export function EmailConfigForm({
               type={showPassword ? "text" : "password"}
               value={formData.smtpPassword || ""}
               onChange={(e) => setFormData({ ...formData, smtpPassword: e.target.value })}
-              className="w-full rounded-md border border-input bg-background pr-10 pl-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+              className="w-full rounded-none border border-input bg-background pr-10 pl-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
               placeholder={config.isPasswordSet ? "••••••••••••••••" : "Enter SMTP Password"}
             />
             <button
@@ -161,7 +161,7 @@ export function EmailConfigForm({
             required
             value={formData.senderName}
             onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="e.g. SIMS Lite System Alerts"
           />
         </div>
@@ -173,7 +173,7 @@ export function EmailConfigForm({
             required
             value={formData.senderEmail}
             onChange={(e) => setFormData({ ...formData, senderEmail: e.target.value })}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="e.g. no-reply@simslite.com"
           />
         </div>
@@ -183,7 +183,7 @@ export function EmailConfigForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-none bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isSubmitting ? "Saving Configuration..." : "Save Email Configuration"}

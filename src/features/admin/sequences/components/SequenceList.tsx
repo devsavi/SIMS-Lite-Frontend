@@ -14,7 +14,7 @@ interface SequenceListProps {
 
 export function SequenceList({ sequences, isLoading, onEditSequence }: SequenceListProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+    <div className="overflow-x-auto rounded-none border border-border bg-card shadow-sm">
       <table className="w-full text-left text-sm text-foreground">
         <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
           <tr>
@@ -30,12 +30,12 @@ export function SequenceList({ sequences, isLoading, onEditSequence }: SequenceL
           {isLoading ? (
             Array.from({ length: 3 }).map((_, idx) => (
               <tr key={idx} className="animate-pulse">
-                <td className="px-4 py-3"><div className="h-4 w-36 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-12 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-20 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-6 w-32 rounded bg-muted"></div></td>
-                <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-36 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-24 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-12 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-20 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-6 w-32 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded-none bg-muted"></div></td>
               </tr>
             ))
           ) : sequences.length === 0 ? (
@@ -60,7 +60,7 @@ export function SequenceList({ sequences, isLoading, onEditSequence }: SequenceL
                   {seq.nextNumber}
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
-                  <span className="rounded bg-muted px-2 py-0.5 font-semibold">
+                  <span className="rounded-none bg-muted px-2 py-0.5 font-semibold">
                     {seq.resetFrequency}
                   </span>
                 </td>
@@ -78,7 +78,7 @@ export function SequenceList({ sequences, isLoading, onEditSequence }: SequenceL
                     onClick={() => onEditSequence(seq)}
                     title="Edit Sequence"
                     aria-label={`Edit ${seq.title}`}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex items-center gap-1.5 rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Edit2 className="h-3.5 w-3.5" />
                     Configure

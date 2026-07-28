@@ -28,7 +28,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"
 export function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
   if (loading) {
     return (
-      <div className="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm flex items-center justify-center h-64">
+      <div className="bg-card border border-border rounded-none p-6 mb-6 shadow-sm flex items-center justify-center h-64">
         <span className="text-sm text-muted-foreground animate-pulse">Loading charts...</span>
       </div>
     );
@@ -47,7 +47,7 @@ export function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       {showCategoryPie && data.categoryDistribution && (
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+        <div className="bg-card border border-border rounded-none p-5 shadow-sm">
           <h4 className="text-sm font-semibold text-foreground mb-4">Category Distribution</h4>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -75,7 +75,7 @@ export function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
       )}
 
       {showMovementLine && data.movementTrends && (
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm lg:col-span-2">
+        <div className="bg-card border border-border rounded-none p-5 shadow-sm lg:col-span-2">
           <h4 className="text-sm font-semibold text-foreground mb-4">Inventory Movement Trend (7 Days)</h4>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -93,7 +93,7 @@ export function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
       )}
 
       {showSupplierBar && data.supplierSpending && (
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+        <div className="bg-card border border-border rounded-none p-5 shadow-sm">
           <h4 className="text-sm font-semibold text-foreground mb-4">Supplier Purchase Breakdown ($)</h4>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">

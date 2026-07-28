@@ -105,7 +105,7 @@ export function SearchInput({
           aria-label="Clear search"
           onClick={handleClear}
           disabled={disabled}
-          className="absolute right-3 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="absolute right-3 rounded-none text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>

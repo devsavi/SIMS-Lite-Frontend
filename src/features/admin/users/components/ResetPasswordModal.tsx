@@ -52,7 +52,7 @@ export function ResetPasswordModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-md rounded-none border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="flex items-center gap-2 text-base font-semibold">
             <KeyRound className="h-5 w-5 text-primary" />
@@ -62,7 +62,7 @@ export function ResetPasswordModal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded p-1 text-muted-foreground hover:bg-accent"
+            className="rounded-none p-1 text-muted-foreground hover:bg-accent"
           >
             <X className="h-4 w-4" />
           </button>
@@ -75,7 +75,7 @@ export function ResetPasswordModal({
               id="autoGen"
               checked={autoGenerate}
               onChange={(e) => setAutoGenerate(e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="autoGen" className="text-sm font-medium">
               Auto-generate secure temporary password and email to user
@@ -90,7 +90,7 @@ export function ResetPasswordModal({
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   placeholder="At least 8 characters"
                 />
               </div>
@@ -101,7 +101,7 @@ export function ResetPasswordModal({
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   placeholder="Repeat new password"
                 />
               </div>
@@ -114,14 +114,14 @@ export function ResetPasswordModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-input bg-background px-4 py-2 font-medium hover:bg-accent"
+              className="rounded-none border border-input bg-background px-4 py-2 font-medium hover:bg-accent"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="rounded-none bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {isSubmitting ? "Resetting..." : "Reset Password"}
             </button>

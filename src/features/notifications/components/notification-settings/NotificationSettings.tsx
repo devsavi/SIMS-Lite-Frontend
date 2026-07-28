@@ -100,7 +100,7 @@ function BrowserPermissionBanner({
 
   if (permission === "denied") {
     return (
-      <div className="flex items-start gap-3 rounded-sm border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+      <div className="flex items-start gap-3 rounded-none border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
         <BellOff className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
         <div>
           <p className="font-medium text-destructive">Browser notifications blocked</p>
@@ -114,7 +114,7 @@ function BrowserPermissionBanner({
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-sm border border-border bg-muted/40 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-none border border-border bg-muted/40 px-4 py-3">
       <Monitor className="h-4 w-4 shrink-0 text-muted-foreground" />
       <p className="flex-1 text-sm text-muted-foreground">
         Allow browser notifications to receive alerts when SIMS is in the
@@ -174,10 +174,10 @@ export function NotificationSettings() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between">
             <div className="space-y-1">
-              <div className="h-4 w-40 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-64 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-40 animate-pulse rounded-none bg-muted" />
+              <div className="h-3 w-64 animate-pulse rounded-none bg-muted" />
             </div>
-            <div className="h-5 w-9 animate-pulse rounded-full bg-muted" />
+            <div className="h-5 w-9 animate-pulse rounded-none bg-muted" />
           </div>
         ))}
       </div>
@@ -269,7 +269,7 @@ export function NotificationSettings() {
                 render={({ field }) => (
                   <FormItem
                     className={cn(
-                      "flex items-center justify-between gap-4 rounded-sm p-3",
+                      "flex items-center justify-between gap-4 rounded-none p-3",
                       "border border-border hover:bg-muted/30 transition-colors"
                     )}
                   >

@@ -88,7 +88,7 @@ export function GRNDetail({
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">
             Linked Purchase Order
           </p>
@@ -101,13 +101,13 @@ export function GRNDetail({
             </Link>
           </p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">Supplier</p>
           <p className="text-base font-semibold mt-1">
             {grn.supplierName || grn.supplierId}
           </p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">
             Received By
           </p>
@@ -118,7 +118,7 @@ export function GRNDetail({
       </div>
 
       {grn.notes && (
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-none border bg-card p-4">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Delivery / Receipt Notes
           </h3>
@@ -131,7 +131,7 @@ export function GRNDetail({
       {/* Received Items */}
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Received Quantities</h3>
-        <div className="rounded-md border bg-card">
+        <div className="rounded-none border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -188,7 +188,7 @@ export function GRNDetail({
       {grn.inventoryImpact && grn.inventoryImpact.length > 0 && (
         <div className="space-y-2 pt-4">
           <h3 className="text-lg font-semibold">Inventory Impact Summary</h3>
-          <div className="rounded-md border bg-card">
+          <div className="rounded-none border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>

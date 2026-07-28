@@ -79,7 +79,7 @@ export function UserList({
             placeholder="Search users by name, email or department..."
             value={filters.search || ""}
             onChange={handleSearchChange}
-            className="w-full rounded-md border border-input bg-background pl-9 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background pl-9 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -89,7 +89,7 @@ export function UserList({
             value={filters.role || "ALL"}
             onChange={handleRoleFilterChange}
             aria-label="Filter by role"
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="ALL">All Roles</option>
             <option value="super_admin">Super Admin</option>
@@ -105,7 +105,7 @@ export function UserList({
             value={filters.status || "ALL"}
             onChange={handleStatusFilterChange}
             aria-label="Filter by status"
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="ALL">All Statuses</option>
             <option value="ACTIVE">Active</option>
@@ -116,7 +116,7 @@ export function UserList({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-md border border-border bg-card shadow-sm">
+      <div className="overflow-x-auto rounded-none border border-border bg-card shadow-sm">
         <table className="w-full text-left text-sm text-foreground">
           <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
             <tr>
@@ -133,14 +133,14 @@ export function UserList({
               Array.from({ length: 5 }).map((_, idx) => (
                 <tr key={idx} className="animate-pulse">
                   <td className="px-4 py-3">
-                    <div className="h-4 w-36 rounded bg-muted"></div>
-                    <div className="mt-1 h-3 w-48 rounded bg-muted/60"></div>
+                    <div className="h-4 w-36 rounded-none bg-muted"></div>
+                    <div className="mt-1 h-3 w-48 rounded-none bg-muted/60"></div>
                   </td>
-                  <td className="px-4 py-3"><div className="h-5 w-24 rounded bg-muted"></div></td>
-                  <td className="px-4 py-3"><div className="h-5 w-16 rounded bg-muted"></div></td>
-                  <td className="px-4 py-3"><div className="h-4 w-28 rounded bg-muted"></div></td>
-                  <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-muted"></div></td>
-                  <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded bg-muted"></div></td>
+                  <td className="px-4 py-3"><div className="h-5 w-24 rounded-none bg-muted"></div></td>
+                  <td className="px-4 py-3"><div className="h-5 w-16 rounded-none bg-muted"></div></td>
+                  <td className="px-4 py-3"><div className="h-4 w-28 rounded-none bg-muted"></div></td>
+                  <td className="px-4 py-3"><div className="h-4 w-24 rounded-none bg-muted"></div></td>
+                  <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded-none bg-muted"></div></td>
                 </tr>
               ))
             ) : users.length === 0 ? (
@@ -157,12 +157,12 @@ export function UserList({
                     <div className="text-xs text-muted-foreground">{user.email}</div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", getRoleBadgeClass(user.role))}>
+                    <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-semibold", getRoleBadgeClass(user.role))}>
                       {ROLE_LABELS[user.role] || user.role}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium", getStatusBadgeClass(user.status))}>
+                    <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-medium", getStatusBadgeClass(user.status))}>
                       {user.status}
                     </span>
                   </td>
@@ -179,7 +179,7 @@ export function UserList({
                         onClick={() => onViewDetails(user)}
                         title="View Details"
                         aria-label={`View details for ${user.name}`}
-                        className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                        className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -188,7 +188,7 @@ export function UserList({
                         onClick={() => onEditUser(user)}
                         title="Edit User"
                         aria-label={`Edit ${user.name}`}
-                        className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                        className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
@@ -199,7 +199,7 @@ export function UserList({
                           type="button"
                           onClick={() => setOpenDropdownId(openDropdownId === user.id ? null : user.id)}
                           aria-label={`More actions for ${user.name}`}
-                          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                          className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </button>
@@ -210,14 +210,14 @@ export function UserList({
                               className="fixed inset-0 z-10"
                               onClick={() => setOpenDropdownId(null)}
                             />
-                            <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-md border border-border bg-popover p-1 shadow-md text-popover-foreground text-xs">
+                            <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-none border border-border bg-popover p-1 shadow-md text-popover-foreground text-xs">
                               <button
                                 type="button"
                                 onClick={() => {
                                   setOpenDropdownId(null);
                                   onAssignRole(user);
                                 }}
-                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
+                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
                               >
                                 <Shield className="h-3.5 w-3.5" />
                                 Assign Role
@@ -228,7 +228,7 @@ export function UserList({
                                   setOpenDropdownId(null);
                                   onResetPassword(user);
                                 }}
-                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
+                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
                               >
                                 <KeyRound className="h-3.5 w-3.5" />
                                 Reset Password
@@ -239,7 +239,7 @@ export function UserList({
                                   setOpenDropdownId(null);
                                   onToggleStatus(user);
                                 }}
-                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-destructive hover:bg-destructive/10"
+                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
                               >
                                 {user.status === "ACTIVE" ? (
                                   <>
@@ -278,7 +278,7 @@ export function UserList({
             type="button"
             disabled={page <= 1}
             onClick={() => onFilterChange({ ...filters, page: page - 1 })}
-            className="rounded border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+            className="rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
           >
             Previous
           </button>
@@ -289,7 +289,7 @@ export function UserList({
             type="button"
             disabled={page >= totalPages}
             onClick={() => onFilterChange({ ...filters, page: page + 1 })}
-            className="rounded border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+            className="rounded-none border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
           >
             Next
           </button>

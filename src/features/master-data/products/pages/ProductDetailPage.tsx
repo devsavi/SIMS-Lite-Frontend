@@ -189,13 +189,13 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
             <DetailRow
               icon={<Tag className="h-4 w-4" />}
               label="SKU"
-              value={<code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{product.sku}</code>}
+              value={<code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">{product.sku}</code>}
             />
             {product.barcode && (
               <DetailRow
                 icon={<Barcode className="h-4 w-4" />}
                 label="Barcode"
-                value={<code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{product.barcode}</code>}
+                value={<code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">{product.barcode}</code>}
               />
             )}
             {product.description && (
@@ -234,7 +234,7 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
                 product.uom ? (
                   <span>
                     {product.uom.name}{" "}
-                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+                    <code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">
                       {product.uom.symbol}
                     </code>
                   </span>

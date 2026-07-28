@@ -55,7 +55,7 @@ export function UomsPage() {
       accessorKey: "symbol",
       header: "Symbol",
       cell: ({ row }) => (
-        <code className="rounded bg-muted px-1.5 py-0.5 text-sm font-mono">
+        <code className="rounded-none bg-muted px-1.5 py-0.5 text-sm font-mono">
           {row.original.symbol}
         </code>
       ),

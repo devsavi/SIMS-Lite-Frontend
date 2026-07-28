@@ -27,7 +27,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
         problem persists.
       </p>
       {process.env.NODE_ENV === "development" && error.message && (
-        <pre className="mt-4 max-w-lg overflow-auto rounded border border-destructive/20 bg-destructive/5 p-3 text-left text-xs text-destructive">
+        <pre className="mt-4 max-w-lg overflow-auto rounded-none border border-destructive/20 bg-destructive/5 p-3 text-left text-xs text-destructive">
           {error.message}
         </pre>
       )}

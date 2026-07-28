@@ -187,7 +187,7 @@ export function StockAdjustmentDialog({
           )}
 
           {/* Current & New Quantity Preview Card */}
-          <div className="grid grid-cols-3 gap-3 p-3 bg-muted/50 rounded-lg border border-border text-center items-center">
+          <div className="grid grid-cols-3 gap-3 p-3 bg-muted/50 rounded-none border border-border text-center items-center">
             <div>
               <div className="text-xs text-muted-foreground uppercase font-semibold">
                 Current Stock

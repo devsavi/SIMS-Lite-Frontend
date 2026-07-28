@@ -70,7 +70,7 @@ export function ReleaseItemRow({
   const errors = form.formState.errors.items?.[index];
 
   return (
-    <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-3 transition-all hover:border-border">
+    <div className="p-4 rounded-none border border-border/80 bg-card/60 space-y-3 transition-all hover:border-border">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
         {/* Product selector (cols 1-5) */}
         <div className="md:col-span-5 space-y-1">
@@ -146,7 +146,7 @@ export function ReleaseItemRow({
           <label className="text-xs font-semibold text-muted-foreground">
             Available Stock
           </label>
-          <div className="h-9 flex items-center px-3 rounded-md bg-muted/40 border border-border/50">
+          <div className="h-9 flex items-center px-3 rounded-none bg-muted/40 border border-border/50">
             {selectedInventoryItem ? (
               <Badge
                 variant={availableStock > 0 ? "outline" : "destructive"}
@@ -225,7 +225,7 @@ export function ReleaseItemRow({
       </div>
 
       {isOverStock && (
-        <div className="flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-3 py-1.5 rounded-md font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-3 py-1.5 rounded-none font-medium">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>
             Selected quantity ({releaseQty}) exceeds available stock (

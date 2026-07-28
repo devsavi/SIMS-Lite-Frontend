@@ -40,7 +40,7 @@ export function InventoryFilters({
   );
 
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-card p-4 border border-border rounded-lg shadow-sm">
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-card p-4 border border-border rounded-none shadow-sm">
       <div className="flex flex-1 flex-wrap items-center gap-3">
         <div className="w-full sm:w-72">
           <SearchInput

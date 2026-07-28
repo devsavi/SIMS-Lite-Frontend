@@ -45,7 +45,7 @@ export function EmailConfigPage() {
         <AdminNavTabs />
 
         {isLoading || !config ? (
-          <div className="h-96 max-w-4xl animate-pulse rounded-lg bg-muted"></div>
+          <div className="h-96 max-w-4xl animate-pulse rounded-none bg-muted"></div>
         ) : (
           <EmailConfigForm
             config={config}

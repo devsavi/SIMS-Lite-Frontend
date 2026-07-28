@@ -48,18 +48,18 @@ export function ExportDialog({
       aria-labelledby="export-dialog-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-150"
     >
-      <div className="bg-card text-card-foreground border border-border rounded-lg shadow-xl w-full max-w-md p-6 relative">
+      <div className="bg-card text-card-foreground border border-border rounded-none shadow-xl w-full max-w-md p-6 relative">
         <button
           type="button"
           onClick={onClose}
           aria-label="Close dialog"
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground rounded-sm p-1 transition-colors"
+          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground rounded-none p-1 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 rounded-md bg-primary/10 text-primary">
+          <div className="p-2 rounded-none bg-primary/10 text-primary">
             <Download className="h-5 w-5" />
           </div>
           <div>
@@ -81,7 +81,7 @@ export function ExportDialog({
               <button
                 type="button"
                 onClick={() => setFormat("excel")}
-                className={`flex flex-col items-center justify-center p-3 rounded-md border text-xs font-medium transition-all ${
+                className={`flex flex-col items-center justify-center p-3 rounded-none border text-xs font-medium transition-all ${
                   format === "excel"
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-input bg-background hover:bg-accent text-foreground"
@@ -94,7 +94,7 @@ export function ExportDialog({
               <button
                 type="button"
                 onClick={() => setFormat("csv")}
-                className={`flex flex-col items-center justify-center p-3 rounded-md border text-xs font-medium transition-all ${
+                className={`flex flex-col items-center justify-center p-3 rounded-none border text-xs font-medium transition-all ${
                   format === "csv"
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-input bg-background hover:bg-accent text-foreground"
@@ -107,7 +107,7 @@ export function ExportDialog({
               <button
                 type="button"
                 onClick={() => setFormat("pdf")}
-                className={`flex flex-col items-center justify-center p-3 rounded-md border text-xs font-medium transition-all ${
+                className={`flex flex-col items-center justify-center p-3 rounded-none border text-xs font-medium transition-all ${
                   format === "pdf"
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-input bg-background hover:bg-accent text-foreground"
@@ -125,7 +125,7 @@ export function ExportDialog({
               id="include-summary"
               checked={includeSummary}
               onChange={(e) => setIncludeSummary(e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="include-summary" className="text-sm text-foreground">
               Include KPI Summary Header & Filter Info
@@ -144,7 +144,7 @@ export function ExportDialog({
             type="button"
             onClick={onClose}
             disabled={exportMutation.isPending}
-            className="px-4 py-2 text-xs font-medium border border-input rounded-md hover:bg-accent transition-colors"
+            className="px-4 py-2 text-xs font-medium border border-input rounded-none hover:bg-accent transition-colors"
           >
             Cancel
           </button>
@@ -152,7 +152,7 @@ export function ExportDialog({
             type="button"
             onClick={handleExport}
             disabled={exportMutation.isPending}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-none hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {exportMutation.isPending ? (
               <>

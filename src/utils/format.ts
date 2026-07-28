@@ -60,11 +60,23 @@ export function formatPercent(
   return `${value.toFixed(decimals)}%`;
 }
 
+export function formatCompactNumber(
+  value: number | null | undefined,
+  locale = "en-US"
+): string {
+  if (value == null) return "—";
+  return new Intl.NumberFormat(locale, {
+    notation: "compact",
+    compactDisplay: "short",
+  }).format(value);
+}
+
 // ---------------------------------------------------------------------------
 // String helpers
 // ---------------------------------------------------------------------------
 
 export function truncate(str: string, maxLength: number): string {
+  if (!str) return "";
   if (str.length <= maxLength) return str;
   return `${str.slice(0, maxLength - 3)}...`;
 }
@@ -75,8 +87,10 @@ export function capitalise(str: string): string {
 }
 
 export function toTitleCase(str: string): string {
+  if (!str) return "";
   return str
     .split(/[\s_-]+/)
     .map(capitalise)
     .join(" ");
 }
+

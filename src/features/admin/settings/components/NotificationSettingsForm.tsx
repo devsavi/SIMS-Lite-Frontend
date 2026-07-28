@@ -39,7 +39,7 @@ export function NotificationSettingsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-none border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <h3 className="text-base font-semibold text-foreground">Notification & Alert Rules</h3>
@@ -61,7 +61,7 @@ export function NotificationSettingsForm({
           <select
             value={formData.digestFrequency}
             onChange={(e) => handleChange("digestFrequency", e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="REALTIME">Real-time Immediate Alerts</option>
             <option value="DAILY">Daily Summary Digest</option>
@@ -76,7 +76,7 @@ export function NotificationSettingsForm({
               id="emailAlertsEnabled"
               checked={formData.emailAlertsEnabled}
               onChange={(e) => handleChange("emailAlertsEnabled", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="emailAlertsEnabled" className="font-medium cursor-pointer">
               Enable Global Email Notification Subscriptions
@@ -89,7 +89,7 @@ export function NotificationSettingsForm({
               id="stockLevelAlerts"
               checked={formData.stockLevelAlerts}
               onChange={(e) => handleChange("stockLevelAlerts", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="stockLevelAlerts" className="font-medium cursor-pointer">
               Notify on Low Stock / Out-of-Stock Trigger Events
@@ -102,7 +102,7 @@ export function NotificationSettingsForm({
               id="poApprovalAlerts"
               checked={formData.poApprovalAlerts}
               onChange={(e) => handleChange("poApprovalAlerts", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="poApprovalAlerts" className="font-medium cursor-pointer">
               Notify when Purchase Orders require manager approval
@@ -115,7 +115,7 @@ export function NotificationSettingsForm({
               id="securityAlerts"
               checked={formData.securityAlerts}
               onChange={(e) => handleChange("securityAlerts", e.target.checked)}
-              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-none border-input text-primary focus:ring-ring"
             />
             <label htmlFor="securityAlerts" className="font-medium cursor-pointer">
               Send immediate security alerts for new device logins & failed authentication
@@ -128,7 +128,7 @@ export function NotificationSettingsForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-none bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isSubmitting ? "Saving..." : "Save Notification Settings"}

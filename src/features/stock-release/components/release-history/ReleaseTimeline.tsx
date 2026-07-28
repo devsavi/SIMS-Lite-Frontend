@@ -107,7 +107,7 @@ export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
               {/* Circle Icon Badge */}
               <div
                 className={cn(
-                  "absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-full text-white ring-4 ring-background text-[10px] font-bold transition-all",
+                  "absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-none text-white ring-4 ring-background text-[10px] font-bold transition-all",
                   step.status === "completed" && "bg-emerald-600 dark:bg-emerald-500",
                   step.status === "active" && "bg-amber-500 animate-pulse",
                   step.status === "pending" && "bg-muted-foreground/30 text-muted-foreground",

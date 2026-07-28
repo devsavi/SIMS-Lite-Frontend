@@ -34,11 +34,11 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-2xl rounded-none border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-none bg-primary/10 text-primary font-bold text-lg">
               {user.name.charAt(0)}
             </div>
             <div>
@@ -50,7 +50,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
             type="button"
             onClick={onClose}
             aria-label="Close user details modal"
-            className="rounded p-1 text-muted-foreground hover:bg-accent"
+            className="rounded-none p-1 text-muted-foreground hover:bg-accent"
           >
             <X className="h-5 w-5" />
           </button>
@@ -113,7 +113,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
                     <Shield className="h-3.5 w-3.5" /> Assigned Role
                   </span>
                   <div>
-                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", getRoleBadgeClass(displayData.role))}>
+                    <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-semibold", getRoleBadgeClass(displayData.role))}>
                       {ROLE_LABELS[displayData.role] || displayData.role}
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
                 <div className="space-y-1">
                   <span className="text-xs font-medium text-muted-foreground">Account Status</span>
                   <div>
-                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium", getStatusBadgeClass(displayData.status))}>
+                    <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-medium", getStatusBadgeClass(displayData.status))}>
                       {displayData.status}
                     </span>
                   </div>
@@ -167,7 +167,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
                   {displayData.permissions?.map((perm) => (
                     <span
                       key={perm}
-                      className="rounded bg-muted px-2 py-1 text-xs font-mono text-foreground border border-border"
+                      className="rounded-none bg-muted px-2 py-1 text-xs font-mono text-foreground border border-border"
                     >
                       {perm}
                     </span>
@@ -183,7 +183,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
                   {displayData.activities?.map((act) => (
                     <div
                       key={act.id}
-                      className="flex items-center justify-between rounded-md border border-border p-2.5 text-xs"
+                      className="flex items-center justify-between rounded-none border border-border p-2.5 text-xs"
                     >
                       <div>
                         <div className="font-medium text-foreground">{act.action}</div>
@@ -200,7 +200,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
           ) : (
             <div className="space-y-3">
               {displayData.notifications?.map((notif) => (
-                <div key={notif.id} className="rounded-md border border-border p-3 text-xs">
+                <div key={notif.id} className="rounded-none border border-border p-3 text-xs">
                   <div className="font-semibold text-foreground">{notif.title}</div>
                   <p className="text-muted-foreground mt-0.5">{notif.message}</p>
                   <span className="text-[10px] text-muted-foreground mt-2 block">
@@ -217,7 +217,7 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
+            className="rounded-none bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
           >
             Close
           </button>

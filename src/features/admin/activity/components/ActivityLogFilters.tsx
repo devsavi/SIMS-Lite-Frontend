@@ -19,7 +19,7 @@ export function ActivityLogFilters({ filters, onFilterChange }: ActivityLogFilte
           placeholder="Search logs by action, user name or email..."
           value={filters.search || ""}
           onChange={(e) => onFilterChange({ ...filters, search: e.target.value, page: 1 })}
-          className="w-full rounded-md border border-input bg-background pl-9 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="w-full rounded-none border border-input bg-background pl-9 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
 
@@ -28,7 +28,7 @@ export function ActivityLogFilters({ filters, onFilterChange }: ActivityLogFilte
           value={filters.module || "ALL"}
           onChange={(e) => onFilterChange({ ...filters, module: e.target.value, page: 1 })}
           aria-label="Filter by module"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <option value="ALL">All Modules</option>
           <option value="AUTH">Authentication</option>
@@ -43,7 +43,7 @@ export function ActivityLogFilters({ filters, onFilterChange }: ActivityLogFilte
           value={filters.status || "ALL"}
           onChange={(e) => onFilterChange({ ...filters, status: e.target.value as ActivityStatus | "ALL", page: 1 })}
           aria-label="Filter by status"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <option value="ALL">All Statuses</option>
           <option value="SUCCESS">Success</option>

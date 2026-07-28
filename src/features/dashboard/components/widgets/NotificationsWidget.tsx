@@ -42,7 +42,7 @@ function NotificationRow({ item }: NotificationRowProps) {
             {item.title}
           </p>
           {!item.is_read && (
-            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" aria-label="Unread" />
+            <span className="mt-1 h-2 w-2 shrink-0 rounded-none bg-primary" aria-label="Unread" />
           )}
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.message}</p>
@@ -78,7 +78,7 @@ function NotificationSkeleton() {
     <div className="space-y-0">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="flex items-start gap-3 py-3">
-          <div className="mt-0.5 h-4 w-4 shrink-0 animate-pulse bg-muted rounded-full" />
+          <div className="mt-0.5 h-4 w-4 shrink-0 animate-pulse bg-muted rounded-none" />
           <div className="flex-1 space-y-1.5">
             <div className="h-4 w-40 animate-pulse bg-muted" />
             <div className="h-3 w-56 animate-pulse bg-muted" />

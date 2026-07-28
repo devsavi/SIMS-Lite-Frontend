@@ -31,8 +31,8 @@ export function UserStatusToggle({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150 p-6 space-y-4 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+      <div className="w-full max-w-md rounded-none border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150 p-6 space-y-4 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-none bg-muted">
           {isActivating ? (
             <CheckCircle className="h-6 w-6 text-emerald-600" />
           ) : (
@@ -60,7 +60,7 @@ export function UserStatusToggle({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
+            className="rounded-none border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
           >
             Cancel
           </button>
@@ -68,7 +68,7 @@ export function UserStatusToggle({
             type="button"
             disabled={isSubmitting}
             onClick={handleConfirm}
-            className={`rounded-md px-4 py-2 text-sm font-medium text-white ${
+            className={`rounded-none px-4 py-2 text-sm font-medium text-white ${
               isActivating ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
             } disabled:opacity-50`}
           >

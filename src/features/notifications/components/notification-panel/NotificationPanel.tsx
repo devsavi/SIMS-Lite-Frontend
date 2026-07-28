@@ -20,11 +20,11 @@ function NotificationSkeleton() {
     <div className="space-y-0">
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex gap-3 px-4 py-3">
-          <div className="mt-0.5 h-7 w-7 shrink-0 animate-pulse rounded-full bg-muted" />
+          <div className="mt-0.5 h-7 w-7 shrink-0 animate-pulse rounded-none bg-muted" />
           <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-48 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-64 animate-pulse rounded bg-muted" />
-            <div className="h-2.5 w-24 animate-pulse rounded bg-muted" />
+            <div className="h-3.5 w-48 animate-pulse rounded-none bg-muted" />
+            <div className="h-3 w-64 animate-pulse rounded-none bg-muted" />
+            <div className="h-2.5 w-24 animate-pulse rounded-none bg-muted" />
           </div>
         </div>
       ))}
@@ -69,7 +69,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
           {unreadCount > 0 && (
-            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-none bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}

@@ -88,7 +88,7 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
             <ArrowLeft className="h-4 w-4" /> Back to Inventory
           </Link>
         </div>
-        <div className="h-48 rounded-lg bg-card animate-pulse border border-border" />
+        <div className="h-48 rounded-none bg-card animate-pulse border border-border" />
       </PageContainer>
     );
   }

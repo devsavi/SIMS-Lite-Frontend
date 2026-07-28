@@ -21,7 +21,7 @@ function ConnectionDot({ isConnected }: { isConnected: boolean }) {
   return (
     <span
       className={cn(
-        "absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full ring-1 ring-background",
+        "absolute bottom-1 right-1 h-1.5 w-1.5 rounded-none ring-1 ring-background",
         isConnected ? "bg-emerald-500" : "bg-muted-foreground/50"
       )}
       aria-label={isConnected ? "Real-time connected" : "Real-time disconnected"}
@@ -41,7 +41,7 @@ function UnreadBadge({ count }: { count: number }) {
       aria-label={`${count} unread notification${count !== 1 ? "s" : ""}`}
       className={cn(
         "absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center",
-        "rounded-full bg-destructive px-1 text-[9px] font-bold leading-none text-white",
+        "rounded-none bg-destructive px-1 text-[9px] font-bold leading-none text-white",
         "animate-in zoom-in-50 duration-200"
       )}
     >

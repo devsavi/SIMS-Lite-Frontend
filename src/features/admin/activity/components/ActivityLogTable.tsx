@@ -27,7 +27,7 @@ export function ActivityLogTable({ logs, isLoading, onViewDetails }: ActivityLog
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+    <div className="overflow-x-auto rounded-none border border-border bg-card shadow-sm">
       <table className="w-full text-left text-sm text-foreground">
         <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
           <tr>
@@ -43,12 +43,12 @@ export function ActivityLogTable({ logs, isLoading, onViewDetails }: ActivityLog
           {isLoading ? (
             Array.from({ length: 5 }).map((_, idx) => (
               <tr key={idx} className="animate-pulse">
-                <td className="px-4 py-3"><div className="h-4 w-28 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-48 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-4 w-16 rounded bg-muted"></div></td>
-                <td className="px-4 py-3"><div className="h-5 w-16 rounded bg-muted"></div></td>
-                <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-28 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-32 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-48 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-4 w-16 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3"><div className="h-5 w-16 rounded-none bg-muted"></div></td>
+                <td className="px-4 py-3 text-right"><div className="ml-auto h-6 w-8 rounded-none bg-muted"></div></td>
               </tr>
             ))
           ) : logs.length === 0 ? (
@@ -71,12 +71,12 @@ export function ActivityLogTable({ logs, isLoading, onViewDetails }: ActivityLog
                   {log.action}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="rounded bg-muted px-2 py-0.5 font-mono text-xs font-semibold">
+                  <span className="rounded-none bg-muted px-2 py-0.5 font-mono text-xs font-semibold">
                     {log.module}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold", getStatusBadge(log.status))}>
+                  <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-semibold", getStatusBadge(log.status))}>
                     {log.status}
                   </span>
                 </td>
@@ -86,7 +86,7 @@ export function ActivityLogTable({ logs, isLoading, onViewDetails }: ActivityLog
                     onClick={() => onViewDetails(log)}
                     title="View Raw Details"
                     aria-label={`View details for action ${log.action}`}
-                    className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
                     <Eye className="h-4 w-4" />
                   </button>

@@ -39,7 +39,7 @@ export function ReportFilters({
   const showCategoryFilter = ["inventory", "low-stock", "product"].includes(reportType);
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4 mb-6 shadow-sm space-y-4">
+    <div className="bg-card border border-border rounded-none p-4 mb-6 shadow-sm space-y-4">
       <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Filter className="h-4 w-4 text-primary" />
@@ -64,7 +64,7 @@ export function ReportFilters({
             placeholder="Search report..."
             value={filters.search || ""}
             onChange={(e) => handleInputChange("search", e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -76,7 +76,7 @@ export function ReportFilters({
             placeholder="Start Date"
             value={filters.startDate || ""}
             onChange={(e) => handleInputChange("startDate", e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -88,7 +88,7 @@ export function ReportFilters({
             placeholder="End Date"
             value={filters.endDate || ""}
             onChange={(e) => handleInputChange("endDate", e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -99,7 +99,7 @@ export function ReportFilters({
               aria-label="Filter by Status"
               value={filters.status || "ALL"}
               onChange={(e) => handleInputChange("status", e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full px-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="ALL">All Statuses</option>
               {reportType === "po" && (
@@ -144,7 +144,7 @@ export function ReportFilters({
               aria-label="Filter by Movement Type"
               value={filters.actionType || "ALL"}
               onChange={(e) => handleInputChange("actionType", e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full px-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="ALL">All Movement Types</option>
               <option value="INFLOW">Inflow (GRN / Receipt)</option>
@@ -163,7 +163,7 @@ export function ReportFilters({
               aria-label="Filter by Category"
               value={filters.categoryId || "ALL"}
               onChange={(e) => handleInputChange("categoryId", e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full px-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="ALL">All Categories</option>
               <option value="industrial">Industrial Components</option>

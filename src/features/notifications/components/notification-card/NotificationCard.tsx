@@ -111,7 +111,7 @@ export function NotificationCard({
       {/* Type icon */}
       <div
         className={cn(
-          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-none",
           cfg.bg
         )}
         aria-hidden="true"
@@ -132,7 +132,7 @@ export function NotificationCard({
           </p>
           {!notification.is_read && (
             <span
-              className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary"
+              className="mt-1.5 h-2 w-2 shrink-0 rounded-none bg-primary"
               aria-label="Unread"
             />
           )}

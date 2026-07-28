@@ -16,7 +16,7 @@ export function AuditDiffModal({ record, isOpen, onClose }: AuditDiffModalProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-2xl rounded-none border border-border bg-card shadow-lg text-foreground animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="flex items-center gap-2 text-base font-semibold">
             <FileCheck className="h-5 w-5 text-primary" />
@@ -26,7 +26,7 @@ export function AuditDiffModal({ record, isOpen, onClose }: AuditDiffModalProps)
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded p-1 text-muted-foreground hover:bg-accent"
+            className="rounded-none p-1 text-muted-foreground hover:bg-accent"
           >
             <X className="h-4 w-4" />
           </button>
@@ -34,7 +34,7 @@ export function AuditDiffModal({ record, isOpen, onClose }: AuditDiffModalProps)
 
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Metadata Header */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-lg border border-border bg-muted/30 p-3 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-none border border-border bg-muted/30 p-3 text-xs">
             <div>
               <span className="text-muted-foreground block">Action Type</span>
               <span className="font-semibold text-foreground">{record.action}</span>
@@ -61,11 +61,11 @@ export function AuditDiffModal({ record, isOpen, onClose }: AuditDiffModalProps)
 
             <div className="space-y-3">
               {record.diffs.map((diff) => (
-                <div key={diff.field} className="rounded-md border border-border bg-card p-3 text-xs space-y-2">
+                <div key={diff.field} className="rounded-none border border-border bg-card p-3 text-xs space-y-2">
                   <div className="font-mono font-bold text-primary">{diff.field}</div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     {/* Previous Value */}
-                    <div className="rounded bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 p-2.5">
+                    <div className="rounded-none bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 p-2.5">
                       <span className="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400 block mb-1">
                         Previous Value
                       </span>
@@ -79,7 +79,7 @@ export function AuditDiffModal({ record, isOpen, onClose }: AuditDiffModalProps)
                     </div>
 
                     {/* New Value */}
-                    <div className="rounded bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 p-2.5">
+                    <div className="rounded-none bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 p-2.5">
                       <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 block mb-1">
                         New Value
                       </span>
@@ -102,7 +102,7 @@ export function AuditDiffModal({ record, isOpen, onClose }: AuditDiffModalProps)
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md bg-secondary px-4 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80"
+            className="rounded-none bg-secondary px-4 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80"
           >
             Close
           </button>

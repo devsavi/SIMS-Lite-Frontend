@@ -89,7 +89,7 @@ export function ReportTable({
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div className="overflow-x-auto rounded-none border border-border bg-card">
         <table className="w-full text-left text-sm">
           <thead className="bg-muted/50 text-xs font-semibold uppercase text-muted-foreground border-b border-border">
             {reportType === "inventory" && (
@@ -321,7 +321,7 @@ export function ReportTable({
               type="button"
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1 border border-input rounded-md hover:bg-accent disabled:opacity-50"
+              className="px-3 py-1 border border-input rounded-none hover:bg-accent disabled:opacity-50"
             >
               Previous
             </button>
@@ -329,7 +329,7 @@ export function ReportTable({
               type="button"
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1 border border-input rounded-md hover:bg-accent disabled:opacity-50"
+              className="px-3 py-1 border border-input rounded-none hover:bg-accent disabled:opacity-50"
             >
               Next
             </button>
