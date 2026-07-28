@@ -21,6 +21,14 @@ import {
   ChevronRight,
   Menu,
   X,
+  ShieldCheck,
+  Building2,
+  Mail,
+  Hash,
+  Activity,
+  FileCheck,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { useAuthStore } from "@/stores/auth.store";
@@ -38,6 +46,13 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   permissions: Permission[];
+}
+
+interface NavGroup {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  permissions: Permission[];
+  items: NavItem[];
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -113,13 +128,22 @@ const NAV_ITEMS: NavItem[] = [
     icon: BarChart2,
     permissions: ["reports.view"],
   },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: Settings,
-    permissions: ["settings.view"],
-  },
 ];
+
+const ADMIN_GROUP: NavGroup = {
+  label: "Administration",
+  icon: ShieldCheck,
+  permissions: ["settings.view"],
+  items: [
+    { label: "Users", href: "/admin/users", icon: Users, permissions: ["users.view"] },
+    { label: "Company Profile", href: "/admin/company", icon: Building2, permissions: ["settings.edit"] },
+    { label: "System Settings", href: "/admin/settings", icon: Settings, permissions: ["settings.view"] },
+    { label: "Email Config", href: "/admin/email", icon: Mail, permissions: ["settings.edit"] },
+    { label: "Numbering Sequences", href: "/admin/sequences", icon: Hash, permissions: ["settings.edit"] },
+    { label: "Activity Log", href: "/admin/activity", icon: Activity, permissions: ["settings.view"] },
+    { label: "Audit Trail", href: "/admin/audit", icon: FileCheck, permissions: ["settings.view"] },
+  ],
+};
 
 // ---------------------------------------------------------------------------
 // NavLink
@@ -129,9 +153,10 @@ interface NavLinkProps {
   item: NavItem;
   collapsed: boolean;
   onClick?: () => void;
+  indent?: boolean;
 }
 
-function NavLink({ item, collapsed, onClick }: NavLinkProps) {
+function NavLink({ item, collapsed, onClick, indent = false }: NavLinkProps) {
   const pathname = usePathname();
   const isActive =
     pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -149,12 +174,104 @@ function NavLink({ item, collapsed, onClick }: NavLinkProps) {
         isActive
           ? "bg-primary text-primary-foreground"
           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        collapsed && "justify-center px-2"
+        collapsed && "justify-center px-2",
+        indent && !collapsed && "pl-7"
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
       {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AdminNavGroup
+// ---------------------------------------------------------------------------
+
+interface AdminNavGroupProps {
+  group: NavGroup;
+  collapsed: boolean;
+  role: UserRole;
+  onClick?: () => void;
+}
+
+function AdminNavGroup({ group, collapsed, role, onClick }: AdminNavGroupProps) {
+  const pathname = usePathname();
+  const isGroupActive = group.items.some(
+    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
+  );
+
+  const [isOpen, setIsOpen] = React.useState(isGroupActive);
+  const GroupIcon = group.icon;
+
+  React.useEffect(() => {
+    if (isGroupActive) setIsOpen(true);
+  }, [isGroupActive]);
+
+  const visibleItems = group.items.filter((item) =>
+    canAccessAny(role, item.permissions)
+  );
+
+  if (visibleItems.length === 0) return null;
+
+  if (collapsed) {
+    return (
+      <li>
+        <Link
+          href="/admin/users"
+          title="Administration"
+          className={cn(
+            "flex items-center justify-center px-2 py-2 text-sm font-medium transition-colors",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            isGroupActive
+              ? "bg-primary text-primary-foreground"
+              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          )}
+        >
+          <GroupIcon className="h-4 w-4 shrink-0" />
+        </Link>
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className={cn(
+          "flex w-full items-center gap-3 px-3 py-2 text-sm font-medium transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          isGroupActive
+            ? "text-primary"
+            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        )}
+      >
+        <GroupIcon className="h-4 w-4 shrink-0" />
+        <span className="flex-1 truncate text-left">{group.label}</span>
+        {isOpen ? (
+          <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+        )}
+      </button>
+
+      {isOpen && (
+        <ul className="mt-0.5 space-y-0.5">
+          {visibleItems.map((item) => (
+            <li key={item.href}>
+              <NavLink
+                item={item}
+                collapsed={false}
+                onClick={onClick}
+                indent
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }
 
@@ -171,6 +288,11 @@ export function AppSidebar() {
     return NAV_ITEMS.filter((item) =>
       canAccessAny(role as UserRole, item.permissions)
     );
+  }, [role]);
+
+  const showAdminGroup = React.useMemo(() => {
+    if (!role) return false;
+    return canAccessAny(role as UserRole, ADMIN_GROUP.permissions);
   }, [role]);
 
   return (
@@ -252,6 +374,27 @@ export function AppSidebar() {
                 />
               </li>
             ))}
+
+            {/* Administration Group */}
+            {showAdminGroup && (
+              <>
+                {!isCollapsed && (
+                  <li>
+                    <div className="mt-3 mb-1 px-3">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                        Administration
+                      </span>
+                    </div>
+                  </li>
+                )}
+                <AdminNavGroup
+                  group={ADMIN_GROUP}
+                  collapsed={isCollapsed}
+                  role={role as UserRole}
+                  onClick={() => setMobileOpen(false)}
+                />
+              </>
+            )}
           </ul>
         </nav>
       </aside>

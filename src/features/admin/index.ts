@@ -1,0 +1,36 @@
+/**
+ * Admin Feature Module — Phase 10
+ */
+
+// Shared
+export { PermissionGuard } from "./shared/components/PermissionGuard";
+export { AdminNavTabs } from "./shared/components/AdminNavTabs";
+
+// User Management
+export { UsersPage } from "./users/pages/UsersPage";
+export { useUsersList, useUserDetail, useCreateUser, useUpdateUser, useToggleUserStatus, useResetUserPassword, useAssignUserRole } from "./users/hooks/use-admin-users";
+export { adminUsersApi } from "./users/api/admin-users-api";
+
+// Company Profile
+export { CompanyProfilePage } from "./company/pages/CompanyProfilePage";
+export { useCompanyProfile, useUpdateCompanyProfile, useUploadCompanyLogo } from "./company/hooks/use-company-profile";
+
+// System Settings
+export { SystemSettingsPage } from "./settings/pages/SystemSettingsPage";
+export { useSystemSettings, useUpdateSettingsSection } from "./settings/hooks/use-system-settings";
+
+// Email Config
+export { EmailConfigPage } from "./email/pages/EmailConfigPage";
+export { useEmailConfig, useUpdateEmailConfig, useTestEmailConnection } from "./email/hooks/use-email-config";
+
+// Numbering Sequences
+export { NumberingSequencesPage } from "./sequences/pages/NumberingSequencesPage";
+export { useNumberingSequences, useUpdateSequence } from "./sequences/hooks/use-numbering-sequences";
+
+// Activity Log
+export { ActivityLogPage } from "./activity/pages/ActivityLogPage";
+export { useActivityLogs } from "./activity/hooks/use-activity-log";
+
+// Audit Trail
+export { AuditTrailPage } from "./audit/pages/AuditTrailPage";
+export { useAuditTrail } from "./audit/hooks/use-audit-trail";
