@@ -35,13 +35,13 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
       company_name: "",
       contact_person: "",
       email: "",
-      phone: "",
       address: "",
       city: "",
       country: "",
       notes: "",
       is_active: true,
       ...defaultValues,
+      phone: defaultValues?.phone || "+94",
     },
   });
 

@@ -98,9 +98,12 @@ export interface ComposeNotificationPayload {
 // ---------------------------------------------------------------------------
 
 export interface NotificationPreferences {
-  browser_notifications_enabled: boolean;
-  in_app_notifications_enabled: boolean;
-  categories: Record<NotificationCategory, boolean>;
+  user_id?: string;
+  enable_websocket: boolean;
+  enable_email: boolean;
+  enable_system: boolean;
+  mute_until: string | null;
+  updated_at?: string;
 }
 
 // ---------------------------------------------------------------------------

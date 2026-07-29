@@ -28,6 +28,7 @@ const ROUTE_LABELS: Record<string, { parent?: string; title: string }> = {
   "/stock-release": { title: "Stock Release Requests" },
   "/notifications": { title: "Notification Center" },
   "/reports": { title: "Reports & Analytics" },
+  "/profile": { title: "User Profile" },
   "/admin/users": { parent: "Administration", title: "User Management" },
   "/admin/company": { parent: "Administration", title: "Company Profile" },
   "/admin/settings": { parent: "Administration", title: "System Settings" },
@@ -80,8 +81,9 @@ function ThemeToggle() {
 
 export function AppHeader() {
   const pathname = usePathname();
-  const routeInfo = ROUTE_LABELS[pathname] ?? {
-    title: pathname.split("/").filter(Boolean).pop()?.replace(/-/g, " ") ?? "Dashboard",
+  const safePathname = pathname || "/";
+  const routeInfo = ROUTE_LABELS[safePathname] ?? {
+    title: safePathname.split("/").filter(Boolean).pop()?.replace(/-/g, " ") ?? "Dashboard",
   };
 
   return (

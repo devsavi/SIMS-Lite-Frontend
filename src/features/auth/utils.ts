@@ -43,6 +43,6 @@ export function userReadToAuthUser(u: UserRead): AuthUser {
     name: u.full_name || `${u.first_name} ${u.last_name}`.trim() || u.email,
     email: u.email,
     role: normalizeRoleName(rawRoleName),
-    avatar: undefined,
+    avatar: u.avatar_url ?? u.avatar ?? undefined,
   };
 }

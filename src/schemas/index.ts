@@ -19,7 +19,14 @@ export const emailSchema = z
 export const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters")
-  .max(128, "Password must not exceed 128 characters");
+  .max(128, "Password must not exceed 128 characters")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter (A–Z)")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter (a–z)")
+  .regex(/[0-9]/, "Password must contain at least one digit (0–9)")
+  .regex(
+    /[!@#$%^&*()\-_=+\[\]{}|;:,.<>?]/,
+    "Password must contain at least one special character (!@#$%^&*()-_=+[]{}|;:,.<>?)"
+  );
 
 export const phoneSchema = z
   .string()

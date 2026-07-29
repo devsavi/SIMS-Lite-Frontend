@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LogOut, User, ChevronDown } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { ROLE_LABELS } from "@/lib/auth";
@@ -24,14 +26,22 @@ function getInitials(name: string | undefined | null): string {
 }
 
 export function UserMenu() {
+  const router = useRouter();
+  const [open, setOpen] = React.useState(false);
   const { user, role, logout } = useAuthStore();
 
   if (!user) return null;
 
   const roleLabel = role ? ROLE_LABELS[role] : "";
 
+  const handleProfileClick = (e: React.MouseEvent | Event) => {
+    e.preventDefault();
+    setOpen(false);
+    router.push("/profile");
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
         className="flex items-center gap-2 rounded-none px-2 py-1.5 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="User menu"
@@ -59,26 +69,23 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <button
-            type="button"
-            className="w-full cursor-pointer"
-            onClick={() => {/* profile page — Phase 3 */ }}
-          >
+        <DropdownMenuItem
+          asChild
+          className="cursor-pointer"
+          onSelect={handleProfileClick}
+        >
+          <Link href="/profile" onClick={handleProfileClick} className="flex items-center w-full">
             <User className="mr-2 h-4 w-4" />
             Profile
-          </button>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <button
-            type="button"
-            className="w-full cursor-pointer text-destructive focus:text-destructive"
-            onClick={logout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </button>
+        <DropdownMenuItem
+          className="cursor-pointer text-destructive focus:text-destructive"
+          onSelect={logout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

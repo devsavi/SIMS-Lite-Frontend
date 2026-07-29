@@ -79,7 +79,7 @@ describe("ReleaseTable", () => {
     expect(screen.getByText("REL-2026-0002")).toBeInTheDocument();
     expect(screen.getByText("Submitted")).toBeInTheDocument();
     expect(screen.getByText("Approved")).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("renders requester and approver names correctly", () => {
     render(

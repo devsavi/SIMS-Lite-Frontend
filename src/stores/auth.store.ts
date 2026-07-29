@@ -107,6 +107,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   // -----------------------------------------------------------------------
   setUser: (user) => {
     const role = user.role as UserRole;
+    persistedUser.set(user);
     useSessionStore.getState().setUser(user);
     set({
       user,

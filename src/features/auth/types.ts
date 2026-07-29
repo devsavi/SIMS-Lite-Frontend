@@ -26,7 +26,7 @@ export interface ForgotPasswordRequest {
 
 export interface ResetPasswordRequest {
   token: string;
-  password: string;
+  new_password: string;
 }
 
 export interface RefreshTokenRequest {
@@ -67,6 +67,8 @@ export interface UserRead {
   last_name: string;
   full_name: string;
   phone: string | null;
+  avatar_url?: string | null;
+  avatar?: string | null;
   is_active: boolean;
   is_verified: boolean;
   is_superuser: boolean;

@@ -3,7 +3,7 @@
  * All paths relative to NEXT_PUBLIC_API_URL.
  */
 
-import { get, post, patch, del } from "@/lib/api/client";
+import { get, post, patch, put, del } from "@/lib/api/client";
 import type { SuccessResponse } from "@/features/auth/types";
 import type {
   Notification,
@@ -53,7 +53,7 @@ export const notificationsApi = {
    */
   async getUnreadCount(): Promise<number> {
     const res = await get<SuccessResponse<UnreadCountResponse>>(
-      `${BASE}/unread-count`
+      `${BASE}/dashboard/unread-count`
     );
     return res.data.unread_count;
   },
@@ -121,23 +121,23 @@ export const notificationsApi = {
   // ---------------------------------------------------------------------------
 
   /**
-   * GET /notifications/preferences
+   * GET /notifications/preferences/me
    */
   async getPreferences(): Promise<NotificationPreferences> {
     const res = await get<SuccessResponse<NotificationPreferences>>(
-      `${BASE}/preferences`
+      `${BASE}/preferences/me`
     );
     return res.data;
   },
 
   /**
-   * PATCH /notifications/preferences
+   * PUT /notifications/preferences/me
    */
   async updatePreferences(
     prefs: Partial<NotificationPreferences>
   ): Promise<NotificationPreferences> {
-    const res = await patch<SuccessResponse<NotificationPreferences>>(
-      `${BASE}/preferences`,
+    const res = await put<SuccessResponse<NotificationPreferences>>(
+      `${BASE}/preferences/me`,
       prefs
     );
     return res.data;

@@ -29,7 +29,7 @@ export function UserFormDialog({
     email: "",
     role: "procurement_officer" as UserRole,
     department: "",
-    phone: "",
+    phone: "+94",
     sendInviteEmail: true,
   });
 
@@ -42,7 +42,7 @@ export function UserFormDialog({
         email: user.email,
         role: user.role,
         department: user.department || "",
-        phone: user.phone || "",
+        phone: user.phone || "+94",
         sendInviteEmail: false,
       });
     } else {
@@ -51,7 +51,7 @@ export function UserFormDialog({
         email: "",
         role: "procurement_officer",
         department: "",
-        phone: "",
+        phone: "+94",
         sendInviteEmail: true,
       });
     }

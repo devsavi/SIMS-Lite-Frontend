@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { registerSchema, type RegisterFormValues } from "../schemas";
 import { useRegister } from "../hooks/use-auth";
+import { PasswordStrengthHints } from "./PasswordStrengthHints";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import {
@@ -143,6 +144,7 @@ export function RegisterForm() {
                   </button>
                 </div>
               </FormControl>
+              <PasswordStrengthHints value={field.value} />
               <FormMessage />
             </FormItem>
           )}

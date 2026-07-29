@@ -61,16 +61,10 @@ export type ComposeNotificationFormValues = z.infer<typeof composeNotificationSc
 // ---------------------------------------------------------------------------
 
 export const notificationPreferencesSchema = z.object({
-  browser_notifications_enabled: z.boolean(),
-  in_app_notifications_enabled: z.boolean(),
-  categories: z.object({
-    inventory: z.boolean(),
-    procurement: z.boolean(),
-    stock_release: z.boolean(),
-    administration: z.boolean(),
-    system: z.boolean(),
-    general: z.boolean(),
-  }),
+  enable_websocket: z.boolean(),
+  enable_email: z.boolean(),
+  enable_system: z.boolean(),
+  mute_until: z.string().nullable().optional(),
 });
 
 export type NotificationPreferencesFormValues = z.infer<
