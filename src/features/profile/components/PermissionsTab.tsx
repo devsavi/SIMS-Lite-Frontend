@@ -31,6 +31,10 @@ const ALL_PERMISSION_GROUPS: PermissionGroup[] = [
       { key: "users.create", label: "Create New User" },
       { key: "users.edit", label: "Edit User Details & Roles" },
       { key: "users.delete", label: "Deactivate or Delete Users" },
+      { key: "roles.view", label: "View Roles & Permissions" },
+      { key: "roles.write", label: "Create & Edit Roles" },
+      { key: "roles.delete", label: "Delete Roles" },
+      { key: "audit_logs.view", label: "View Audit Logs" },
     ],
   },
   {
@@ -68,6 +72,8 @@ const ALL_PERMISSION_GROUPS: PermissionGroup[] = [
     permissions: [
       { key: "inventory.view", label: "View Stock & Warehouses" },
       { key: "inventory.adjust", label: "Perform Stock Adjustments" },
+      { key: "inventory.transfer", label: "Transfer Stock Between Locations" },
+      { key: "inventory.approve", label: "Approve Stock Adjustments" },
       { key: "stock_release.view", label: "View Stock Releases" },
       { key: "stock_release.create", label: "Create Stock Release Requests" },
       { key: "stock_release.approve", label: "Approve Stock Releases" },

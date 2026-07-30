@@ -185,24 +185,18 @@ describe("useToggleUserStatus mutation", () => {
 
 describe("useAssignUserRole mutation", () => {
   it("assigns a new role to user", async () => {
-    vi.mocked(adminUsersApi.assignRole).mockResolvedValue({
-      ...mockUser,
-      role: "warehouse_manager",
-    });
+    vi.mocked(adminUsersApi.assignRole).mockResolvedValue(undefined);
 
     const wrapper = createWrapper();
     const { result } = renderHook(() => useAssignUserRole(), { wrapper });
 
     result.current.mutate({
       userId: "usr-1",
-      role: "warehouse_manager",
-      reason: "Promotion",
+      roleIds: ["role-store-keeper"],
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(adminUsersApi.assignRole).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: "usr-1", role: "warehouse_manager" })
-    );
+    expect(adminUsersApi.assignRole).toHaveBeenCalledWith("usr-1", ["role-store-keeper"]);
   });
 });
 
@@ -219,7 +213,7 @@ describe("useResetUserPassword mutation", () => {
     const wrapper = createWrapper();
     const { result } = renderHook(() => useResetUserPassword(), { wrapper });
 
-    result.current.mutate({ userId: "usr-1" });
+    result.current.mutate({ userId: "usr-1", auto_generate: true });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(adminUsersApi.resetPassword).toHaveBeenCalledWith(
@@ -246,6 +240,7 @@ describe("UserList component", () => {
     onAssignRole: vi.fn(),
     onResetPassword: vi.fn(),
     onToggleStatus: vi.fn(),
+    onDeleteUser: vi.fn(),
   };
 
   it("renders user data in table rows", () => {

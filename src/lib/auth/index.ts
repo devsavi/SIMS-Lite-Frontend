@@ -1,14 +1,13 @@
 /**
  * Auth library — role definitions, user type, and re-exports.
+ *
+ * Three canonical roles matching the backend API:
+ *   ADMIN        → "admin"
+ *   OFFICER      → "officer"
+ *   STORE_KEEPER → "store_keeper"
  */
 
-export type UserRole =
-  | "super_admin"
-  | "admin"
-  | "warehouse_manager"
-  | "procurement_officer"
-  | "stock_clerk"
-  | "viewer";
+export type UserRole = "admin" | "officer" | "store_keeper";
 
 export interface AuthUser {
   id: string;
@@ -16,24 +15,19 @@ export interface AuthUser {
   name: string;
   role: UserRole;
   avatar?: string;
+  is_superuser?: boolean;
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
-  super_admin: "Super Admin",
   admin: "Admin",
-  warehouse_manager: "Warehouse Manager",
-  procurement_officer: "Procurement Officer",
-  stock_clerk: "Stock Clerk",
-  viewer: "Viewer",
+  officer: "Officer",
+  store_keeper: "Store Keeper",
 };
 
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
-  super_admin: 6,
-  admin: 5,
-  warehouse_manager: 4,
-  procurement_officer: 3,
-  stock_clerk: 2,
-  viewer: 1,
+  admin: 3,
+  officer: 2,
+  store_keeper: 1,
 };
 
 export function hasPermission(

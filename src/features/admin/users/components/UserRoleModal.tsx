@@ -4,12 +4,20 @@ import React from "react";
 import { X, Shield } from "lucide-react";
 import type { UserItem } from "../types";
 import { ROLE_LABELS, type UserRole } from "@/lib/auth";
+import { useRolesList } from "../hooks/use-admin-users";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
 
 interface UserRoleModalProps {
   user: UserItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onAssignRole: (userId: string, role: UserRole, reason?: string) => Promise<void>;
+  onAssignRole: (userId: string, roleIds: string[]) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -20,22 +28,24 @@ export function UserRoleModal({
   onAssignRole,
   isSubmitting,
 }: UserRoleModalProps) {
-  const [selectedRole, setSelectedRole] = React.useState<UserRole>("procurement_officer");
-  const [reason, setReason] = React.useState("");
+  const { data: roles, isLoading: isLoadingRoles } = useRolesList();
+  const [selectedRoleId, setSelectedRoleId] = React.useState("");
 
   React.useEffect(() => {
-    if (user) {
-      setSelectedRole(user.role);
-      setReason("");
+    if (user && roles) {
+      const userRole = roles.find((r) => r.name.toLowerCase() === user.role.toLowerCase());
+      setSelectedRoleId(userRole?.id || roles[0]?.id || "");
     }
-  }, [user, isOpen]);
+  }, [user, roles, isOpen]);
 
   if (!isOpen || !user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onAssignRole(user.id, selectedRole, reason);
-    onClose();
+    if (selectedRoleId) {
+      await onAssignRole(user.id, [selectedRoleId]);
+      onClose();
+    }
   };
 
   return (
@@ -59,29 +69,22 @@ export function UserRoleModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-sm">
           <div>
             <label className="block font-medium mb-1">Select New Role</label>
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-              className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <Select
+              value={selectedRoleId}
+              onValueChange={setSelectedRoleId}
+              disabled={isLoadingRoles}
             >
-              <option value="super_admin">Super Admin</option>
-              <option value="admin">Admin</option>
-              <option value="warehouse_manager">Warehouse Manager</option>
-              <option value="procurement_officer">Procurement Officer</option>
-              <option value="stock_clerk">Stock Clerk</option>
-              <option value="viewer">Viewer</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">Reason for Role Change (Optional)</label>
-            <textarea
-              rows={3}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Promotion or department transfer..."
-              className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
+              <SelectTrigger className="w-full h-[38px] text-sm rounded-none border border-input bg-background px-3 py-2">
+                <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select new role"} />
+              </SelectTrigger>
+              <SelectContent>
+                {roles?.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {ROLE_LABELS[r.name.toLowerCase() as UserRole] || r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
@@ -94,7 +97,7 @@ export function UserRoleModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !selectedRoleId}
               className="rounded-none bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {isSubmitting ? "Updating..." : "Update Role"}
@@ -105,3 +108,4 @@ export function UserRoleModal({
     </div>
   );
 }
+

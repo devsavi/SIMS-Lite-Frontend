@@ -49,27 +49,39 @@ export interface UserFilterParams {
 }
 
 export interface CreateUserDTO {
-  name: string;
   email: string;
-  role: UserRole;
-  department?: string;
+  password?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  role_ids?: string[];
+  // Fallbacks for mock UI components
+  name?: string;
+  role?: UserRole;
+  department?: string;
   sendInviteEmail?: boolean;
 }
 
 export interface UpdateUserDTO {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  // Fallbacks for mock UI components
   name?: string;
   email?: string;
   role?: UserRole;
   status?: UserStatus;
   department?: string;
-  phone?: string;
 }
 
 export interface ResetPasswordDTO {
   userId: string;
-  newPassword?: string;
-  requirePasswordChangeOnLogin?: boolean;
+  auto_generate: boolean;
+  new_password?: string;
 }
 
 export interface AssignRoleDTO {
@@ -77,3 +89,22 @@ export interface AssignRoleDTO {
   role: UserRole;
   reason?: string;
 }
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  resource: string;
+  action: string;
+  created_at: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  is_system: boolean;
+  permissions?: Permission[];
+  created_at?: string;
+}
+

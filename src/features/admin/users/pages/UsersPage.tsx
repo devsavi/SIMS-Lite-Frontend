@@ -16,6 +16,7 @@ import {
   useToggleUserStatus,
   useResetUserPassword,
   useAssignUserRole,
+  useDeleteUser,
 } from "../hooks/use-admin-users";
 import type { UserItem, UserFilterParams, CreateUserDTO, UpdateUserDTO } from "../types";
 import type { UserRole } from "@/lib/auth";
@@ -49,6 +50,7 @@ export function UsersPage() {
   const toggleStatusMutation = useToggleUserStatus();
   const resetPasswordMutation = useResetUserPassword();
   const assignRoleMutation = useAssignUserRole();
+  const deleteUserMutation = useDeleteUser();
 
   const handleCreateSubmit = async (data: CreateUserDTO) => {
     await createUserMutation.mutateAsync(data);
@@ -58,17 +60,28 @@ export function UsersPage() {
     await updateUserMutation.mutateAsync({ id, payload: data });
   };
 
-  const handleAssignRole = async (userId: string, role: UserRole, reason?: string) => {
-    await assignRoleMutation.mutateAsync({ userId, role, reason });
+  const handleAssignRole = async (userId: string, roleIds: string[]) => {
+    await assignRoleMutation.mutateAsync({ userId, roleIds });
   };
 
-  const handleResetPassword = async (userId: string, newPassword?: string) => {
-    await resetPasswordMutation.mutateAsync({ userId, newPassword });
+  const handleResetPassword = async (userId: string, autoGenerate: boolean, newPassword?: string) => {
+    await resetPasswordMutation.mutateAsync({
+      userId,
+      auto_generate: autoGenerate,
+      new_password: autoGenerate ? undefined : newPassword,
+    });
   };
 
   const handleToggleStatus = async (userId: string, status: "ACTIVE" | "INACTIVE") => {
     await toggleStatusMutation.mutateAsync({ id: userId, status });
   };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+      await deleteUserMutation.mutateAsync(userId);
+    }
+  };
+
 
   return (
     <PermissionGuard requiredPermission="users.view">
@@ -114,6 +127,7 @@ export function UsersPage() {
           onAssignRole={(u) => setRoleUser(u)}
           onResetPassword={(u) => setResetUser(u)}
           onToggleStatus={(u) => setToggleUser(u)}
+          onDeleteUser={handleDeleteUser}
         />
 
         {/* Modals */}

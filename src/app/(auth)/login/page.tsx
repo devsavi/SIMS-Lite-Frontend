@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { GuestRoute } from "@/app/components/auth/GuestRoute";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
@@ -16,7 +17,9 @@ export default function LoginPage() {
           </p>
         </div>
         <div className="border border-border bg-card p-6 shadow-sm">
-          <LoginForm />
+          <React.Suspense fallback={null}>
+            <LoginForm />
+          </React.Suspense>
         </div>
       </div>
     </GuestRoute>

@@ -12,23 +12,22 @@ describe("canAccess()", () => {
     expect(canAccess("admin", "stock_release.approve")).toBe(true);
   });
 
-  it("stock_clerk can only access their own permissions", () => {
-    expect(canAccess("stock_clerk", "inventory.view")).toBe(true);
-    expect(canAccess("stock_clerk", "stock_release.view")).toBe(true);
-    expect(canAccess("stock_clerk", "users.create")).toBe(false);
-    expect(canAccess("stock_clerk", "products.delete")).toBe(false);
-    expect(canAccess("stock_clerk", "settings.edit")).toBe(false);
+  it("store_keeper can only access their own permissions", () => {
+    expect(canAccess("store_keeper", "inventory.view")).toBe(true);
+    expect(canAccess("store_keeper", "stock_release.view")).toBe(true);
+    expect(canAccess("store_keeper", "users.create")).toBe(false);
+    expect(canAccess("store_keeper", "products.delete")).toBe(false);
+    expect(canAccess("store_keeper", "settings.edit")).toBe(false);
   });
 
-  it("procurement_officer has appropriate permissions", () => {
-    expect(canAccess("procurement_officer", "purchase_orders.create")).toBe(true);
-    expect(canAccess("procurement_officer", "suppliers.view")).toBe(true);
-    expect(canAccess("procurement_officer", "users.delete")).toBe(false);
-    expect(canAccess("procurement_officer", "settings.edit")).toBe(false);
+  it("officer has appropriate permissions", () => {
+    expect(canAccess("officer", "purchase_orders.create")).toBe(true);
+    expect(canAccess("officer", "suppliers.view")).toBe(true);
+    expect(canAccess("officer", "users.delete")).toBe(false);
+    expect(canAccess("officer", "settings.edit")).toBe(false);
   });
 
   it("returns false for unknown role", () => {
-    // @ts-expect-error — testing unknown role
     expect(canAccess("unknown_role", "dashboard.view")).toBe(false);
   });
 });
@@ -39,21 +38,21 @@ describe("canAccessAll()", () => {
   });
 
   it("returns false when role is missing one permission", () => {
-    expect(canAccessAll("stock_clerk", ["inventory.view", "users.delete"])).toBe(false);
+    expect(canAccessAll("store_keeper", ["inventory.view", "users.delete"])).toBe(false);
   });
 
   it("returns true for empty permission array", () => {
-    expect(canAccessAll("viewer", [])).toBe(true);
+    expect(canAccessAll("store_keeper", [])).toBe(true);
   });
 });
 
 describe("canAccessAny()", () => {
   it("returns true when role has at least one permission", () => {
-    expect(canAccessAny("stock_clerk", ["users.create", "inventory.view"])).toBe(true);
+    expect(canAccessAny("store_keeper", ["users.create", "inventory.view"])).toBe(true);
   });
 
   it("returns false when role has none of the permissions", () => {
-    expect(canAccessAny("stock_clerk", ["users.create", "settings.edit"])).toBe(false);
+    expect(canAccessAny("store_keeper", ["users.create", "settings.edit"])).toBe(false);
   });
 
   it("returns false for empty permission array", () => {
@@ -66,9 +65,10 @@ describe("getPermissions()", () => {
     expect(getPermissions("admin").length).toBeGreaterThan(0);
   });
 
-  it("admin has more permissions than stock_clerk", () => {
+  it("admin has more permissions than store_keeper", () => {
     const adminPerms = getPermissions("admin");
-    const clerkPerms = getPermissions("stock_clerk");
+    const clerkPerms = getPermissions("store_keeper");
     expect(adminPerms.length).toBeGreaterThan(clerkPerms.length);
   });
 });
+

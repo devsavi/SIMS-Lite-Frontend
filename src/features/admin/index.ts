@@ -23,10 +23,6 @@ export { useSystemSettings, useUpdateSystemSettings } from "./settings/hooks/use
 export { EmailConfigPage } from "./email/pages/EmailConfigPage";
 export { useEmailConfig, useUpdateEmailConfig } from "./email/hooks/use-email-config";
 
-// Activity Log
+// Activity Log (consolidated audit log)
 export { ActivityLogPage } from "./activity/pages/ActivityLogPage";
-export { useActivityLogs } from "./activity/hooks/use-activity-log";
-
-// Audit Trail
-export { AuditTrailPage } from "./audit/pages/AuditTrailPage";
-export { useAuditTrail } from "./audit/hooks/use-audit-trail";
+export { useAdminAuditLogs } from "./activity/hooks/use-activity-log";

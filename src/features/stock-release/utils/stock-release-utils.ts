@@ -56,14 +56,10 @@ export function canEditRelease(
   if (norm !== "draft") return false;
   if (!userRole) return false;
   const role = userRole.toLowerCase();
+  // ADMIN: full access | STORE_KEEPER: inventory:write | OFFICER: no edit
   return (
     role === "admin" ||
-    role === "super_admin" ||
-    role === "officer" ||
-    role === "procurement_officer" ||
-    role === "store_keeper" ||
-    role === "stock_clerk" ||
-    role === "warehouse_manager"
+    role === "store_keeper"
   );
 }
 
@@ -75,14 +71,10 @@ export function canSubmitRelease(
   if (norm !== "draft") return false;
   if (!userRole) return false;
   const role = userRole.toLowerCase();
+  // ADMIN: full access | STORE_KEEPER: inventory:write | OFFICER: no submit
   return (
     role === "admin" ||
-    role === "super_admin" ||
-    role === "officer" ||
-    role === "procurement_officer" ||
-    role === "store_keeper" ||
-    role === "stock_clerk" ||
-    role === "warehouse_manager"
+    role === "store_keeper"
   );
 }
 
@@ -94,10 +86,10 @@ export function canApproveRelease(
   if (norm !== "submitted") return false;
   if (!userRole) return false;
   const role = userRole.toLowerCase();
+  // ADMIN: inventory:approve | STORE_KEEPER: inventory:approve | OFFICER: no approve
   return (
     role === "admin" ||
-    role === "super_admin" ||
-    role === "warehouse_manager"
+    role === "store_keeper"
   );
 }
 
@@ -109,13 +101,10 @@ export function canCancelRelease(
   if (norm !== "draft" && norm !== "submitted") return false;
   if (!userRole) return false;
   const role = userRole.toLowerCase();
+  // ADMIN: full access | STORE_KEEPER: inventory:write | OFFICER: no cancel
   return (
     role === "admin" ||
-    role === "super_admin" ||
-    role === "officer" ||
-    role === "procurement_officer" ||
-    role === "store_keeper" ||
-    role === "stock_clerk" ||
-    role === "warehouse_manager"
+    role === "store_keeper"
   );
 }
+

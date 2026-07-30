@@ -4,11 +4,9 @@
  * DashboardRouter — renders the correct dashboard based on the current user's role.
  *
  * Role mapping:
- *   admin / super_admin      → AdminDashboard
- *   procurement_officer /
- *   warehouse_manager        → OfficerDashboard
- *   stock_clerk              → StoreKeeperDashboard
- *   viewer / unknown         → AdminDashboard (read-only KPIs still visible)
+ *   admin        → AdminDashboard
+ *   officer      → OfficerDashboard
+ *   store_keeper → StoreKeeperDashboard
  */
 
 import * as React from "react";
@@ -21,19 +19,18 @@ export function DashboardRouter() {
   const role = useAuthStore((s) => s.role);
 
   switch (role) {
-    case "super_admin":
     case "admin":
       return <AdminDashboard />;
 
-    case "procurement_officer":
-    case "warehouse_manager":
+    case "officer":
       return <OfficerDashboard />;
 
-    case "stock_clerk":
+    case "store_keeper":
       return <StoreKeeperDashboard />;
 
     default:
-      // viewer or any unexpected role gets the admin view (read-only by permission guards)
+      // Fallback — show admin view (permission guards control actual visibility)
       return <AdminDashboard />;
   }
 }
+

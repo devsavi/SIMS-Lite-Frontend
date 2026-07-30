@@ -26,14 +26,11 @@ export function StockReleaseListPage() {
   const userRole = user?.role;
 
   const role = (userRole as string) || "";
+  // ADMIN/STORE_KEEPER can create stock releases
   const canCreate =
+    user?.is_superuser ||
     role === "admin" ||
-    role === "super_admin" ||
-    role === "officer" ||
-    role === "procurement_officer" ||
-    role === "store_keeper" ||
-    role === "stock_clerk" ||
-    role === "warehouse_manager";
+    role === "store_keeper";
 
   const [filters, setFilters] = React.useState<StockReleaseFilterParams>({
     page: 1,

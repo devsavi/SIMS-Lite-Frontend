@@ -47,7 +47,7 @@ const MOCK_DEFAULT_PROFILE: UserProfile = {
   firstName: "System",
   lastName: "Admin",
   email: "admin@simslite.com",
-  role: "super_admin",
+  role: "admin",
   phone: "+1 555-0101",
   department: "Executive Management",
   bio: "Senior inventory & operations manager responsible for SIMS Lite platform administration.",
@@ -58,19 +58,17 @@ const MOCK_DEFAULT_PROFILE: UserProfile = {
 };
 
 const ROLE_NAME_MAP: Record<string, UserRole> = {
-  SUPER_ADMIN: "super_admin",
   ADMIN: "admin",
-  WAREHOUSE_MANAGER: "warehouse_manager",
-  PROCUREMENT_OFFICER: "procurement_officer",
-  STOCK_CLERK: "stock_clerk",
-  VIEWER: "viewer",
+  OFFICER: "officer",
+  STORE_KEEPER: "store_keeper",
 };
 
 function normalizeRoleName(raw?: string): UserRole {
-  if (!raw) return "super_admin";
+  if (!raw) return "store_keeper";
   const upper = raw.toUpperCase().replace(/[^A-Z_]/g, "_");
   return ROLE_NAME_MAP[upper] ?? (raw.toLowerCase() as UserRole);
 }
+
 
 function mapRawToUserProfile(raw: any): UserProfile {
   if (!raw || typeof raw !== "object") {

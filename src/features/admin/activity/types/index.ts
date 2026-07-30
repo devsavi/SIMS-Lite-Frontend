@@ -1,35 +1,52 @@
-export type ActivityStatus = "SUCCESS" | "FAILED" | "WARNING";
+// ---- Audit Log Entry (matches GET /admin/audit-logs/ response) ----
 
-export interface ActivityLogEntry {
+export interface AuditLogActor {
   id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userRole: string;
+  email: string;
+  full_name: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  actor_id: string;
+  actor: AuditLogActor;
   action: string;
-  module: string;
-  status: ActivityStatus;
-  timestamp: string;
-  ipAddress?: string;
-  userAgent?: string;
-  details?: Record<string, any>;
+  resource_type: string;
+  resource_id: string;
+  ip_address: string;
+  status: "success" | "failure";
+  detail: Record<string, any> | null;
+  created_at: string;
 }
 
-export interface ActivityFilterParams {
-  search?: string;
-  user?: string;
-  module?: string;
-  status?: ActivityStatus | "ALL";
-  startDate?: string;
-  endDate?: string;
-  page?: number;
-  limit?: number;
-}
+// ---- Filter Params ----
 
-export interface ActivityLogResponse {
-  data: ActivityLogEntry[];
-  total: number;
+export type AuditPeriod = "today" | "week" | "month" | "custom";
+export type AuditActionCategory = "all" | "auth" | "user" | "inventory";
+export type AuditResourceType = "all" | "User" | "Product" | "PurchaseOrder";
+
+export interface AuditLogFilterParams {
+  period: AuditPeriod;
+  date_from?: string;
+  date_to?: string;
+  action: AuditActionCategory;
+  user_id?: string;
+  resource_type: AuditResourceType;
   page: number;
-  limit: number;
-  totalPages: number;
+  size: number;
+}
+
+// ---- API Response ----
+
+export interface AuditLogPagination {
+  page: number;
+  size: number;
+  total: number;
+  pages: number;
+}
+
+export interface AuditLogApiResponse {
+  status: string;
+  data: AuditLogEntry[];
+  pagination: AuditLogPagination;
 }

@@ -11,11 +11,19 @@ import {
   XCircle,
   ArrowUpDown,
   Search,
+  Trash2,
 } from "lucide-react";
 import { ROLE_LABELS, type UserRole } from "@/lib/auth";
 import type { UserItem, UserStatus, UserFilterParams } from "../types";
 import { getRoleBadgeClass, getStatusBadgeClass, formatDateTime } from "../utils/user-helpers";
 import { cn } from "@/utils/cn";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
 
 interface UserListProps {
   users: UserItem[];
@@ -30,6 +38,7 @@ interface UserListProps {
   onAssignRole: (user: UserItem) => void;
   onResetPassword: (user: UserItem) => void;
   onToggleStatus: (user: UserItem) => void;
+  onDeleteUser: (userId: string) => void;
 }
 
 export function UserList({
@@ -45,27 +54,12 @@ export function UserList({
   onAssignRole,
   onResetPassword,
   onToggleStatus,
+  onDeleteUser,
 }: UserListProps) {
   const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange({ ...filters, search: e.target.value, page: 1 });
-  };
-
-  const handleRoleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFilterChange({
-      ...filters,
-      role: e.target.value as UserRole | "ALL",
-      page: 1,
-    });
-  };
-
-  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFilterChange({
-      ...filters,
-      status: e.target.value as UserStatus | "ALL",
-      page: 1,
-    });
   };
 
   return (
@@ -85,33 +79,36 @@ export function UserList({
 
         <div className="flex items-center gap-2">
           {/* Role Filter */}
-          <select
+          <Select
             value={filters.role || "ALL"}
-            onChange={handleRoleFilterChange}
-            aria-label="Filter by role"
-            className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onValueChange={(v) => onFilterChange({ ...filters, role: v === "ALL" ? undefined : v as any, page: 1 })}
           >
-            <option value="ALL">All Roles</option>
-            <option value="super_admin">Super Admin</option>
-            <option value="admin">Admin</option>
-            <option value="warehouse_manager">Warehouse Manager</option>
-            <option value="procurement_officer">Procurement Officer</option>
-            <option value="stock_clerk">Stock Clerk</option>
-            <option value="viewer">Viewer</option>
-          </select>
+            <SelectTrigger className="h-9 w-36 text-sm" aria-label="Filter by role">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Roles</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="officer">Officer</SelectItem>
+              <SelectItem value="store_keeper">Store Keeper</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Status Filter */}
-          <select
+          <Select
             value={filters.status || "ALL"}
-            onChange={handleStatusFilterChange}
-            aria-label="Filter by status"
-            className="rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onValueChange={(v) => onFilterChange({ ...filters, status: v === "ALL" ? undefined : v as UserStatus, page: 1 })}
           >
-            <option value="ALL">All Statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-            <option value="PENDING">Pending</option>
-          </select>
+            <SelectTrigger className="h-9 w-36 text-sm" aria-label="Filter by status">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="INACTIVE">Inactive</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -252,6 +249,17 @@ export function UserList({
                                     Activate User
                                   </>
                                 )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenDropdownId(null);
+                                  onDeleteUser(user.id);
+                                }}
+                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Delete User
                               </button>
                             </div>
                           </>

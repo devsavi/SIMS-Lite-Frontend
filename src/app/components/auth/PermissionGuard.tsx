@@ -39,9 +39,11 @@ export function PermissionGuard({
   anyOf,
   fallback = null,
 }: PermissionGuardProps) {
-  const { role, isAuthenticated } = useAuthStore();
+  const { user, role, isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated || !role) return <>{fallback}</>;
+
+  if (user?.is_superuser) return <>{children}</>;
 
   const userRole = role as UserRole;
 

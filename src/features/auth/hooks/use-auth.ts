@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import { authApi } from "../api/auth-api";
 import { userReadToAuthUser } from "../utils";
+import { toast } from "@/app/components/ui/use-toast";
 
 // ---------------------------------------------------------------------------
 // useLogin
@@ -45,8 +46,6 @@ export function useLogin() {
 // ---------------------------------------------------------------------------
 
 export function useRegister() {
-  const { login } = useAuthStore();
-
   return useMutation({
     mutationFn: async (values: {
       name: string;
@@ -58,19 +57,12 @@ export function useRegister() {
       const first_name = parts[0] ?? values.name;
       const last_name = parts.slice(1).join(" ") || first_name;
 
-      const tokens = await authApi.register({ email: values.email, password: values.password, first_name, last_name });
-      const { accessToken } = await import("@/lib/auth/token");
-      accessToken.set(tokens.access_token, tokens.expires_in);
-      const user = await authApi.me();
-      return { tokens, user };
+      await authApi.register({ email: values.email, password: values.password, first_name, last_name });
+      return { email: values.email };
     },
-    onSuccess: ({ tokens, user }) => {
-      login(userReadToAuthUser(user), {
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-        expiresIn: tokens.expires_in,
-      });
-      window.location.replace("/dashboard");
+    onSuccess: ({ email }) => {
+      // Redirect to verify-email page — user must verify before accessing the app
+      window.location.replace(`/verify-email?email=${encodeURIComponent(email)}`);
     },
   });
 }
@@ -105,6 +97,39 @@ export function useResetPassword() {
     mutationFn: authApi.resetPassword,
     onSuccess: () => {
       router.replace("/login");
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useVerifyEmail
+// ---------------------------------------------------------------------------
+
+export function useVerifyEmail() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: ({ email, otp }: { email: string; otp: string }) =>
+      authApi.verifyEmail(email, otp),
+    onSuccess: () => {
+      // Redirect to login with success flag
+      router.replace("/login?verified=true");
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// useResendVerification
+// ---------------------------------------------------------------------------
+
+export function useResendVerification() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (email: string) => authApi.resendVerification(email),
+    onSuccess: (_data, email) => {
+      toast({ title: "Verification code sent! Check your inbox." });
+      router.replace(`/verify-email?email=${encodeURIComponent(email)}`);
     },
   });
 }

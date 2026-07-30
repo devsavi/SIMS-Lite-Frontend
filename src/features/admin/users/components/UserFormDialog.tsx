@@ -1,9 +1,17 @@
 "use client";
 
 import React from "react";
-import { X, UserPlus, Save } from "lucide-react";
+import { X, UserPlus, Save, Eye, EyeOff } from "lucide-react";
 import type { UserItem, CreateUserDTO, UpdateUserDTO } from "../types";
 import { ROLE_LABELS, type UserRole } from "@/lib/auth";
+import { useRolesList } from "../hooks/use-admin-users";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -24,15 +32,18 @@ export function UserFormDialog({
 }: UserFormDialogProps) {
   const isEdit = !!user;
 
+  const { data: roles, isLoading: isLoadingRoles } = useRolesList();
+
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
-    role: "procurement_officer" as UserRole,
-    department: "",
+    password: "",
+    role: "officer" as UserRole,
     phone: "+94",
     sendInviteEmail: true,
   });
 
+  const [showPassword, setShowPassword] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
@@ -40,8 +51,8 @@ export function UserFormDialog({
       setFormData({
         name: user.name,
         email: user.email,
+        password: "",
         role: user.role,
-        department: user.department || "",
         phone: user.phone || "+94",
         sendInviteEmail: false,
       });
@@ -49,13 +60,14 @@ export function UserFormDialog({
       setFormData({
         name: "",
         email: "",
-        role: "procurement_officer",
-        department: "",
+        password: "",
+        role: "officer",
         phone: "+94",
         sendInviteEmail: true,
       });
     }
     setErrors({});
+    setShowPassword(false);
   }, [user, isOpen]);
 
   if (!isOpen) return null;
@@ -68,6 +80,23 @@ export function UserFormDialog({
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errs.email = "Invalid email format";
     }
+
+    if (!isEdit) {
+      if (!formData.password) {
+        errs.password = "Password is required";
+      } else {
+        const hasUpper = /[A-Z]/.test(formData.password);
+        const hasLower = /[a-z]/.test(formData.password);
+        const hasNumber = /[0-9]/.test(formData.password);
+        const hasSpecial = /[^A-Za-z0-9]/.test(formData.password);
+        if (formData.password.length < 8) {
+          errs.password = "Password must be at least 8 characters long";
+        } else if (!(hasUpper && hasLower && hasNumber && hasSpecial)) {
+          errs.password = "Password must contain uppercase, lowercase, number, and special character";
+        }
+      }
+    }
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -76,22 +105,31 @@ export function UserFormDialog({
     e.preventDefault();
     if (!validate()) return;
 
+    const parts = formData.name.trim().split(/\s+/);
+    const first_name = parts[0] || "";
+    const last_name = parts.slice(1).join(" ") || "";
+
     if (isEdit && user) {
       await onSubmitUpdate(user.id, {
-        name: formData.name,
-        email: formData.email,
-        role: formData.role,
-        department: formData.department,
+        first_name,
+        last_name,
         phone: formData.phone,
+        is_active: user.status === "ACTIVE",
+        is_verified: true,
       });
     } else {
+      const selectedRoleObj = roles?.find(r => r.name.toLowerCase() === formData.role.toLowerCase());
+      const role_ids = selectedRoleObj ? [selectedRoleObj.id] : [];
+
       await onSubmitCreate({
-        name: formData.name,
         email: formData.email,
-        role: formData.role,
-        department: formData.department,
+        password: formData.password,
+        first_name,
+        last_name,
         phone: formData.phone,
-        sendInviteEmail: formData.sendInviteEmail,
+        is_active: true,
+        is_verified: false,
+        role_ids,
       });
     }
     onClose();
@@ -133,51 +171,74 @@ export function UserFormDialog({
             <input
               type="email"
               value={formData.email}
+              disabled={isEdit}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               placeholder="e.g. sarah.j@company.com"
             />
             {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
           </div>
 
+          {!isEdit && (
+            <div className="relative">
+              <label className="block text-sm font-medium mb-1">Password *</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full rounded-none border border-input bg-background pl-3 pr-10 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder="Create password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password ? (
+                <p className="mt-1 text-xs text-destructive">{errors.password}</p>
+              ) : (
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Must be at least 8 characters with 1 uppercase, 1 lowercase, 1 digit, and 1 special character.
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">System Role *</label>
-              <select
+              <Select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
-                className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onValueChange={(v) => setFormData({ ...formData, role: v as UserRole })}
+                disabled={isLoadingRoles}
               >
-                <option value="super_admin">Super Admin</option>
-                <option value="admin">Admin</option>
-                <option value="warehouse_manager">Warehouse Manager</option>
-                <option value="procurement_officer">Procurement Officer</option>
-                <option value="stock_clerk">Stock Clerk</option>
-                <option value="viewer">Viewer</option>
-              </select>
+                <SelectTrigger className="w-full h-[38px] text-sm rounded-none border border-input bg-background px-3 py-2">
+                  <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select system role"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles?.map((r) => (
+                    <SelectItem key={r.id} value={r.name.toLowerCase()}>
+                      {ROLE_LABELS[r.name.toLowerCase() as UserRole] || r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Department</label>
+              <label className="block text-sm font-medium mb-1">Phone Number</label>
               <input
-                type="text"
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                placeholder="e.g. Logistics"
+                placeholder="e.g. +1 555-0199"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="e.g. +1 555-0199"
-            />
           </div>
 
           {!isEdit && (
@@ -216,3 +277,4 @@ export function UserFormDialog({
     </div>
   );
 }
+

@@ -136,7 +136,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   // can — permission check shorthand
   // -----------------------------------------------------------------------
   can: (permission) => {
-    const { role } = get();
+    const { user, role } = get();
+    if (user?.is_superuser) return true;
     if (!role) return false;
     return canAccess(role, permission);
   },

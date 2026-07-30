@@ -102,4 +102,27 @@ export const authApi = {
     );
     return res.data;
   },
+
+  /**
+   * GET /auth/verify-email
+   * Verifies the email using OTP from email.
+   */
+  verifyEmail: async (email: string, otp: string): Promise<MessageResponse> => {
+    const res = await get<SuccessResponse<MessageResponse>>(
+      `${AUTH}/verify-email?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
+    );
+    return res.data;
+  },
+
+  /**
+   * POST /auth/resend-verification
+   * Resends the verification email.
+   */
+  resendVerification: async (email: string): Promise<MessageResponse> => {
+    const res = await post<SuccessResponse<MessageResponse>>(
+      `${AUTH}/resend-verification`,
+      { email }
+    );
+    return res.data;
+  },
 };

@@ -119,7 +119,7 @@ describe("Auth store", () => {
     });
 
     it("returns false for a permission the role lacks", () => {
-      const storeKeeperUser = { ...mockUser, role: "stock_clerk" as const };
+      const storeKeeperUser = { ...mockUser, role: "store_keeper" as const };
       useAuthStore.getState().login(storeKeeperUser, mockTokens);
       expect(useAuthStore.getState().can("users.create")).toBe(false);
     });

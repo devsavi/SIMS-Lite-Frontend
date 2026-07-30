@@ -37,11 +37,11 @@ export function InventoryTable({
   onRefresh,
 }: InventoryTableProps) {
   const { user } = useAuthStore();
+  // ADMIN: inventory:write | STORE_KEEPER: inventory:write | OFFICER: inventory:read only
   const canAdjust =
+    user?.is_superuser ||
     user?.role === "admin" ||
-    user?.role === "super_admin" ||
-    user?.role === "stock_clerk" ||
-    user?.role === "warehouse_manager";
+    user?.role === "store_keeper";
 
   const columns = React.useMemo<ColumnDef<InventoryItem>[]>(
     () => [

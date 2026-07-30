@@ -26,7 +26,6 @@ import {
   Mail,
   Hash,
   Activity,
-  FileCheck,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -140,7 +139,6 @@ const ADMIN_GROUP: NavGroup = {
     { label: "System Settings", href: "/admin/settings", icon: Settings, permissions: ["settings.view"] },
     { label: "Email Config", href: "/admin/email", icon: Mail, permissions: ["settings.edit"] },
     { label: "Activity Log", href: "/admin/activity", icon: Activity, permissions: ["settings.view"] },
-    { label: "Audit Trail", href: "/admin/audit", icon: FileCheck, permissions: ["settings.view"] },
   ],
 };
 

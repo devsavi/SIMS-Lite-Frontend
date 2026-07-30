@@ -51,7 +51,7 @@ const mockReportMeta: ReportMeta = {
   description: "Detailed stock report.",
   category: "inventory",
   iconName: "Archive",
-  allowedRoles: ["admin", "super_admin"],
+  allowedRoles: ["admin", "officer"],
   lastGenerated: "Today",
   supportedFormats: ["excel", "csv", "pdf"],
 };

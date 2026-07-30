@@ -27,7 +27,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Detailed breakdown of stock levels, minimum stock, category, supplier, and stock valuation.",
     category: "inventory",
     iconName: "Archive",
-    allowedRoles: ["super_admin", "admin", "warehouse_manager", "stock_clerk", "procurement_officer"],
+    // ADMIN: inventory:read | OFFICER: inventory:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Today",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -37,7 +38,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Products currently below minimum stock or reorder point requiring reordering.",
     category: "inventory",
     iconName: "AlertTriangle",
-    allowedRoles: ["super_admin", "admin", "warehouse_manager", "stock_clerk", "procurement_officer"],
+    // ADMIN: inventory:read | OFFICER: inventory:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Today",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -47,7 +49,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Summary of purchase orders, supplier status, approval timelines, and totals.",
     category: "procurement",
     iconName: "ShoppingCart",
-    allowedRoles: ["super_admin", "admin", "procurement_officer"],
+    // ADMIN: procurement:read | OFFICER: procurement:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Yesterday",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -57,7 +60,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Goods Received Notes history, quantities received, receiving status, and suppliers.",
     category: "procurement",
     iconName: "ClipboardCheck",
-    allowedRoles: ["super_admin", "admin", "procurement_officer", "warehouse_manager"],
+    // ADMIN: procurement:read | OFFICER: procurement:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Today",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -67,7 +71,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "History of stock releases, issued items, released by users, and release statuses.",
     category: "inventory",
     iconName: "ArrowUpFromLine",
-    allowedRoles: ["super_admin", "admin", "warehouse_manager", "procurement_officer"],
+    // ADMIN: inventory:read | OFFICER: inventory:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Today",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -77,7 +82,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Transaction history including inflows, outflows, transfers, balance after transaction.",
     category: "inventory",
     iconName: "TrendingUp",
-    allowedRoles: ["super_admin", "admin", "warehouse_manager", "stock_clerk", "procurement_officer"],
+    // ADMIN: inventory:read | OFFICER: inventory:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Today",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -87,7 +93,8 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Supplier performance, total purchase orders, GRN counts, and aggregate spending.",
     category: "master-data",
     iconName: "Truck",
-    allowedRoles: ["super_admin", "admin", "procurement_officer"],
+    // ADMIN: master_data:read | OFFICER: master_data:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "2 days ago",
     supportedFormats: ["excel", "csv", "pdf"],
   },
@@ -97,11 +104,13 @@ export const REPORT_METADATA: ReportMeta[] = [
     description: "Master list of products, SKUs, brands, categories, and master stock status.",
     category: "master-data",
     iconName: "Package",
-    allowedRoles: ["super_admin", "admin", "procurement_officer", "warehouse_manager", "stock_clerk"],
+    // ADMIN: master_data:read | OFFICER: master_data:read | STORE_KEEPER: no reports:read
+    allowedRoles: ["admin", "officer"],
     lastGenerated: "Today",
     supportedFormats: ["excel", "csv", "pdf"],
   },
 ];
+
 
 export const reportsApi = {
   /**

@@ -1,13 +1,11 @@
 import { z } from "zod";
 
 export const USER_ROLES = [
-  "super_admin",
   "admin",
-  "warehouse_manager",
-  "procurement_officer",
-  "stock_clerk",
-  "viewer",
+  "officer",
+  "store_keeper",
 ] as const;
+
 
 export const USER_STATUSES = ["ACTIVE", "INACTIVE", "PENDING"] as const;
 

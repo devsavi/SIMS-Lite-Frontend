@@ -21,11 +21,12 @@ export function PermissionGuard({
   requiredPermissions,
   fallbackUrl = "/dashboard",
 }: PermissionGuardProps) {
-  const { role } = useAuthStore();
+  const { user, role } = useAuthStore();
 
   const userRole = role as UserRole | undefined;
 
   const hasAccess = React.useMemo(() => {
+    if (user?.is_superuser) return true;
     if (!userRole) return false;
     if (requiredPermission) {
       return canAccess(userRole, requiredPermission);
@@ -34,8 +35,8 @@ export function PermissionGuard({
       return canAccessAny(userRole, requiredPermissions);
     }
     // Default to admin requirement if no specific permission specified
-    return userRole === "admin" || userRole === "super_admin";
-  }, [userRole, requiredPermission, requiredPermissions]);
+    return userRole === "admin";
+  }, [user, userRole, requiredPermission, requiredPermissions]);
 
   if (!hasAccess) {
     return (

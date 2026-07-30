@@ -1,16 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { activityApi } from "../api/activity-api";
-import type { ActivityFilterParams } from "../types";
+import { auditLogsApi } from "../api/activity-api";
+import type { AuditLogFilterParams } from "../types";
 
-export const activityKeys = {
-  all: ["activity-logs"] as const,
-  list: (filters?: ActivityFilterParams) => [...activityKeys.all, "list", filters] as const,
+export const auditLogKeys = {
+  all: ["admin-audit-logs"] as const,
+  list: (filters: AuditLogFilterParams) => [...auditLogKeys.all, "list", filters] as const,
 };
 
-export function useActivityLogs(filters?: ActivityFilterParams) {
+export function useAdminAuditLogs(filters: AuditLogFilterParams) {
   return useQuery({
-    queryKey: activityKeys.list(filters),
-    queryFn: () => activityApi.getActivityLogs(filters),
-    staleTime: 60 * 1000,
+    queryKey: auditLogKeys.list(filters),
+    queryFn: () => auditLogsApi.getAuditLogs(filters),
+    staleTime: 30 * 1000,
+    placeholderData: (prev) => prev,
   });
 }

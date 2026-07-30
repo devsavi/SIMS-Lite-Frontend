@@ -3,6 +3,13 @@
 import React from "react";
 import { Save, CheckCircle2 } from "lucide-react";
 import type { CompanyProfile, UpdateCompanyDTO } from "../types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
 
 interface CompanyProfileFormProps {
   profile: CompanyProfile;
@@ -227,18 +234,22 @@ export function CompanyProfileForm({ profile, onSave, isSubmitting }: CompanyPro
 
         <div>
           <label className="block font-medium mb-1">Base System Currency *</label>
-          <select
+          <Select
             value={formData.base_currency}
-            onChange={(e) => setFormData({ ...formData, base_currency: e.target.value })}
-            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onValueChange={(v) => setFormData({ ...formData, base_currency: v })}
           >
-            <option value="USD">USD — US Dollar ($)</option>
-            <option value="EUR">EUR — Euro (€)</option>
-            <option value="GBP">GBP — British Pound (£)</option>
-            <option value="LKR">LKR — Sri Lankan Rupee (Rs)</option>
-            <option value="AUD">AUD — Australian Dollar ($)</option>
-            <option value="CAD">CAD — Canadian Dollar ($)</option>
-          </select>
+            <SelectTrigger className="w-full h-[38px] text-sm rounded-none border border-input bg-background px-3 py-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD — US Dollar ($)</SelectItem>
+              <SelectItem value="EUR">EUR — Euro (€)</SelectItem>
+              <SelectItem value="GBP">GBP — British Pound (£)</SelectItem>
+              <SelectItem value="LKR">LKR — Sri Lankan Rupee (Rs)</SelectItem>
+              <SelectItem value="AUD">AUD — Australian Dollar ($)</SelectItem>
+              <SelectItem value="CAD">CAD — Canadian Dollar ($)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

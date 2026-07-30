@@ -35,7 +35,6 @@ const ROUTE_LABELS: Record<string, { parent?: string; title: string }> = {
   "/admin/email": { parent: "Administration", title: "Email Config" },
   "/admin/sequences": { parent: "Administration", title: "Numbering Sequences" },
   "/admin/activity": { parent: "Administration", title: "Activity Log" },
-  "/admin/audit": { parent: "Administration", title: "Audit Trail" },
 };
 
 function ThemeToggle() {

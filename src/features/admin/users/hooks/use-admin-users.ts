@@ -65,6 +65,8 @@ export function useToggleUserStatus() {
   });
 }
 
+import type { ActivityLogFilters } from "@/features/profile/types";
+
 export function useResetUserPassword() {
   return useMutation({
     mutationFn: (payload: ResetPasswordDTO) => adminUsersApi.resetPassword(payload),
@@ -74,10 +76,39 @@ export function useResetUserPassword() {
 export function useAssignUserRole() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: AssignRoleDTO) => adminUsersApi.assignRole(payload),
+    mutationFn: ({ userId, roleIds }: { userId: string; roleIds: string[] }) =>
+      adminUsersApi.assignRole(userId, roleIds),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: adminUsersKeys.all });
       queryClient.invalidateQueries({ queryKey: adminUsersKeys.detail(variables.userId) });
     },
   });
 }
+
+export function useRolesList() {
+  return useQuery({
+    queryKey: ["admin-roles"],
+    queryFn: () => adminUsersApi.getRoles(),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminUsersApi.deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.all });
+    },
+  });
+}
+
+export function useUserAuditLogs(userId: string | null, filters: ActivityLogFilters) {
+  return useQuery({
+    queryKey: ["admin-user-audit-logs", userId, filters],
+    queryFn: () => adminUsersApi.getUserAuditLogs(userId!, filters),
+    enabled: !!userId,
+    staleTime: 30 * 1000,
+  });
+}
+

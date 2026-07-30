@@ -264,14 +264,8 @@ export function ComposeNotification({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="procurement_officer">
-                          Procurement Officer
-                        </SelectItem>
-                        <SelectItem value="warehouse_manager">
-                          Warehouse Manager
-                        </SelectItem>
-                        <SelectItem value="stock_clerk">Stock Clerk</SelectItem>
-                        <SelectItem value="viewer">Viewer</SelectItem>
+                        <SelectItem value="officer">Officer</SelectItem>
+                        <SelectItem value="store_keeper">Store Keeper</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

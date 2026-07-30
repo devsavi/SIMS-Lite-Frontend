@@ -4,12 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Users,
   Building2,
   Sliders,
   Mail,
   Activity,
-  FileCheck,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 
@@ -18,7 +16,6 @@ export const ADMIN_TABS = [
   { id: "settings", label: "System Settings", href: "/admin/settings", icon: Sliders },
   { id: "email", label: "Email Config", href: "/admin/email", icon: Mail },
   { id: "activity", label: "Activity Log", href: "/admin/activity", icon: Activity },
-  { id: "audit", label: "Audit Trail", href: "/admin/audit", icon: FileCheck },
 ];
 
 export function AdminNavTabs() {
