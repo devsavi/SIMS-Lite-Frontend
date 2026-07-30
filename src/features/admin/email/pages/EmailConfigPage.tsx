@@ -5,26 +5,17 @@ import { Mail } from "lucide-react";
 import { PermissionGuard } from "../../shared/components/PermissionGuard";
 import { AdminNavTabs } from "../../shared/components/AdminNavTabs";
 import { EmailConfigForm } from "../components/EmailConfigForm";
-import { TestConnectionModal } from "../components/TestConnectionModal";
 import {
   useEmailConfig,
   useUpdateEmailConfig,
-  useTestEmailConnection,
 } from "../hooks/use-email-config";
 
 export function EmailConfigPage() {
   const { data: config, isLoading } = useEmailConfig();
   const updateMutation = useUpdateEmailConfig();
-  const testMutation = useTestEmailConnection();
-
-  const [isTestModalOpen, setIsTestModalOpen] = React.useState(false);
 
   const handleSave = async (data: any) => {
     await updateMutation.mutateAsync(data);
-  };
-
-  const handleTestConnection = async (recipientEmail: string) => {
-    return await testMutation.mutateAsync({ recipientEmail });
   };
 
   return (
@@ -34,10 +25,10 @@ export function EmailConfigPage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
             <Mail className="h-6 w-6 text-primary" />
-            Email & SMTP Gateway Configuration
+            Email Configuration
           </h1>
           <p className="text-sm text-muted-foreground">
-            Setup outgoing email credentials, encryption types, sender headers, and perform connectivity diagnostics.
+            Configure the sender identity used for outgoing system emails and notifications.
           </p>
         </div>
 
@@ -45,22 +36,14 @@ export function EmailConfigPage() {
         <AdminNavTabs />
 
         {isLoading || !config ? (
-          <div className="h-96 max-w-4xl animate-pulse rounded-none bg-muted"></div>
+          <div className="h-64 animate-pulse rounded-none bg-muted"></div>
         ) : (
           <EmailConfigForm
             config={config}
             onSave={handleSave}
-            onOpenTestModal={() => setIsTestModalOpen(true)}
             isSubmitting={updateMutation.isPending}
           />
         )}
-
-        <TestConnectionModal
-          isOpen={isTestModalOpen}
-          onClose={() => setIsTestModalOpen(false)}
-          onTestConnection={handleTestConnection}
-          isTesting={testMutation.isPending}
-        />
       </div>
     </PermissionGuard>
   );

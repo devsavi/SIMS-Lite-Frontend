@@ -8,18 +8,15 @@ import {
   Building2,
   Sliders,
   Mail,
-  Hash,
   Activity,
   FileCheck,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 export const ADMIN_TABS = [
-  { id: "users", label: "Users", href: "/admin/users", icon: Users },
   { id: "company", label: "Company Profile", href: "/admin/company", icon: Building2 },
   { id: "settings", label: "System Settings", href: "/admin/settings", icon: Sliders },
   { id: "email", label: "Email Config", href: "/admin/email", icon: Mail },
-  { id: "sequences", label: "Numbering Sequences", href: "/admin/sequences", icon: Hash },
   { id: "activity", label: "Activity Log", href: "/admin/activity", icon: Activity },
   { id: "audit", label: "Audit Trail", href: "/admin/audit", icon: FileCheck },
 ];
@@ -35,7 +32,6 @@ export function AdminNavTabs() {
       {ADMIN_TABS.map((tab) => {
         const isActive =
           pathname === tab.href ||
-          (tab.id === "users" && pathname === "/users") ||
           (tab.id === "settings" && pathname === "/settings") ||
           pathname.startsWith(`${tab.href}/`);
         const Icon = tab.icon;

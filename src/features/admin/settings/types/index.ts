@@ -1,49 +1,40 @@
 export interface GeneralSettings {
-  siteName: string;
-  supportEmail: string;
-  sessionTimeoutMinutes: number;
-  timeZone: string;
-  dateFormat: string;
-  maintenanceMode: boolean;
+  app_title: string;
+  support_email: string | null;
+  date_format: string;
 }
 
 export interface InventorySettings {
-  lowStockThresholdDefault: number;
-  enableStockReservation: boolean;
-  reservationExpiryHours: number;
-  allowNegativeStock: boolean;
-  autoBatchTracking: boolean;
-  barcodeFormat: "CODE128" | "EAN13" | "QR";
+  default_low_stock_level: number;
 }
 
-export interface ProcurementSettings {
-  autoApprovePoLimit: number;
-  requireGrnInspection: boolean;
-  defaultPaymentTerms: string;
-  allowOverReceivingPercentage: number;
-  enableSupplierRatings: boolean;
+export interface NumberingSequenceEntry {
+  prefix: string;
+  suffix: string | null;
+  next_sequence: number;
 }
 
-export interface NotificationSettings {
-  emailAlertsEnabled: boolean;
-  stockLevelAlerts: boolean;
-  poApprovalAlerts: boolean;
-  securityAlerts: boolean;
-  digestFrequency: "DAILY" | "WEEKLY" | "REALTIME";
-}
-
-export interface ReportSettings {
-  defaultExportFormat: "excel" | "csv" | "pdf";
-  pageSize: "A4" | "LETTER";
-  includeHeaderLogo: boolean;
-  scheduledReportsEnabled: boolean;
+export interface NumberingSettings {
+  po: NumberingSequenceEntry;
+  grn: NumberingSequenceEntry;
+  srn: NumberingSequenceEntry;
 }
 
 export interface SystemSettingsConfig {
+  id: string;
   general: GeneralSettings;
   inventory: InventorySettings;
-  procurement: ProcurementSettings;
-  notifications: NotificationSettings;
-  reports: ReportSettings;
-  updatedAt: string;
+  numbering: NumberingSettings;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateSystemSettingsDTO {
+  general?: Partial<GeneralSettings>;
+  inventory?: Partial<InventorySettings>;
+  numbering?: {
+    po?: Partial<NumberingSequenceEntry>;
+    grn?: Partial<NumberingSequenceEntry>;
+    srn?: Partial<NumberingSequenceEntry>;
+  };
 }

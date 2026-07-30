@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { emailApi } from "../api/email-api";
-import type { UpdateEmailConfigDTO, TestConnectionDTO } from "../types";
+import type { UpdateEmailConfigDTO } from "../types";
 
 export const emailKeys = {
   config: ["email-config"] as const,
@@ -22,11 +22,5 @@ export function useUpdateEmailConfig() {
       queryClient.setQueryData(emailKeys.config, updated);
       queryClient.invalidateQueries({ queryKey: emailKeys.config });
     },
-  });
-}
-
-export function useTestEmailConnection() {
-  return useMutation({
-    mutationFn: (payload: TestConnectionDTO) => emailApi.testConnection(payload),
   });
 }

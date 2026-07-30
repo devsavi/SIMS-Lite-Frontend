@@ -13,19 +13,15 @@ export { adminUsersApi } from "./users/api/admin-users-api";
 
 // Company Profile
 export { CompanyProfilePage } from "./company/pages/CompanyProfilePage";
-export { useCompanyProfile, useUpdateCompanyProfile, useUploadCompanyLogo } from "./company/hooks/use-company-profile";
+export { useCompanyProfile, useUpdateCompanyProfile } from "./company/hooks/use-company-profile";
 
 // System Settings
 export { SystemSettingsPage } from "./settings/pages/SystemSettingsPage";
-export { useSystemSettings, useUpdateSettingsSection } from "./settings/hooks/use-system-settings";
+export { useSystemSettings, useUpdateSystemSettings } from "./settings/hooks/use-system-settings";
 
 // Email Config
 export { EmailConfigPage } from "./email/pages/EmailConfigPage";
-export { useEmailConfig, useUpdateEmailConfig, useTestEmailConnection } from "./email/hooks/use-email-config";
-
-// Numbering Sequences
-export { NumberingSequencesPage } from "./sequences/pages/NumberingSequencesPage";
-export { useNumberingSequences, useUpdateSequence } from "./sequences/hooks/use-numbering-sequences";
+export { useEmailConfig, useUpdateEmailConfig } from "./email/hooks/use-email-config";
 
 // Activity Log
 export { ActivityLogPage } from "./activity/pages/ActivityLogPage";

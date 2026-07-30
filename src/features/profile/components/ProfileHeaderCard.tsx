@@ -18,10 +18,11 @@ function getInitials(name: string | undefined | null): string {
 }
 
 function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return "Jan 2026";
+  if (!dateStr) return "Jan 1, 2026";
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "Jan 2026";
+  if (isNaN(d.getTime())) return "Jan 1, 2026";
   return d.toLocaleDateString(undefined, {
+    day: "numeric",
     month: "short",
     year: "numeric",
   });
@@ -113,7 +114,7 @@ export function ProfileHeaderCard({ profile }: ProfileHeaderCardProps) {
 
             <div className="flex flex-col gap-0.5 border border-border bg-muted/30 p-2.5">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                <Clock className="h-3 w-3" /> Last Active
+                <Clock className="h-3 w-3" /> Last Login
               </span>
               <span className="text-xs font-medium text-foreground">
                 {formatTime(profile.lastLogin)}

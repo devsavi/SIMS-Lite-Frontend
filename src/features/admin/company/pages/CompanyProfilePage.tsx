@@ -4,25 +4,18 @@ import React from "react";
 import { Building2 } from "lucide-react";
 import { PermissionGuard } from "../../shared/components/PermissionGuard";
 import { AdminNavTabs } from "../../shared/components/AdminNavTabs";
-import { LogoUploader } from "../components/LogoUploader";
 import { CompanyProfileForm } from "../components/CompanyProfileForm";
 import {
   useCompanyProfile,
   useUpdateCompanyProfile,
-  useUploadCompanyLogo,
 } from "../hooks/use-company-profile";
 
 export function CompanyProfilePage() {
   const { data: profile, isLoading } = useCompanyProfile();
   const updateMutation = useUpdateCompanyProfile();
-  const uploadLogoMutation = useUploadCompanyLogo();
 
   const handleSaveProfile = async (data: any) => {
     await updateMutation.mutateAsync(data);
-  };
-
-  const handleUploadLogo = async (file: File) => {
-    await uploadLogoMutation.mutateAsync(file);
   };
 
   return (
@@ -44,17 +37,10 @@ export function CompanyProfilePage() {
 
         {isLoading || !profile ? (
           <div className="space-y-4 animate-pulse">
-            <div className="h-32 rounded-none bg-muted"></div>
             <div className="h-96 rounded-none bg-muted"></div>
           </div>
         ) : (
-          <div className="space-y-6 max-w-4xl">
-            <LogoUploader
-              currentLogoUrl={profile.logoUrl}
-              onUploadLogo={handleUploadLogo}
-              isUploading={uploadLogoMutation.isPending}
-            />
-
+          <div className="space-y-6">
             <CompanyProfileForm
               profile={profile}
               onSave={handleSaveProfile}

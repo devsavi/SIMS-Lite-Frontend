@@ -1,23 +1,36 @@
 import { format, formatDistanceToNow, isValid, parseISO } from "date-fns";
+import { useSystemSettingsStore } from "@/stores/settings.store";
 
 // ---------------------------------------------------------------------------
 // Date formatting
 // ---------------------------------------------------------------------------
 
+function getSystemDateFormat(): string {
+  try {
+    const storeFormat = useSystemSettingsStore.getState().dateFormat;
+    if (storeFormat === "DD/MM/YYYY") return "dd/MM/yyyy";
+    if (storeFormat === "MM/DD/YYYY") return "MM/dd/yyyy";
+    return "yyyy-MM-dd";
+  } catch {
+    return "yyyy-MM-dd";
+  }
+}
+
 export function formatDate(
   date: string | Date | null | undefined,
-  pattern = "MMM d, yyyy"
+  pattern?: string
 ): string {
   if (!date) return "—";
   const d = typeof date === "string" ? parseISO(date) : date;
   if (!isValid(d)) return "Invalid date";
-  return format(d, pattern);
+  return format(d, pattern || getSystemDateFormat());
 }
 
 export function formatDateTime(
   date: string | Date | null | undefined
 ): string {
-  return formatDate(date, "MMM d, yyyy h:mm a");
+  const timePattern = "h:mm a";
+  return `${formatDate(date)} ${date ? format(typeof date === "string" ? parseISO(date) : date, timePattern) : ""}`;
 }
 
 export function formatRelative(date: string | Date | null | undefined): string {

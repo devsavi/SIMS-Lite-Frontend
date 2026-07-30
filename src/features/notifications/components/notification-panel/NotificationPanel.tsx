@@ -59,8 +59,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
 
   return (
     <div
-      className="flex flex-col overflow-hidden"
-      style={{ width: 380, maxHeight: "min(520px, calc(100dvh - 80px))" }}
+      className="flex flex-col overflow-hidden w-full"
+      style={{ maxHeight: "min(520px, calc(100dvh - 80px))" }}
       role="dialog"
       aria-label="Notifications panel"
     >

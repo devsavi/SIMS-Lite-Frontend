@@ -6,6 +6,7 @@ import { AppHeader } from "./AppHeader";
 import { ProtectedRoute } from "@/app/components/auth/ProtectedRoute";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { cn } from "@/utils/cn";
+import { SystemSettingsSync } from "./SystemSettingsSync";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <ProtectedRoute>
+      <SystemSettingsSync />
       <div className="flex min-h-screen bg-background text-foreground">
         {/* Sidebar */}
         <AppSidebar />

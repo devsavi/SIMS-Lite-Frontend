@@ -1,38 +1,34 @@
 export interface CompanyProfile {
   id: string;
-  name: string;
-  logoUrl?: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  phone: string;
-  email: string;
-  website: string;
-  taxRegistrationNumber: string;
-  businessRegistrationNumber: string;
-  currency: string;
-  updatedAt: string;
+  legal_name: string;
+  logo_url: string | null;
+  business_registration_no: string | null;
+  tax_registration_no: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  website_url: string | null;
+  street_address: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  country: string | null;
+  base_currency: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UpdateCompanyDTO {
-  name: string;
-  logoUrl?: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  phone: string;
-  email: string;
-  website: string;
-  taxRegistrationNumber: string;
-  businessRegistrationNumber: string;
-  currency: string;
-}
-
-export interface LogoUploadResponse {
-  logoUrl: string;
-  filename: string;
+  legal_name?: string;
+  logo_url?: string | null;
+  business_registration_no?: string | null;
+  tax_registration_no?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  website_url?: string | null;
+  street_address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  base_currency?: string;
 }

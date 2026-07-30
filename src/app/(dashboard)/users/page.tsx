@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { UsersPage } from "@/features/admin";
 
-export default function UsersLegacyPage() {
-  redirect("/admin/users");
+export const metadata = {
+  title: "User Management | SIMS Lite",
+  description: "Manage system users, roles, and access permissions in SIMS Lite.",
+};
+
+export default function AppUsersPage() {
+  return <UsersPage />;
 }

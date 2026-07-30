@@ -33,6 +33,7 @@ import {
 import { cn } from "@/utils/cn";
 import { useAuthStore } from "@/stores/auth.store";
 import { useSidebarStore } from "@/stores/sidebar.store";
+import { useSystemSettingsStore } from "@/stores/settings.store";
 import { canAccessAny } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth";
 import type { Permission } from "@/lib/auth/permissions";
@@ -135,11 +136,9 @@ const ADMIN_GROUP: NavGroup = {
   icon: ShieldCheck,
   permissions: ["settings.view"],
   items: [
-    { label: "Users", href: "/admin/users", icon: Users, permissions: ["users.view"] },
     { label: "Company Profile", href: "/admin/company", icon: Building2, permissions: ["settings.edit"] },
     { label: "System Settings", href: "/admin/settings", icon: Settings, permissions: ["settings.view"] },
     { label: "Email Config", href: "/admin/email", icon: Mail, permissions: ["settings.edit"] },
-    { label: "Numbering Sequences", href: "/admin/sequences", icon: Hash, permissions: ["settings.edit"] },
     { label: "Activity Log", href: "/admin/activity", icon: Activity, permissions: ["settings.view"] },
     { label: "Audit Trail", href: "/admin/audit", icon: FileCheck, permissions: ["settings.view"] },
   ],
@@ -215,10 +214,11 @@ function AdminNavGroup({ group, collapsed, role, onClick }: AdminNavGroupProps) 
   if (visibleItems.length === 0) return null;
 
   if (collapsed) {
+    const firstHref = visibleItems[0]?.href || "/admin/company";
     return (
       <li>
         <Link
-          href="/admin/users"
+          href={firstHref}
           title="Administration"
           className={cn(
             "flex items-center justify-center px-2 py-2 text-sm font-medium transition-colors",
@@ -282,6 +282,7 @@ function AdminNavGroup({ group, collapsed, role, onClick }: AdminNavGroupProps) 
 export function AppSidebar() {
   const { role } = useAuthStore();
   const { isCollapsed, isMobileOpen, toggle, setMobileOpen } = useSidebarStore();
+  const { appTitle, logoUrl } = useSystemSettingsStore();
 
   const visibleItems = React.useMemo(() => {
     if (!role) return [];
@@ -328,11 +329,21 @@ export function AppSidebar() {
         >
           {!isCollapsed && (
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center bg-primary">
-                <span className="text-xs font-bold text-primary-foreground">S</span>
+              <div className={cn(
+                "flex h-7 w-7 items-center justify-center overflow-hidden shrink-0",
+                logoUrl ? "bg-transparent" : "bg-primary"
+              )}>
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoUrl} alt={appTitle} className="h-full w-full object-contain p-0.5 bg-transparent" />
+                ) : (
+                  <span className="text-xs font-bold text-primary-foreground">
+                    {appTitle.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
-              <span className="text-sm font-semibold text-sidebar-foreground">
-                SIMS Lite
+              <span className="text-sm font-semibold text-sidebar-foreground truncate max-w-[150px]">
+                {appTitle}
               </span>
             </Link>
           )}

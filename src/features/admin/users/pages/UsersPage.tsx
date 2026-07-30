@@ -3,7 +3,6 @@
 import React from "react";
 import { UserPlus, Users as UsersIcon } from "lucide-react";
 import { PermissionGuard } from "../../shared/components/PermissionGuard";
-import { AdminNavTabs } from "../../shared/components/AdminNavTabs";
 import { UserList } from "../components/UserList";
 import { UserFormDialog } from "../components/UserFormDialog";
 import { UserDetailsModal } from "../components/UserDetailsModal";
@@ -98,10 +97,6 @@ export function UsersPage() {
             Add New User
           </button>
         </div>
-
-        {/* Subnav Tabs */}
-        <AdminNavTabs />
-
         {/* User List Table */}
         <UserList
           users={data?.data || []}

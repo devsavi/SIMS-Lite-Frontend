@@ -24,16 +24,3 @@ export function useUpdateCompanyProfile() {
     },
   });
 }
-
-export function useUploadCompanyLogo() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (file: File) => companyApi.uploadLogo(file),
-    onSuccess: (result) => {
-      queryClient.setQueryData(companyKeys.profile, (old: any) =>
-        old ? { ...old, logoUrl: result.logoUrl } : old
-      );
-      queryClient.invalidateQueries({ queryKey: companyKeys.profile });
-    },
-  });
-}

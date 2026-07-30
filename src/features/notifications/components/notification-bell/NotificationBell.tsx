@@ -118,7 +118,7 @@ export function NotificationBell() {
         <PopoverContent
           align="end"
           sideOffset={8}
-          className="p-0 shadow-xl"
+          className="p-0 shadow-xl w-[calc(100vw-32px)] sm:w-[380px]"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <NotificationPanel onClose={() => setOpen(false)} />

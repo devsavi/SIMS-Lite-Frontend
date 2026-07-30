@@ -1,28 +1,25 @@
 "use client";
 
 import React from "react";
-import { Sliders, Settings, Archive, ShoppingCart, Bell, FileText } from "lucide-react";
+import { Sliders, Settings, Archive, Hash } from "lucide-react";
 import { PermissionGuard } from "../../shared/components/PermissionGuard";
 import { AdminNavTabs } from "../../shared/components/AdminNavTabs";
 import { GeneralSettingsForm } from "../components/GeneralSettingsForm";
 import { InventorySettingsForm } from "../components/InventorySettingsForm";
-import { ProcurementSettingsForm } from "../components/ProcurementSettingsForm";
-import { NotificationSettingsForm } from "../components/NotificationSettingsForm";
-import { ReportSettingsForm } from "../components/ReportSettingsForm";
+import { NumberingSettingsForm } from "../components/NumberingSettingsForm";
 import { UnsavedChangesDialog } from "../components/UnsavedChangesDialog";
-import { useSystemSettings, useUpdateSettingsSection } from "../hooks/use-system-settings";
+import { useSystemSettings, useUpdateSystemSettings } from "../hooks/use-system-settings";
+import type { GeneralSettings, InventorySettings, NumberingSettings } from "../types";
 import { cn } from "@/utils/cn";
 
-type SettingsSection = "general" | "inventory" | "procurement" | "notifications" | "reports";
+type SettingsSection = "general" | "inventory" | "numbering";
 
 export function SystemSettingsPage() {
   const { data: config, isLoading } = useSystemSettings();
-  const updateSectionMutation = useUpdateSettingsSection();
+  const updateMutation = useUpdateSystemSettings();
 
   const [activeSection, setActiveSection] = React.useState<SettingsSection>("general");
   const [isDirty, setIsDirty] = React.useState(false);
-
-  // Unsaved changes dialog state
   const [pendingSection, setPendingSection] = React.useState<SettingsSection | null>(null);
 
   const handleSectionClick = (section: SettingsSection) => {
@@ -42,8 +39,16 @@ export function SystemSettingsPage() {
     }
   };
 
-  const handleSaveSection = async (section: SettingsSection, data: any) => {
-    await updateSectionMutation.mutateAsync({ section, data });
+  const handleSaveGeneral = async (data: GeneralSettings) => {
+    await updateMutation.mutateAsync({ general: data });
+  };
+
+  const handleSaveInventory = async (data: InventorySettings) => {
+    await updateMutation.mutateAsync({ inventory: data });
+  };
+
+  const handleSaveNumbering = async (data: NumberingSettings) => {
+    await updateMutation.mutateAsync({ numbering: data });
   };
 
   return (
@@ -53,10 +58,10 @@ export function SystemSettingsPage() {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
             <Sliders className="h-6 w-6 text-primary" />
-            System Settings & Parameters
+            System Settings
           </h1>
           <p className="text-sm text-muted-foreground">
-            Configure global operating rules, inventory thresholds, procurement limits, and system parameters.
+            Configure global operating rules, inventory thresholds, and document numbering sequences.
           </p>
         </div>
 
@@ -80,7 +85,7 @@ export function SystemSettingsPage() {
                 )}
               >
                 <Settings className="h-4 w-4 shrink-0" />
-                General System
+                General Settings
               </button>
 
               <button
@@ -94,49 +99,21 @@ export function SystemSettingsPage() {
                 )}
               >
                 <Archive className="h-4 w-4 shrink-0" />
-                Inventory & Stock
+                Inventory Settings
               </button>
 
               <button
                 type="button"
-                onClick={() => handleSectionClick("procurement")}
+                onClick={() => handleSectionClick("numbering")}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
-                  activeSection === "procurement"
+                  activeSection === "numbering"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 )}
               >
-                <ShoppingCart className="h-4 w-4 shrink-0" />
-                Procurement & PO
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSectionClick("notifications")}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
-                  activeSection === "notifications"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <Bell className="h-4 w-4 shrink-0" />
-                Notification Alerts
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSectionClick("reports")}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-none px-3 py-2.5 text-xs font-semibold transition-colors text-left",
-                  activeSection === "reports"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <FileText className="h-4 w-4 shrink-0" />
-                Report & Exports
+                <Hash className="h-4 w-4 shrink-0" />
+                Numbering Sequence
               </button>
             </div>
 
@@ -145,8 +122,8 @@ export function SystemSettingsPage() {
               {activeSection === "general" && (
                 <GeneralSettingsForm
                   settings={config.general}
-                  onSave={(data) => handleSaveSection("general", data)}
-                  isSubmitting={updateSectionMutation.isPending}
+                  onSave={handleSaveGeneral}
+                  isSubmitting={updateMutation.isPending}
                   onDirtyChange={setIsDirty}
                 />
               )}
@@ -154,35 +131,17 @@ export function SystemSettingsPage() {
               {activeSection === "inventory" && (
                 <InventorySettingsForm
                   settings={config.inventory}
-                  onSave={(data) => handleSaveSection("inventory", data)}
-                  isSubmitting={updateSectionMutation.isPending}
+                  onSave={handleSaveInventory}
+                  isSubmitting={updateMutation.isPending}
                   onDirtyChange={setIsDirty}
                 />
               )}
 
-              {activeSection === "procurement" && (
-                <ProcurementSettingsForm
-                  settings={config.procurement}
-                  onSave={(data) => handleSaveSection("procurement", data)}
-                  isSubmitting={updateSectionMutation.isPending}
-                  onDirtyChange={setIsDirty}
-                />
-              )}
-
-              {activeSection === "notifications" && (
-                <NotificationSettingsForm
-                  settings={config.notifications}
-                  onSave={(data) => handleSaveSection("notifications", data)}
-                  isSubmitting={updateSectionMutation.isPending}
-                  onDirtyChange={setIsDirty}
-                />
-              )}
-
-              {activeSection === "reports" && (
-                <ReportSettingsForm
-                  settings={config.reports}
-                  onSave={(data) => handleSaveSection("reports", data)}
-                  isSubmitting={updateSectionMutation.isPending}
+              {activeSection === "numbering" && (
+                <NumberingSettingsForm
+                  settings={config.numbering}
+                  onSave={handleSaveNumbering}
+                  isSubmitting={updateMutation.isPending}
                   onDirtyChange={setIsDirty}
                 />
               )}
