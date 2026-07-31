@@ -19,6 +19,7 @@ export function useUsersList(filters?: UserFilterParams) {
     queryKey: adminUsersKeys.list(filters),
     queryFn: () => adminUsersApi.getUsers(filters),
     staleTime: 60 * 1000,
+    retry: 1,
   });
 }
 

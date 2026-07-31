@@ -58,20 +58,14 @@ describe("DashboardRouter", () => {
     expect(screen.getByTestId("admin-dashboard")).toBeInTheDocument();
   });
 
-  it("renders OfficerDashboard for procurement_officer role", () => {
-    setupRole("procurement_officer");
+  it("renders OfficerDashboard for officer role", () => {
+    setupRole("officer");
     render(<DashboardRouter />);
     expect(screen.getByTestId("officer-dashboard")).toBeInTheDocument();
   });
 
-  it("renders OfficerDashboard for warehouse_manager role", () => {
-    setupRole("warehouse_manager");
-    render(<DashboardRouter />);
-    expect(screen.getByTestId("officer-dashboard")).toBeInTheDocument();
-  });
-
-  it("renders StoreKeeperDashboard for stock_clerk role", () => {
-    setupRole("stock_clerk");
+  it("renders StoreKeeperDashboard for store_keeper role", () => {
+    setupRole("store_keeper");
     render(<DashboardRouter />);
     expect(screen.getByTestId("storekeeper-dashboard")).toBeInTheDocument();
   });

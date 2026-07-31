@@ -53,10 +53,21 @@ export const dashboardApi = {
    * Returns KPI statistics.
    */
   getStats: async (params?: DashboardQueryParams): Promise<DashboardStats> => {
-    const res = await get<SuccessResponse<DashboardStats>>(`${BASE}/stats`, {
+    const res = await get<SuccessResponse<any>>(`${BASE}/stats`, {
       params,
     });
-    return res.data;
+    const raw = res.data;
+    return {
+      total_products: raw.master_data?.total_products ?? 0,
+      total_suppliers: raw.master_data?.total_suppliers ?? 0,
+      total_inventory_items: raw.inventory?.total_quantity_on_hand ?? 0,
+      inventory_value: raw.inventory?.total_inventory_value ?? 0,
+      low_stock_count: raw.inventory?.low_stock_items ?? 0,
+      pending_purchase_orders: raw.procurement?.pending_pos ?? 0,
+      pending_grns: raw.procurement?.pending_grns ?? 0,
+      pending_stock_releases: raw.stock_releases?.pending_releases ?? 0,
+      today_stock_releases: raw.stock_releases?.approved_releases ?? 0,
+    };
   },
 
   // ---------------------------------------------------------------------------

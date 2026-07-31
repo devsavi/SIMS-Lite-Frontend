@@ -43,10 +43,27 @@ import type { DashboardQueryParams } from "../types";
 type Period = NonNullable<DashboardQueryParams["period"]>;
 
 export function AdminDashboard() {
-  const [period, setPeriod] = React.useState<Period>("30d");
+  const [period, setPeriod] = React.useState<Period>("today");
+  const [fromDate, setFromDate] = React.useState<string>("");
+  const [toDate, setToDate] = React.useState<string>("");
   const queryClient = useQueryClient();
 
-  const params: DashboardQueryParams = { period };
+  const getIsoDate = (dateStr: string, timeSuffix: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return new Date(dateStr + timeSuffix).toISOString();
+    } catch (e) {
+      return undefined;
+    }
+  };
+
+  const params: DashboardQueryParams = {
+    period,
+    ...(period === "custom" ? {
+      from_date: getIsoDate(fromDate, "T00:00:00"),
+      to_date: getIsoDate(toDate, "T23:59:59.999"),
+    } : {}),
+  };
 
   const statsQuery = useDashboardStats(params);
   const chartsQuery = useDashboardCharts(params);
@@ -76,6 +93,10 @@ export function AdminDashboard() {
           <DashboardFilters
             period={period}
             onPeriodChange={setPeriod}
+            fromDate={fromDate}
+            onFromDateChange={setFromDate}
+            toDate={toDate}
+            onToDateChange={setToDate}
             onRefresh={handleRefresh}
             isRefreshing={isRefreshing}
           />

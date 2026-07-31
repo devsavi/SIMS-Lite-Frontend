@@ -267,5 +267,7 @@ export interface StoreKeeperDashboardData {
 // ---------------------------------------------------------------------------
 
 export interface DashboardQueryParams {
-  period?: "7d" | "30d" | "90d" | "1y";
+  period?: "today" | "week" | "month" | "custom";
+  from_date?: string;
+  to_date?: string;
 }

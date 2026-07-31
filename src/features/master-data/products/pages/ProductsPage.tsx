@@ -6,7 +6,7 @@
  */
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2, RotateCcw, Eye } from "lucide-react";
 import { type SortingState } from "@tanstack/react-table";
 import { useProducts, useDeleteProduct, useRestoreProduct } from "../../hooks/use-products";
@@ -43,6 +43,7 @@ import type { Product, Category, Brand, Supplier } from "../../types";
 
 export function ProductsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // ---- Pagination & search ----
   const [page, setPage] = React.useState(1);
@@ -63,6 +64,14 @@ export function ProductsPage() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Product | null>(null);
+
+  // Automatically open dialog if query param create=true
+  React.useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      setEditingProduct(null);
+      setDialogOpen(true);
+    }
+  }, [searchParams]);
 
   // Derive server-side ordering string
   const ordering = sorting.length > 0

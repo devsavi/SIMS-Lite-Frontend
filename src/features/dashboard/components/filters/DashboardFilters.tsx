@@ -16,15 +16,19 @@ import type { DashboardQueryParams } from "../../types";
 type Period = NonNullable<DashboardQueryParams["period"]>;
 
 const PERIOD_OPTIONS: { value: Period; label: string }[] = [
-  { value: "7d", label: "Last 7 days" },
-  { value: "30d", label: "Last 30 days" },
-  { value: "90d", label: "Last 90 days" },
-  { value: "1y", label: "Last 12 months" },
+  { value: "today", label: "Today" },
+  { value: "week", label: "This Week" },
+  { value: "month", label: "This Month" },
+  { value: "custom", label: "Custom Range" },
 ];
 
 interface DashboardFiltersProps {
   period: Period;
   onPeriodChange: (period: Period) => void;
+  fromDate?: string;
+  onFromDateChange?: (date: string) => void;
+  toDate?: string;
+  onToDateChange?: (date: string) => void;
   onRefresh: () => void;
   isRefreshing?: boolean;
   className?: string;
@@ -33,12 +37,16 @@ interface DashboardFiltersProps {
 export function DashboardFilters({
   period,
   onPeriodChange,
+  fromDate,
+  onFromDateChange,
+  toDate,
+  onToDateChange,
   onRefresh,
   isRefreshing = false,
   className,
 }: DashboardFiltersProps) {
   return (
-    <div className={cn("flex items-center gap-2", className)} role="toolbar" aria-label="Dashboard filters">
+    <div className={cn("flex flex-wrap items-center gap-2", className)} role="toolbar" aria-label="Dashboard filters">
       <Select value={period} onValueChange={(v) => onPeriodChange(v as Period)}>
         <SelectTrigger
           className="h-8 w-[140px] text-sm"
@@ -54,6 +62,26 @@ export function DashboardFilters({
           ))}
         </SelectContent>
       </Select>
+
+      {period === "custom" && (
+        <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
+          <input
+            type="date"
+            value={fromDate || ""}
+            onChange={(e) => onFromDateChange?.(e.target.value)}
+            className="h-8 rounded-none border border-border bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground"
+            aria-label="From Date"
+          />
+          <span className="text-xs text-muted-foreground">to</span>
+          <input
+            type="date"
+            value={toDate || ""}
+            onChange={(e) => onToDateChange?.(e.target.value)}
+            className="h-8 rounded-none border border-border bg-card px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground"
+            aria-label="To Date"
+          />
+        </div>
+      )}
 
       <Button
         variant="outline"

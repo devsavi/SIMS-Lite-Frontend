@@ -5,7 +5,7 @@
  */
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2, RotateCcw, Eye, Mail, Phone } from "lucide-react";
 import { useSuppliers, useDeleteSupplier, useRestoreSupplier } from "../../hooks/use-suppliers";
 import { SupplierFormDialog } from "../components/SupplierFormDialog";
@@ -30,6 +30,7 @@ import type { Supplier } from "../../types";
 
 export function SuppliersPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // ---- State ----
   const [page, setPage] = React.useState(1);
@@ -41,6 +42,14 @@ export function SuppliersPage() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingSupplier, setEditingSupplier] = React.useState<Supplier | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Supplier | null>(null);
+
+  // Automatically open dialog if query param create=true
+  React.useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      setEditingSupplier(null);
+      setDialogOpen(true);
+    }
+  }, [searchParams]);
 
   // ---- Query ----
   const { data, isLoading, error, refetch } = useSuppliers({

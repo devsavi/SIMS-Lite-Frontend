@@ -87,6 +87,12 @@ const NAV_ITEMS: NavItem[] = [
     permissions: ["brands.view"],
   },
   {
+    label: "Units of Measure",
+    href: "/uoms",
+    icon: Hash,
+    permissions: ["products.view"],
+  },
+  {
     label: "Suppliers",
     href: "/suppliers",
     icon: Truck,

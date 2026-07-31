@@ -12,15 +12,15 @@ describe("dashboardKeys", () => {
   });
 
   it("generates a unique overview key per period", () => {
-    const k1 = dashboardKeys.overview({ period: "30d" });
-    const k2 = dashboardKeys.overview({ period: "7d" });
+    const k1 = dashboardKeys.overview({ period: "month" });
+    const k2 = dashboardKeys.overview({ period: "week" });
     expect(k1).not.toEqual(k2);
     expect(k1[0]).toBe("dashboard");
   });
 
   it("generates distinct keys for stats vs charts", () => {
-    const stats = dashboardKeys.stats({ period: "30d" });
-    const charts = dashboardKeys.charts({ period: "30d" });
+    const stats = dashboardKeys.stats({ period: "month" });
+    const charts = dashboardKeys.charts({ period: "month" });
     expect(stats).not.toEqual(charts);
   });
 

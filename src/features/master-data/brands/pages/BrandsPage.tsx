@@ -48,24 +48,48 @@ export function BrandsPage() {
   const columns: ColumnDef<Brand>[] = [
     {
       accessorKey: "name",
-      header: "Name",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-foreground">{row.original.name}</span>
-          {row.original.website_url && (
-            <a
-              href={row.original.website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground"
-              aria-label={`Visit ${row.original.name} website`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          )}
-        </div>
-      ),
+      header: "Brand",
+      cell: ({ row }) => {
+        const logoUrl = row.original.logo_url;
+        const websiteUrl = row.original.website_url;
+        const name = row.original.name;
+
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border bg-muted overflow-hidden">
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt={`${name} logo`} className="h-full w-full object-contain p-1" />
+              ) : (
+                <span className="text-xs font-bold text-muted-foreground">
+                  {name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="font-medium text-foreground">{name}</span>
+              {websiteUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="h-6 px-2 py-0 w-fit text-[10px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <a
+                    href={websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 font-normal text-muted-foreground hover:text-foreground"
+                  >
+                    Visit Website <ExternalLink className="h-2.5 w-2.5" />
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "description",

@@ -85,7 +85,7 @@ export function NotificationBell() {
         {announcement}
       </div>
 
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           <Button
             id="notification-bell"

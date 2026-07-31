@@ -59,7 +59,7 @@ const SIZE_OPTIONS = [10, 20, 50];
 
 export function AuditLogFilters({ filters, onFilterChange, onRefresh }: AuditLogFiltersProps) {
   // Fetch all users for the user dropdown
-  const { data: usersData } = useUsersList({ page: 1, limit: 200 });
+  const { data: usersData, isLoading: usersLoading } = useUsersList({ page: 1, limit: 100 });
   const users = usersData?.data ?? [];
 
   const update = (patch: Partial<AuditLogFilterParams>) =>
@@ -180,9 +180,10 @@ export function AuditLogFilters({ filters, onFilterChange, onRefresh }: AuditLog
         <Select
           value={filters.user_id ?? "__all__"}
           onValueChange={(v) => update({ user_id: v === "__all__" ? undefined : v })}
+          disabled={usersLoading}
         >
           <SelectTrigger className="h-9 w-52 text-sm" aria-label="Filter by user">
-            <SelectValue placeholder="All Users" />
+            <SelectValue placeholder={usersLoading ? "Loading users…" : "All Users"} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">All Users</SelectItem>

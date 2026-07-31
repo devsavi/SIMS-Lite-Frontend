@@ -54,9 +54,9 @@ describe("AdminQuickActions", () => {
   });
 
   it("hides actions for roles without permission", () => {
-    setupRole("stock_clerk");
+    setupRole("store_keeper");
     render(<AdminQuickActions />);
-    // stock_clerk has no products.create permission
+    // store_keeper has no products.create permission
     expect(screen.queryByText("Create Product")).not.toBeInTheDocument();
     // but has inventory.view
     expect(screen.getByText("View Inventory")).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe("OfficerQuickActions", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("renders officer actions", () => {
-    setupRole("procurement_officer");
+    setupRole("officer");
     render(<OfficerQuickActions />);
     expect(screen.getByText("Create Purchase Order")).toBeInTheDocument();
     expect(screen.getByText("Receive Goods")).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe("StoreKeeperQuickActions", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("renders store keeper actions", () => {
-    setupRole("stock_clerk");
+    setupRole("store_keeper");
     render(<StoreKeeperQuickActions />);
     expect(screen.getByText("Stock Adjustment")).toBeInTheDocument();
     expect(screen.getByText("Stock Release")).toBeInTheDocument();
