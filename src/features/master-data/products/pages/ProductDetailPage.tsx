@@ -38,7 +38,7 @@ import {
 } from "@/components/common";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { formatDate } from "@/utils/format";
-
+import { usePageTitle } from "@/hooks/use-page-title";
 interface ProductDetailPageProps {
   productId: string;
 }
@@ -98,6 +98,8 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
   const deleteMutation = useDeleteProduct();
   const restoreMutation = useRestoreProduct();
 
+  usePageTitle(product?.name);
+
   if (isLoading) return <ProductDetailSkeleton />;
   if (error) return (
     <PageContainer>
@@ -121,7 +123,6 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "Dashboard", href: "/dashboard" },
               { label: "Products", href: "/products" },
               { label: product.name },
             ]}

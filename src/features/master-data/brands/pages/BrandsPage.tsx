@@ -8,7 +8,6 @@ import { Button } from "@/app/components/ui/button";
 import {
   PageContainer,
   PageHeader,
-  Breadcrumb,
   DataTable,
   SearchInput,
   Toolbar,
@@ -162,9 +161,6 @@ export function BrandsPage() {
       <PageHeader
         title="Brands"
         description="Manage product brands."
-        breadcrumb={
-          <Breadcrumb items={[{ label: "Dashboard", href: "/dashboard" }, { label: "Brands" }]} />
-        }
         actions={
           <PermissionGuard permission="brands.create">
             <Button onClick={() => { setEditingBrand(null); setDialogOpen(true); }}>

@@ -12,7 +12,6 @@ import { Button } from "@/app/components/ui/button";
 import {
   PageContainer,
   PageHeader,
-  Breadcrumb,
   DataTable,
   SearchInput,
   Toolbar,
@@ -141,14 +140,6 @@ export function CategoriesPage() {
       <PageHeader
         title="Categories"
         description="Manage product categories and hierarchy."
-        breadcrumb={
-          <Breadcrumb
-            items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "Categories" },
-            ]}
-          />
-        }
         actions={
           <PermissionGuard permission="categories.create">
             <Button

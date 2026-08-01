@@ -62,16 +62,22 @@ function getActionIcon(action: string) {
   }
 }
 
-function DetailLines({ detail }: { detail: Record<string, string> | null }) {
+function formatDetailValue(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+}
+
+function DetailLines({ detail }: { detail: Record<string, unknown> | null }) {
   if (!detail) return null;
-  const entries = Object.entries(detail).filter(([, v]) => v !== "");
+  const entries = Object.entries(detail).filter(([, v]) => formatDetailValue(v) !== "");
   if (entries.length === 0) return null;
   return (
     <div className="mt-0.5 flex flex-wrap gap-x-2.5 gap-y-0.5">
       {entries.map(([k, v]) => (
         <span key={k} className="text-[10px] text-muted-foreground font-mono">
           <span className="text-foreground/50">{k}:</span>{" "}
-          <span className="text-foreground/80">{v}</span>
+          <span className="text-foreground/80">{formatDetailValue(v)}</span>
         </span>
       ))}
     </div>

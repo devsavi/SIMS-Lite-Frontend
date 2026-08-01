@@ -28,6 +28,7 @@ import { StockAdjustmentDialog } from "../components/adjustment-dialog/StockAdju
 import { useInventoryDetail, useProductLedger } from "../hooks/use-inventory";
 import { formatQuantity, formatCurrency } from "../utils/inventory-utils";
 import { useAuthStore } from "@/stores/auth.store";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export interface InventoryDetailPageProps {
   productId: string;
@@ -57,6 +58,8 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
   } = useProductLedger(productId, 1, 10);
 
   const product = inventoryItem?.product;
+
+  usePageTitle(product?.name);
 
   // Compute transaction statistics from ledger
   const stats = React.useMemo(() => {

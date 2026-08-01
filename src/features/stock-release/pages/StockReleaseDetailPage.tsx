@@ -46,6 +46,7 @@ import {
   canCancelRelease,
 } from "../utils/stock-release-utils";
 import { useAuthStore } from "@/stores/auth.store";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export interface StockReleaseDetailPageProps {
   id: string;
@@ -57,6 +58,8 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
   const userRole = user?.role;
 
   const { data: release, isLoading, error, refetch } = useStockReleaseDetail(id);
+
+  usePageTitle(release ? (release.release_number || `REL-${release.id.substring(0, 8)}`) : null);
 
   const submitMutation = useSubmitStockRelease();
   const approveMutation = useApproveStockRelease();

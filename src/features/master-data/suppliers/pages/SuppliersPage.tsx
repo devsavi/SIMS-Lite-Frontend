@@ -13,7 +13,6 @@ import { Button } from "@/app/components/ui/button";
 import {
   PageContainer,
   PageHeader,
-  Breadcrumb,
   DataTable,
   SearchInput,
   Toolbar,
@@ -203,14 +202,6 @@ export function SuppliersPage() {
       <PageHeader
         title="Suppliers"
         description="Manage your supplier network."
-        breadcrumb={
-          <Breadcrumb
-            items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "Suppliers" },
-            ]}
-          />
-        }
         actions={
           <PermissionGuard permission="suppliers.create">
             <Button

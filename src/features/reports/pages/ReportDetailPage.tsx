@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
 import { Breadcrumb } from "@/components/common/breadcrumb";
 import { useAuthStore } from "@/stores/auth.store";
+import { usePageTitle } from "@/hooks/use-page-title";
 import {
   useReportCharts,
   useReportData,
@@ -83,6 +84,8 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
   const title = reportMeta?.title || `${reportType.toUpperCase()} Report`;
   const description = reportMeta?.description || "Detailed data report view and analysis.";
 
+  usePageTitle(title);
+
   return (
     <PageContainer>
       <PageHeader
@@ -91,7 +94,6 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "Dashboard", href: "/dashboard" },
               { label: "Reports", href: "/reports" },
               { label: title },
             ]}

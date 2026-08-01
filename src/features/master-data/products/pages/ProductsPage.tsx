@@ -25,7 +25,6 @@ import {
 import {
   PageContainer,
   PageHeader,
-  Breadcrumb,
   DataTable,
   SearchInput,
   Toolbar,
@@ -268,14 +267,6 @@ export function ProductsPage() {
       <PageHeader
         title="Products"
         description="Manage your product catalogue."
-        breadcrumb={
-          <Breadcrumb
-            items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "Products" },
-            ]}
-          />
-        }
         actions={
           <PermissionGuard permission="products.create">
             <Button

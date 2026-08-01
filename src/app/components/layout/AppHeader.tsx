@@ -15,6 +15,7 @@ import {
 } from "@/app/components/ui/dropdown-menu";
 import { NotificationBell } from "@/features/notifications";
 import { formatDate } from "@/utils/format";
+import { usePageTitleStore } from "@/stores/page-title.store";
 
 const ROUTE_LABELS: Record<string, { parent?: string; title: string }> = {
   "/dashboard": { title: "Dashboard" },
@@ -162,10 +163,13 @@ function DateTimeShower() {
 
 export function AppHeader() {
   const pathname = usePathname();
+  const dynamicTitle = usePageTitleStore((s) => s.dynamicTitle);
   const safePathname = pathname || "/";
   const routeInfo = ROUTE_LABELS[safePathname] ?? {
     title: safePathname.split("/").filter(Boolean).pop()?.replace(/-/g, " ") ?? "Dashboard",
   };
+
+  const displayTitle = dynamicTitle ?? routeInfo.title;
 
   return (
     <header
@@ -182,7 +186,7 @@ export function AppHeader() {
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" aria-hidden="true" />
             </>
           )}
-          <span className="font-semibold text-foreground">{routeInfo.title}</span>
+          <span className="font-semibold text-foreground">{displayTitle}</span>
         </div>
       </div>
 

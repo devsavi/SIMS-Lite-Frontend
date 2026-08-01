@@ -16,7 +16,6 @@ import {
   Phone,
   MapPin,
   User,
-  Package,
   StickyNote,
 } from "lucide-react";
 import { useSupplier, useDeleteSupplier, useRestoreSupplier } from "../../hooks/use-suppliers";
@@ -35,6 +34,7 @@ import {
 } from "@/components/common";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { formatDate } from "@/utils/format";
+import { usePageTitle } from "@/hooks/use-page-title";
 import type { Supplier } from "../../types";
 
 interface SupplierDetailPageProps {
@@ -102,6 +102,8 @@ export function SupplierDetailPage({ supplierId }: SupplierDetailPageProps) {
   const deleteMutation = useDeleteSupplier();
   const restoreMutation = useRestoreSupplier();
 
+  usePageTitle(supplier?.company_name);
+
   if (isLoading) return <SupplierDetailSkeleton />;
   if (error) return (
     <PageContainer>
@@ -123,7 +125,6 @@ export function SupplierDetailPage({ supplierId }: SupplierDetailPageProps) {
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "Dashboard", href: "/dashboard" },
               { label: "Suppliers", href: "/suppliers" },
               { label: supplier.company_name },
             ]}
@@ -135,9 +136,6 @@ export function SupplierDetailPage({ supplierId }: SupplierDetailPageProps) {
               <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
               Back
             </Button>
-            <div className="flex items-center gap-1">
-              <StatusBadge variant={supplier.is_active ? "active" : "inactive"} dot />
-            </div>
             <PermissionGuard permission="suppliers.edit">
               {supplier.is_active ? (
                 <Button size="sm" onClick={() => setEditOpen(true)}>
@@ -272,22 +270,6 @@ export function SupplierDetailPage({ supplierId }: SupplierDetailPageProps) {
           </CardContent>
         </Card>
 
-        {/* Products — placeholder for future integration */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Package className="h-4 w-4" aria-hidden="true" />
-              Products
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {supplier.product_count != null
-                ? `${supplier.product_count} product${supplier.product_count === 1 ? "" : "s"} linked to this supplier.`
-                : "Product listing will be available in a future update."}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Edit dialog */}

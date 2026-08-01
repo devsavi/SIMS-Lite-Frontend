@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { UserPlus, Users as UsersIcon } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { PermissionGuard } from "../../shared/components/PermissionGuard";
 import { UserList } from "../components/UserList";
 import { UserFormDialog } from "../components/UserFormDialog";
@@ -134,8 +134,7 @@ export function UsersPage() {
         {/* Page Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
-              <UsersIcon className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               User Management
             </h1>
             <p className="text-sm text-muted-foreground">

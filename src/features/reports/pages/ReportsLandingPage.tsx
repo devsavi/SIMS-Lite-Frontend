@@ -4,7 +4,6 @@ import * as React from "react";
 import { BarChart2, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { useAuthStore } from "@/stores/auth.store";
 import { useReportsMetadata } from "../hooks/use-reports";
 import { ReportCard } from "../components/report-cards/ReportCard";
@@ -31,14 +30,6 @@ export function ReportsLandingPage() {
       <PageHeader
         title="Reports & Analytics"
         description="Comprehensive real-time reporting, data exports, print views, and analytical summaries."
-        breadcrumb={
-          <Breadcrumb
-            items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "Reports" },
-            ]}
-          />
-        }
       />
 
       {isLoading && (

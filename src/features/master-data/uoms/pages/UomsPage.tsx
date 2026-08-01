@@ -8,7 +8,6 @@ import { Button } from "@/app/components/ui/button";
 import {
   PageContainer,
   PageHeader,
-  Breadcrumb,
   DataTable,
   SearchInput,
   Toolbar,
@@ -129,9 +128,6 @@ export function UomsPage() {
       <PageHeader
         title="Units of Measure"
         description="Manage units used for product quantities."
-        breadcrumb={
-          <Breadcrumb items={[{ label: "Dashboard", href: "/dashboard" }, { label: "Units of Measure" }]} />
-        }
         actions={
           <PermissionGuard permission="products.create">
             <Button onClick={() => { setEditingUom(null); setDialogOpen(true); }}>
