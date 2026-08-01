@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw } from "lucide-react";
 import { useUoms, useDeleteUom, useRestoreUom } from "../../hooks/use-uoms";
 import { UomFormDialog } from "../components/UomFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -16,6 +16,8 @@ import {
   StatusBadge,
   DeleteDialog,
   PermissionGuard,
+  RowActionsMenu,
+  RowActionsMenuItem,
 } from "@/components/common";
 import type { ColumnDef } from "@/components/common/data-table";
 import { formatDate } from "@/utils/format";
@@ -84,40 +86,40 @@ export function UomsPage() {
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <PermissionGuard permission="products.edit">
-            {row.original.is_active ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => { setEditingUom(row.original); setDialogOpen(true); }}
-                aria-label={`Edit ${row.original.name}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => restoreMutation.mutate(row.original.id)}
-                disabled={restoreMutation.isPending}
-                aria-label={`Restore ${row.original.name}`}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            )}
+            <button
+              type="button"
+              onClick={() => { setEditingUom(row.original); setDialogOpen(true); }}
+              title="Edit"
+              aria-label={`Edit ${row.original.name}`}
+              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
           </PermissionGuard>
-          <PermissionGuard permission="products.delete">
-            {row.original.is_active && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDeleteTarget(row.original)}
-                aria-label={`Delete ${row.original.name}`}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+          <RowActionsMenu label={`More actions for ${row.original.name}`}>
+            {!row.original.is_active && (
+              <PermissionGuard permission="products.edit">
+                <RowActionsMenuItem
+                  icon={<RotateCcw className="h-3.5 w-3.5" />}
+                  onClick={() => restoreMutation.mutate(row.original.id)}
+                  disabled={restoreMutation.isPending}
+                >
+                  Restore
+                </RowActionsMenuItem>
+              </PermissionGuard>
             )}
-          </PermissionGuard>
+            <PermissionGuard permission="products.delete">
+              {row.original.is_active && (
+                <RowActionsMenuItem
+                  icon={<Trash2 className="h-3.5 w-3.5" />}
+                  onClick={() => setDeleteTarget(row.original)}
+                  destructive
+                >
+                  Delete
+                </RowActionsMenuItem>
+              )}
+            </PermissionGuard>
+          </RowActionsMenu>
         </div>
       ),
     },

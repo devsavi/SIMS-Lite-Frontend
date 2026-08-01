@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { format } from "date-fns";
 import { Eye, SlidersHorizontal } from "lucide-react";
 import { DataTable, type ColumnDef } from "@/components/common/data-table";
 import { Button } from "@/app/components/ui/button";
@@ -47,22 +46,32 @@ export function InventoryTable({
     () => [
       {
         accessorKey: "product.name",
-        header: "Product / SKU",
+        header: "Product",
         cell: ({ row }) => {
           const item = row.original;
           const product = item.product;
           return (
-            <div className="flex flex-col gap-0.5">
-              <Link
-                href={`/inventory/${product?.id ?? item.id}`}
-                className="font-medium text-primary hover:underline line-clamp-1"
-              >
-                {product?.name ?? "Unknown Product"}
-              </Link>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>SKU: {product?.sku ?? "N/A"}</span>
-                {product?.barcode && <span>• Barcode: {product.barcode}</span>}
-              </div>
+            <Link
+              href={`/inventory/${product?.id ?? item.id}`}
+              className="font-medium text-primary hover:underline line-clamp-1"
+            >
+              {product?.name ?? "Unknown Product"}
+            </Link>
+          );
+        },
+      },
+      {
+        id: "sku_barcode",
+        header: "SKU & Barcode",
+        cell: ({ row }) => {
+          const product = row.original.product;
+          return (
+            <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+              <span>SKU: {product?.sku ?? "N/A"}</span>
+              {product?.barcode
+                ? <span>Barcode: {product.barcode}</span>
+                : <span className="italic">No barcode</span>
+              }
             </div>
           );
         },
@@ -146,23 +155,6 @@ export function InventoryTable({
               {formatCurrency(row.original.stock_value)}
             </span>
           );
-        },
-      },
-      {
-        accessorKey: "last_updated_at",
-        header: "Last Updated",
-        cell: ({ row }) => {
-          const dt = row.original.last_updated_at || row.original.updated_at;
-          if (!dt) return <span className="text-xs text-muted-foreground">—</span>;
-          try {
-            return (
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(dt), "MMM dd, yyyy HH:mm")}
-              </span>
-            );
-          } catch {
-            return <span className="text-xs text-muted-foreground">{dt}</span>;
-          }
         },
       },
       {

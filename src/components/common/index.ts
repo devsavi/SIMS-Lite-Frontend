@@ -45,6 +45,7 @@ export * from "./date-range-picker";
 // Actions
 export * from "./export-button";
 export * from "./copy-button";
+export * from "./row-actions-menu";
 
 // File upload
 export * from "./file-upload";

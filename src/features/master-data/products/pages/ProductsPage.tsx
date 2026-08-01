@@ -10,12 +10,12 @@ import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
-  Pencil,
+  Edit2,
   Trash2,
   Eye,
-  Download,
   Upload,
   FileSpreadsheet,
+  Barcode,
 } from "lucide-react";
 import { type SortingState } from "@tanstack/react-table";
 import {
@@ -49,6 +49,8 @@ import {
   DeleteDialog,
   PermissionGuard,
   FilterBar,
+  RowActionsMenu,
+  RowActionsMenuItem,
 } from "@/components/common";
 import type { ColumnDef } from "@/components/common/data-table";
 import { formatDate, formatCurrency } from "@/utils/format";
@@ -268,51 +270,50 @@ export function ProductsPage() {
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <PermissionGuard permission="products.view">
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={() => router.push(`/products/${row.original.id}`)}
+              title="View details"
               aria-label={`View ${row.original.name}`}
+              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <Eye className="h-4 w-4" />
-            </Button>
+            </button>
           </PermissionGuard>
           <PermissionGuard permission="products.edit">
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={() => { setEditingProduct(row.original); setDialogOpen(true); }}
+              title="Edit"
               aria-label={`Edit ${row.original.name}`}
+              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
-              <Pencil className="h-4 w-4" />
-            </Button>
+              <Edit2 className="h-4 w-4" />
+            </button>
           </PermissionGuard>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDownloadBarcode(row.original)}
-            aria-label={`Download barcode for ${row.original.name}`}
-            title="Download barcode"
-            disabled={downloadBarcode.isPending}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-          <PermissionGuard permission="products.delete">
-            {row.original.is_active && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDeleteTarget(row.original)}
-                aria-label={`Delete ${row.original.name}`}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </PermissionGuard>
+          <RowActionsMenu label={`More actions for ${row.original.name}`}>
+            <RowActionsMenuItem
+              icon={<Barcode className="h-3.5 w-3.5" />}
+              onClick={() => handleDownloadBarcode(row.original)}
+              disabled={downloadBarcode.isPending}
+            >
+              Download Barcode
+            </RowActionsMenuItem>
+            <PermissionGuard permission="products.delete">
+              {row.original.is_active && (
+                <RowActionsMenuItem
+                  icon={<Trash2 className="h-3.5 w-3.5" />}
+                  onClick={() => setDeleteTarget(row.original)}
+                  destructive
+                >
+                  Delete
+                </RowActionsMenuItem>
+              )}
+            </PermissionGuard>
+          </RowActionsMenu>
         </div>
       ),
-      size: 160,
+      size: 120,
     },
   ];
 

@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, RotateCcw, Eye, Mail, Phone } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, Eye, Mail, Phone } from "lucide-react";
 import { useSuppliers, useDeleteSupplier, useRestoreSupplier } from "../../hooks/use-suppliers";
 import { SupplierFormDialog } from "../components/SupplierFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -21,6 +21,8 @@ import {
   StatusBadge,
   DeleteDialog,
   PermissionGuard,
+  RowActionsMenu,
+  RowActionsMenuItem,
 } from "@/components/common";
 import type { ColumnDef } from "@/components/common/data-table";
 import { formatDate } from "@/utils/format";
@@ -148,50 +150,51 @@ export function SuppliersPage() {
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <PermissionGuard permission="suppliers.view">
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={() => router.push(`/suppliers/${row.original.id}`)}
+              title="View details"
               aria-label={`View ${row.original.company_name}`}
+              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <Eye className="h-4 w-4" />
-            </Button>
+            </button>
           </PermissionGuard>
           <PermissionGuard permission="suppliers.edit">
-            {row.original.is_active ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => { setEditingSupplier(row.original); setDialogOpen(true); }}
-                aria-label={`Edit ${row.original.company_name}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => restoreMutation.mutate(row.original.id)}
-                aria-label={`Restore ${row.original.company_name}`}
-                disabled={restoreMutation.isPending}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            )}
+            <button
+              type="button"
+              onClick={() => { setEditingSupplier(row.original); setDialogOpen(true); }}
+              title="Edit"
+              aria-label={`Edit ${row.original.company_name}`}
+              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
           </PermissionGuard>
-          <PermissionGuard permission="suppliers.delete">
-            {row.original.is_active && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDeleteTarget(row.original)}
-                aria-label={`Delete ${row.original.company_name}`}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+          <RowActionsMenu label={`More actions for ${row.original.company_name}`}>
+            {!row.original.is_active && (
+              <PermissionGuard permission="suppliers.edit">
+                <RowActionsMenuItem
+                  icon={<RotateCcw className="h-3.5 w-3.5" />}
+                  onClick={() => restoreMutation.mutate(row.original.id)}
+                  disabled={restoreMutation.isPending}
+                >
+                  Restore
+                </RowActionsMenuItem>
+              </PermissionGuard>
             )}
-          </PermissionGuard>
+            <PermissionGuard permission="suppliers.delete">
+              {row.original.is_active && (
+                <RowActionsMenuItem
+                  icon={<Trash2 className="h-3.5 w-3.5" />}
+                  onClick={() => setDeleteTarget(row.original)}
+                  destructive
+                >
+                  Delete
+                </RowActionsMenuItem>
+              )}
+            </PermissionGuard>
+          </RowActionsMenu>
         </div>
       ),
     },
