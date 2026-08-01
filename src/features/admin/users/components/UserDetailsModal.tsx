@@ -18,9 +18,10 @@ import {
 } from "lucide-react";
 import type { UserItem } from "../types";
 import { useUserDetail, useUserAuditLogs } from "../hooks/use-admin-users";
-import { getRoleBadgeClass, getStatusBadgeClass, formatDateTime } from "../utils/user-helpers";
+import { getRoleBadgeClass, formatDateTime } from "../utils/user-helpers";
 import { ROLE_LABELS } from "@/lib/auth";
 import { cn } from "@/utils/cn";
+import { StatusBadge } from "@/components/common/status-badge";
 import type {
   ActivityPeriod,
   ActivityAction,
@@ -245,9 +246,19 @@ export function UserDetailsModal({ user, isOpen, onClose }: UserDetailsModalProp
                   <div className="space-y-1">
                     <span className="text-xs font-medium text-muted-foreground">Account Status</span>
                     <div>
-                      <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-medium", getStatusBadgeClass(displayData.status))}>
-                        {displayData.status}
-                      </span>
+                      <StatusBadge
+                        variant={
+                          displayData.status === "ACTIVE" ? "active"
+                          : displayData.status === "INACTIVE" ? "inactive"
+                          : "pending"
+                        }
+                        label={
+                          displayData.status === "ACTIVE" ? "Active"
+                          : displayData.status === "INACTIVE" ? "Inactive"
+                          : "Pending"
+                        }
+                        dot
+                      />
                     </div>
                   </div>
 

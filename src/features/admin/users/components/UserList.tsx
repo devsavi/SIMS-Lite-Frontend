@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { ROLE_LABELS, type UserRole } from "@/lib/auth";
 import type { UserItem, UserStatus, UserFilterParams } from "../types";
-import { getRoleBadgeClass, getStatusBadgeClass, formatDateTime } from "../utils/user-helpers";
+import { getRoleBadgeClass, formatDateTime } from "../utils/user-helpers";
 import { cn } from "@/utils/cn";
 import {
   Select,
@@ -25,6 +25,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
+import { StatusBadge } from "@/components/common/status-badge";
+
+const STATUS_VARIANT_MAP: Record<UserStatus, "active" | "inactive" | "pending"> = {
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  PENDING: "pending",
+};
+
+const STATUS_LABEL_MAP: Record<UserStatus, string> = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  PENDING: "Pending",
+};
 
 /** Renders a dropdown menu via a portal so it escapes any overflow/scroll containers. */
 function DropdownPortal({
@@ -210,9 +223,11 @@ export function UserList({
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn("inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-medium", getStatusBadgeClass(user.status))}>
-                      {user.status}
-                    </span>
+                    <StatusBadge
+                      variant={STATUS_VARIANT_MAP[user.status] ?? "default"}
+                      label={STATUS_LABEL_MAP[user.status] ?? user.status}
+                      dot
+                    />
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {formatDateTime(user.lastLogin)}

@@ -47,10 +47,10 @@ export function StockStatusBadge({
         <Icon
           className={`h-3.5 w-3.5 shrink-0 ${
             status === "in_stock"
-              ? "text-emerald-600"
+              ? "text-[#0F9D58] dark:text-[#4ADE80]"
               : status === "low_stock"
-              ? "text-amber-600"
-              : "text-rose-600"
+              ? "text-[#B9791A] dark:text-[#FBBF24]"
+              : "text-[#C0362C] dark:text-[#F87171]"
           }`}
           aria-hidden="true"
         />

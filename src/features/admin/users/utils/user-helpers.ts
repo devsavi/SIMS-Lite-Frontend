@@ -18,11 +18,11 @@ export function getRoleBadgeClass(role: UserRole): string {
 export function getStatusBadgeClass(status: UserStatus): string {
   switch (status) {
     case "ACTIVE":
-      return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200";
+      return "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]";
     case "INACTIVE":
-      return "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200";
+      return "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]";
     case "PENDING":
-      return "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200";
+      return "bg-[#FFF3D6] text-[#B9791A] border-[#FCE3A0] dark:bg-[rgba(251,191,36,0.15)] dark:text-[#FBBF24] dark:border-[rgba(251,191,36,0.4)]";
     default:
       return "bg-muted text-muted-foreground border-border";
   }

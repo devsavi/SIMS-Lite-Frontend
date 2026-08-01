@@ -7,29 +7,39 @@ import { cn } from "@/utils/cn";
 // ---------------------------------------------------------------------------
 
 const statusBadgeVariants = cva(
-  "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium",
+  "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium border",
   {
     variants: {
       variant: {
         // General
-        active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-        inactive: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-        pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-        approved: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-        rejected: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-        draft: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-        cancelled: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+        active:
+          "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]",
+        inactive:
+          "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]",
+        pending:
+          "bg-[#FFF3D6] text-[#B9791A] border-[#FCE3A0] dark:bg-[rgba(251,191,36,0.15)] dark:text-[#FBBF24] dark:border-[rgba(251,191,36,0.4)]",
+        approved: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50",
+        rejected:
+          "bg-[#FDE2E2] text-[#C0362C] border-[#F8C1BC] dark:bg-[rgba(248,113,113,0.15)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.4)]",
+        draft: "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]",
+        cancelled: "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/50",
         // Inventory
-        "in-stock": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-        "low-stock": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-        "out-of-stock": "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+        "in-stock":
+          "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]",
+        "low-stock":
+          "bg-[#FFF3D6] text-[#B9791A] border-[#FCE3A0] dark:bg-[rgba(251,191,36,0.15)] dark:text-[#FBBF24] dark:border-[rgba(251,191,36,0.4)]",
+        "out-of-stock":
+          "bg-[#FDE2E2] text-[#C0362C] border-[#F8C1BC] dark:bg-[rgba(248,113,113,0.15)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.4)]",
         // Notifications
-        info: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-        success: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-        warning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-        error: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+        info: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50",
+        success:
+          "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]",
+        warning:
+          "bg-[#FFF3D6] text-[#B9791A] border-[#FCE3A0] dark:bg-[rgba(251,191,36,0.15)] dark:text-[#FBBF24] dark:border-[rgba(251,191,36,0.4)]",
+        error:
+          "bg-[#FDE2E2] text-[#C0362C] border-[#F8C1BC] dark:bg-[rgba(248,113,113,0.15)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.4)]",
         // Neutral
-        default: "bg-secondary text-secondary-foreground",
+        default: "bg-secondary text-secondary-foreground border-transparent",
       },
     },
     defaultVariants: {
@@ -43,20 +53,20 @@ const statusBadgeVariants = cva(
 // ---------------------------------------------------------------------------
 
 const dotColours: Record<string, string> = {
-  active: "bg-green-500",
-  inactive: "bg-gray-400",
-  pending: "bg-yellow-500",
-  approved: "bg-blue-500",
-  rejected: "bg-red-500",
-  draft: "bg-gray-400",
-  cancelled: "bg-orange-500",
-  "in-stock": "bg-green-500",
-  "low-stock": "bg-yellow-500",
-  "out-of-stock": "bg-red-500",
-  info: "bg-blue-500",
-  success: "bg-green-500",
-  warning: "bg-yellow-500",
-  error: "bg-red-500",
+  active: "bg-[#0F9D58] dark:bg-[#4ADE80]",
+  inactive: "bg-[#6B6B6B] dark:bg-[#9CA3AF]",
+  pending: "bg-[#B9791A] dark:bg-[#FBBF24]",
+  approved: "bg-blue-500 dark:bg-blue-400",
+  rejected: "bg-[#C0362C] dark:bg-[#F87171]",
+  draft: "bg-[#6B6B6B] dark:bg-[#9CA3AF]",
+  cancelled: "bg-orange-500 dark:bg-orange-400",
+  "in-stock": "bg-[#0F9D58] dark:bg-[#4ADE80]",
+  "low-stock": "bg-[#B9791A] dark:bg-[#FBBF24]",
+  "out-of-stock": "bg-[#C0362C] dark:bg-[#F87171]",
+  info: "bg-blue-500 dark:bg-blue-400",
+  success: "bg-[#0F9D58] dark:bg-[#4ADE80]",
+  warning: "bg-[#B9791A] dark:bg-[#FBBF24]",
+  error: "bg-[#C0362C] dark:bg-[#F87171]",
   default: "bg-muted-foreground",
 };
 
@@ -107,7 +117,7 @@ export function StatusBadge({
     >
       {dot && (
         <span
-          className={cn("h-1.5 w-1.5 rounded-none", dotClass)}
+          className={cn("h-1.5 w-1.5 rounded-full", dotClass)}
           aria-hidden="true"
         />
       )}
