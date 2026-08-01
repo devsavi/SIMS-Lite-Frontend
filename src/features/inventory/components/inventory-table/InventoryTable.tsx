@@ -167,7 +167,7 @@ export function InventoryTable({
       },
       {
         id: "actions",
-        header: "Actions",
+        header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
           const item = row.original;
           const productId = item.product?.id ?? item.id;

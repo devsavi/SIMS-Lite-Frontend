@@ -175,11 +175,17 @@ export function ColumnToggle<TData>({ table }: ColumnToggleProps<TData>) {
 interface DataTableRowProps<TData> {
   row: Row<TData>;
   hasSelection: boolean;
+  /** Changing this value busts the memo cache when column visibility changes. */
+  visibilityKey: string;
 }
 
 const DataTableRow = React.memo(function DataTableRow<TData>({
   row,
   hasSelection,
+  // visibilityKey is intentionally destructured but not used in JSX —
+  // it exists solely to trigger a re-render via React.memo's prop diff.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  visibilityKey: _visibilityKey,
 }: DataTableRowProps<TData>) {
   return (
     <TableRow
@@ -372,7 +378,11 @@ export function DataTable<TData>({
                   return (
                     <TableHead
                       key={header.id}
-                      style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
+                      style={{
+                        minWidth: header.column.columnDef.size !== undefined
+                          ? `${header.column.columnDef.size}px`
+                          : undefined,
+                      }}
                       className={cn(
                         "whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground py-3",
                         canSort && "cursor-pointer select-none"
@@ -434,6 +444,7 @@ export function DataTable<TData>({
                   key={row.id}
                   row={row}
                   hasSelection={hasSelection}
+                  visibilityKey={table.getVisibleLeafColumns().map((c) => c.id).join(",")}
                 />
               ))
             )}

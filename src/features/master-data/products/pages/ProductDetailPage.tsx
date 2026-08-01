@@ -134,9 +134,6 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
               <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
               Back
             </Button>
-            <div className="flex items-center gap-1">
-              <StatusBadge variant={product.is_active ? "active" : "inactive"} dot />
-            </div>
             <PermissionGuard permission="products.edit">
               {product.is_active ? (
                 <Button size="sm" onClick={() => setEditOpen(true)}>

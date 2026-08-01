@@ -207,8 +207,9 @@ export function ProductsPage() {
     },
     {
       id: "actions",
-      header: "",
+      header: () => <div className="text-right">Actions</div>,
       enableSorting: false,
+      enableHiding: false,
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <PermissionGuard permission="products.view">

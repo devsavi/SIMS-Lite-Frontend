@@ -80,7 +80,7 @@ export function UomsPage() {
     },
     {
       id: "actions",
-      header: "",
+      header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <PermissionGuard permission="products.edit">

@@ -159,7 +159,7 @@ export function getReleaseTableColumns({
     },
     {
       id: "actions",
-      header: () => <span className="sr-only">Actions</span>,
+      header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => {
         const release = row.original;
         const status = release.status;
