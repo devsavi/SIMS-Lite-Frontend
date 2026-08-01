@@ -55,9 +55,9 @@ export function OfficerDashboard() {
 
   const statsQuery = useDashboardStats(params);
   const chartsQuery = useDashboardCharts(params);
-  const notificationsQuery = useDashboardNotifications(5);
-  const purchaseOrdersQuery = useRecentPurchaseOrders(8);
-  const grnsQuery = useRecentGRNs(5);
+  const notificationsQuery = useDashboardNotifications(params);
+  const purchaseOrdersQuery = useRecentPurchaseOrders(8, params);
+  const grnsQuery = useRecentGRNs(5, params);
 
   const isRefreshing =
     statsQuery.isFetching || chartsQuery.isFetching;
@@ -139,6 +139,7 @@ export function OfficerDashboard() {
         <NotificationsWidget
           notifications={notificationsQuery.data?.items}
           unreadCount={notificationsQuery.data?.unread_count}
+          total={notificationsQuery.data?.pagination?.total}
           loading={notificationsQuery.isLoading}
           error={notificationsQuery.error}
           onRetry={() => notificationsQuery.refetch()}

@@ -15,6 +15,8 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import { formatCurrency } from "@/utils/format";
+import { useSystemSettingsStore } from "@/stores/settings.store";
 import type { ReportChartData, ReportType } from "../../types";
 
 interface ReportChartsProps {
@@ -26,6 +28,7 @@ interface ReportChartsProps {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
 export const ReportCharts = React.memo(function ReportCharts({ reportType, data, loading }: ReportChartsProps) {
+  const baseCurrency = useSystemSettingsStore((s) => s.baseCurrency);
   if (loading) {
     return (
       <div className="bg-card border border-border rounded-none p-6 mb-6 shadow-sm flex items-center justify-center h-64">
@@ -94,15 +97,15 @@ export const ReportCharts = React.memo(function ReportCharts({ reportType, data,
 
       {showSupplierBar && data.supplierSpending && (
         <div className="bg-card border border-border rounded-none p-5 shadow-sm">
-          <h4 className="text-sm font-semibold text-foreground mb-4">Supplier Purchase Breakdown ($)</h4>
+          <h4 className="text-sm font-semibold text-foreground mb-4">Supplier Purchase Breakdown ({baseCurrency})</h4>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.supplierSpending}>
                 <XAxis dataKey="supplier" stroke="#888888" fontSize={12} />
                 <YAxis stroke="#888888" fontSize={12} />
-                <Tooltip formatter={(value) => `$${Number(value).toLocaleString()}`} />
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
                 <Legend />
-                <Bar dataKey="totalSpent" fill="#3b82f6" name="Total Spent ($)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="totalSpent" fill="#3b82f6" name={`Total Spent (${baseCurrency})`} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

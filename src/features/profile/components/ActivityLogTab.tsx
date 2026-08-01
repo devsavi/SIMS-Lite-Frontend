@@ -78,17 +78,31 @@ function getCategoryBadge(action: string) {
   return styles[prefix] ?? "border-amber-500/40 text-amber-400 bg-amber-500/10";
 }
 
+/** Safely convert any value to a displayable string */
+function toDisplayString(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  // Nested object — flatten key: value pairs
+  if (typeof v === "object") {
+    return Object.entries(v as Record<string, unknown>)
+      .map(([k, val]) => `${k}: ${val}`)
+      .join(", ");
+  }
+  return String(v);
+}
+
 /** Human-friendly detail lines from the detail object */
-function DetailLines({ detail }: { detail: Record<string, string> | null }) {
+function DetailLines({ detail }: { detail: Record<string, unknown> | null }) {
   if (!detail) return null;
-  const entries = Object.entries(detail).filter(([, v]) => v !== "");
+  const entries = Object.entries(detail).filter(([, v]) => v !== "" && v != null);
   if (entries.length === 0) return null;
   return (
     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5">
       {entries.map(([k, v]) => (
         <span key={k} className="text-[11px] text-muted-foreground font-mono">
           <span className="text-foreground/50">{k}:</span>{" "}
-          <span className="text-foreground/80">{v}</span>
+          <span className="text-foreground/80">{toDisplayString(v)}</span>
         </span>
       ))}
     </div>

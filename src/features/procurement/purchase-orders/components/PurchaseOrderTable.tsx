@@ -24,6 +24,7 @@ import { POStatusBadge, POEmailStatusBadge } from "./POStatusBadge";
 import type { PurchaseOrder, POFilters, POStatus } from "../types";
 import { canAccess } from "@/lib/auth/permissions";
 import { useAuthStore } from "@/stores/auth.store";
+import { formatCurrency } from "@/utils/format";
 
 export interface PurchaseOrderTableProps {
   data?: PurchaseOrder[];
@@ -223,7 +224,7 @@ export function PurchaseOrderTable({
                   )}
                   {columnVisibility.totalAmount && (
                     <TableCell className="text-right font-semibold">
-                      ${po.totalAmount.toFixed(2)}
+                      {formatCurrency(po.totalAmount)}
                     </TableCell>
                   )}
                   {columnVisibility.emailStatus && (

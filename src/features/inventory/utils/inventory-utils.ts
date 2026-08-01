@@ -1,4 +1,5 @@
 import type { StockStatus, StockAdjustmentType, LedgerEntryType } from "../types";
+import { formatCurrency as formatCurrencyUtil } from "@/utils/format";
 
 /**
  * Calculates stock status based on current quantity on hand and product reorder level.
@@ -96,17 +97,13 @@ export function getLedgerEntryTypeLabel(type: LedgerEntryType | string): string 
 }
 
 /**
- * Format currency numbers safely.
+ * Format currency numbers safely using the system base currency.
  */
 export function formatCurrency(value: number | null | undefined): string {
   if (value === null || value === undefined || isNaN(value)) {
-    return "$0.00";
+    return formatCurrencyUtil(0);
   }
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(value);
+  return formatCurrencyUtil(value);
 }
 
 /**

@@ -97,18 +97,26 @@ export interface ActivityItem {
   action: string;       // e.g. "created", "approved", "rejected"
   description: string;
   user_name: string;
+  resource_name: string | null;
   created_at: string;
-  reference?: string;   // e.g. PO number
+  reference?: string | null;
 }
 
 export interface NotificationItem {
   id: string;
-  type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
+  type: string;           // e.g. "PURCHASE_ORDER", "STOCK_RELEASE"
+  priority: "HIGH" | "NORMAL" | "LOW";
+  recipient_type: "ROLE" | "USER";
+  recipient_role: string | null;
+  recipient_user_id: string | null;
+  sender_id: string;
   is_read: boolean;
+  read_at: string | null;
+  data: Record<string, unknown>;
   created_at: string;
-  action_url?: string;
+  updated_at: string;
 }
 
 export interface DashboardActivities {
@@ -116,9 +124,17 @@ export interface DashboardActivities {
   total: number;
 }
 
+export interface NotificationPagination {
+  page: number;
+  size: number;
+  total: number;
+  pages: number;
+}
+
 export interface DashboardNotifications {
   items: NotificationItem[];
   unread_count: number;
+  pagination?: NotificationPagination;
 }
 
 // ---------------------------------------------------------------------------
@@ -270,4 +286,12 @@ export interface DashboardQueryParams {
   period?: "today" | "week" | "month" | "custom";
   from_date?: string;
   to_date?: string;
+  /** Year filter for chart data (e.g. 2025). Must be > 2000 and ≤ current year. */
+  year?: number;
+}
+
+export interface ChartQueryParams {
+  /** Year to fetch chart data for. Defaults to current year on the backend.
+   *  Must be > 2000 and ≤ current year. */
+  year?: number;
 }

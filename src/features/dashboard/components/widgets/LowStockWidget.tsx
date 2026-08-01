@@ -121,7 +121,10 @@ export function LowStockWidget({
             className="py-10"
           />
         ) : (
-          <ul className="divide-y divide-border" aria-label="Low stock items list">
+          <ul
+            className="divide-y divide-border max-h-[280px] overflow-y-auto overflow-x-hidden"
+            aria-label="Low stock items list"
+          >
             {items.map((item) => (
               <LowStockRow key={item.id} item={item} />
             ))}

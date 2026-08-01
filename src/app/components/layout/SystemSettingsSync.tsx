@@ -27,6 +27,7 @@ export function SystemSettingsSync() {
     if (companyData) {
       setSettings({
         logoUrl: companyData.logo_url,
+        baseCurrency: companyData.base_currency || "USD",
       });
     }
   }, [companyData, setSettings]);

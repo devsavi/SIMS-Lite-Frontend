@@ -9,7 +9,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../api/dashboard-api";
 import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
-import type { DashboardQueryParams } from "../types";
+import type { DashboardQueryParams, ChartQueryParams } from "../types";
 
 // ---------------------------------------------------------------------------
 // Query keys (stable references for invalidation)
@@ -21,19 +21,19 @@ export const dashboardKeys = {
     [...dashboardKeys.all, "overview", params] as const,
   stats: (params?: DashboardQueryParams) =>
     [...dashboardKeys.all, "stats", params] as const,
-  charts: (params?: DashboardQueryParams) =>
+  charts: (params?: ChartQueryParams) =>
     [...dashboardKeys.all, "charts", params] as const,
-  activities: (limit?: number) =>
-    [...dashboardKeys.all, "activities", limit] as const,
-  notifications: (limit?: number) =>
-    [...dashboardKeys.all, "notifications", limit] as const,
-  pendingApprovals: () => [...dashboardKeys.all, "pending-approvals"] as const,
-  recentPurchaseOrders: (limit?: number) =>
-    [...dashboardKeys.all, "recent-purchase-orders", limit] as const,
-  recentGRNs: (limit?: number) =>
-    [...dashboardKeys.all, "recent-grns", limit] as const,
-  lowStock: (limit?: number) =>
-    [...dashboardKeys.all, "low-stock", limit] as const,
+  activities: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "activities", params] as const,
+  notifications: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "notifications", params] as const,
+  pendingApprovals: (params?: DashboardQueryParams) =>
+    [...dashboardKeys.all, "pending-approvals", params] as const,
+  recentPurchaseOrders: (params?: DashboardQueryParams & { limit?: number }) =>
+    [...dashboardKeys.all, "recent-purchase-orders", params] as const,
+  recentGRNs: (params?: DashboardQueryParams & { limit?: number }) =>
+    [...dashboardKeys.all, "recent-grns", params] as const,
+  lowStock: () => [...dashboardKeys.all, "low-stock"] as const,
   inventoryAlerts: () => [...dashboardKeys.all, "inventory-alerts"] as const,
   recentAdjustments: (limit?: number) =>
     [...dashboardKeys.all, "recent-adjustments", limit] as const,
@@ -87,7 +87,7 @@ export function useDashboardStats(params?: DashboardQueryParams) {
 // useDashboardCharts — chart data
 // ---------------------------------------------------------------------------
 
-export function useDashboardCharts(params?: DashboardQueryParams) {
+export function useDashboardCharts(params?: ChartQueryParams) {
   return useQuery({
     queryKey: dashboardKeys.charts(params),
     queryFn: () => dashboardApi.getCharts(params),
@@ -101,10 +101,10 @@ export function useDashboardCharts(params?: DashboardQueryParams) {
 // useRecentActivities
 // ---------------------------------------------------------------------------
 
-export function useRecentActivities(limit = 10) {
+export function useRecentActivities(params?: DashboardQueryParams) {
   return useQuery({
-    queryKey: dashboardKeys.activities(limit),
-    queryFn: () => dashboardApi.getActivities({ limit }),
+    queryKey: dashboardKeys.activities(params),
+    queryFn: () => dashboardApi.getActivities(params),
     staleTime: DASHBOARD_STALE_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
@@ -114,10 +114,10 @@ export function useRecentActivities(limit = 10) {
 // useDashboardNotifications
 // ---------------------------------------------------------------------------
 
-export function useDashboardNotifications(limit = 5) {
+export function useDashboardNotifications(params?: DashboardQueryParams) {
   return useQuery({
-    queryKey: dashboardKeys.notifications(limit),
-    queryFn: () => dashboardApi.getNotifications({ limit }),
+    queryKey: dashboardKeys.notifications(params),
+    queryFn: () => dashboardApi.getNotifications(params),
     staleTime: 1000 * 60, // 1 minute — notifications should refresh quickly
     refetchInterval: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
@@ -128,10 +128,10 @@ export function useDashboardNotifications(limit = 5) {
 // usePendingApprovals
 // ---------------------------------------------------------------------------
 
-export function usePendingApprovals() {
+export function usePendingApprovals(params?: DashboardQueryParams) {
   return useQuery({
-    queryKey: dashboardKeys.pendingApprovals(),
-    queryFn: dashboardApi.getPendingApprovals,
+    queryKey: dashboardKeys.pendingApprovals(params),
+    queryFn: () => dashboardApi.getPendingApprovals(params),
     staleTime: DASHBOARD_STALE_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
@@ -141,10 +141,11 @@ export function usePendingApprovals() {
 // useRecentPurchaseOrders
 // ---------------------------------------------------------------------------
 
-export function useRecentPurchaseOrders(limit = 5) {
+export function useRecentPurchaseOrders(limit = 5, params?: DashboardQueryParams) {
+  const queryParams = { ...params, limit };
   return useQuery({
-    queryKey: dashboardKeys.recentPurchaseOrders(limit),
-    queryFn: () => dashboardApi.getRecentPurchaseOrders({ limit }),
+    queryKey: dashboardKeys.recentPurchaseOrders(queryParams),
+    queryFn: () => dashboardApi.getRecentPurchaseOrders(queryParams),
     staleTime: DASHBOARD_STALE_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
@@ -154,10 +155,11 @@ export function useRecentPurchaseOrders(limit = 5) {
 // useRecentGRNs
 // ---------------------------------------------------------------------------
 
-export function useRecentGRNs(limit = 5) {
+export function useRecentGRNs(limit = 5, params?: DashboardQueryParams) {
+  const queryParams = { ...params, limit };
   return useQuery({
-    queryKey: dashboardKeys.recentGRNs(limit),
-    queryFn: () => dashboardApi.getRecentGRNs({ limit }),
+    queryKey: dashboardKeys.recentGRNs(queryParams),
+    queryFn: () => dashboardApi.getRecentGRNs(queryParams),
     staleTime: DASHBOARD_STALE_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
@@ -167,10 +169,10 @@ export function useRecentGRNs(limit = 5) {
 // useLowStockItems
 // ---------------------------------------------------------------------------
 
-export function useLowStockItems(limit = 10) {
+export function useLowStockItems() {
   return useQuery({
-    queryKey: dashboardKeys.lowStock(limit),
-    queryFn: () => dashboardApi.getLowStockItems({ limit }),
+    queryKey: dashboardKeys.lowStock(),
+    queryFn: () => dashboardApi.getLowStockItems(),
     staleTime: DASHBOARD_STALE_TIME,
     refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });

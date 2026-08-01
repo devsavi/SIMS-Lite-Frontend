@@ -52,7 +52,7 @@ export interface UserActivityLog {
   resource_id: string;
   ip_address: string;
   status: "success" | "failure";
-  detail: Record<string, string> | null;
+  detail: Record<string, unknown> | null;
   created_at: string;
 }
 

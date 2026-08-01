@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Settings, Bell, Sliders, Save, Loader2, Mail, Wifi } from "lucide-react";
+import { Bell, Save, Loader2, Mail, Wifi } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/app/components/ui/card";
 import { Switch } from "@/app/components/ui/switch";
 import { Button } from "@/app/components/ui/button";
@@ -21,10 +21,6 @@ export function PreferencesTab() {
   // Notification preferences (from notifications API)
   const { data: notifPrefs, isLoading: isNotifLoading } = useNotificationPreferences();
   const updateNotifPrefsMutation = useUpdateNotificationPreferences();
-
-  // Local state for compact density (no API backing)
-  const [compactDensity, setCompactDensity] = React.useState(false);
-  const [displaySaved, setDisplaySaved] = React.useState(false);
 
   // Local state for notification preferences
   const [notifState, setNotifState] = React.useState({
@@ -59,15 +55,6 @@ export function PreferencesTab() {
         variant: "destructive",
       });
     }
-  };
-
-  const handleSaveDisplay = () => {
-    setDisplaySaved(true);
-    toast({
-      title: "Display Preferences Saved",
-      description: "Your interface layout density preference has been updated.",
-    });
-    setTimeout(() => setDisplaySaved(false), 2000);
   };
 
   if (isNotifLoading) {
@@ -223,41 +210,6 @@ export function PreferencesTab() {
         </CardContent>
       </Card>
 
-      {/* Interface Display Preferences Card */}
-      <Card className="rounded-none border border-border bg-card">
-        <CardHeader className="border-b border-border pb-4">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Sliders className="h-4 w-4 text-primary" />
-            Interface & Display Preferences
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Customize layout density and table display options across SIMS Lite.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center justify-between p-3 border border-border">
-            <div className="space-y-0.5">
-              <span className="text-xs font-medium text-foreground">Compact Data Table Density</span>
-              <p className="text-xs text-muted-foreground">Use tighter row padding for data tables to fit more information on screen.</p>
-            </div>
-            <Switch
-              checked={compactDensity}
-              onCheckedChange={(checked) => setCompactDensity(checked)}
-            />
-          </div>
-
-          <div className="flex justify-end pt-4 border-t border-border">
-            <Button
-              type="button"
-              onClick={handleSaveDisplay}
-              className="rounded-none gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {displaySaved ? "Saved!" : "Save Display Preferences"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

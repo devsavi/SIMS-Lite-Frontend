@@ -3,86 +3,80 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/utils/cn";
-import { formatRelative } from "@/utils/format";
+import { formatDateTime } from "@/utils/format";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { Bell, Info, CheckCircle2, AlertTriangle, XCircle, ChevronRight } from "lucide-react";
+import {
+  Bell,
+  ShoppingCart,
+  ArrowUpFromLine,
+  ClipboardList,
+  Package,
+  ChevronRight,
+} from "lucide-react";
 import type { NotificationItem } from "../../types";
 
-const NOTIFICATION_CONFIG: Record<
-  NotificationItem["type"],
-  { icon: React.ComponentType<{ className?: string }>; color: string }
-> = {
-  info: { icon: Info, color: "text-blue-600 dark:text-blue-400" },
-  success: { icon: CheckCircle2, color: "text-green-600 dark:text-green-400" },
-  warning: { icon: AlertTriangle, color: "text-yellow-600 dark:text-yellow-400" },
-  error: { icon: XCircle, color: "text-destructive" },
+// Map backend type strings to icons
+function getNotificationIcon(type: string): React.ComponentType<{ className?: string }> {
+  const t = type.toUpperCase();
+  if (t.includes("PURCHASE_ORDER")) return ShoppingCart;
+  if (t.includes("STOCK_RELEASE")) return ArrowUpFromLine;
+  if (t.includes("GRN")) return ClipboardList;
+  if (t.includes("PRODUCT") || t.includes("INVENTORY")) return Package;
+  return Bell;
+}
+
+const PRIORITY_DOT: Record<string, string> = {
+  HIGH: "bg-destructive",
+  NORMAL: "bg-primary",
+  LOW: "bg-muted-foreground",
 };
+
+// Height matching activities widget — ~5 rows
+const VISIBLE_HEIGHT = "320px";
 
 interface NotificationRowProps {
   item: NotificationItem;
 }
 
 function NotificationRow({ item }: NotificationRowProps) {
-  const config = NOTIFICATION_CONFIG[item.type];
-  const Icon = config?.icon ?? Bell;
-  const colorClass = config?.color ?? "text-muted-foreground";
+  const Icon = getNotificationIcon(item.type);
+  const dotColor = PRIORITY_DOT[item.priority] ?? "bg-muted-foreground";
 
-  const content = (
-    <div
-      className={cn(
-        "flex items-start gap-3 py-3",
-        !item.is_read && "bg-primary/5 -mx-6 px-6"
-      )}
-    >
-      <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", colorClass)} aria-hidden="true" />
+  return (
+    <li className="flex items-start gap-3 py-3">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className={cn("text-sm font-medium text-foreground truncate", !item.is_read && "font-semibold")}>
+          <p className={cn("text-sm text-foreground truncate", !item.is_read && "font-semibold")}>
             {item.title}
           </p>
           {!item.is_read && (
-            <span className="mt-1 h-2 w-2 shrink-0 rounded-none bg-primary" aria-label="Unread" />
+            <span
+              className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", dotColor)}
+              aria-label={`${item.priority} priority, unread`}
+            />
           )}
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.message}</p>
-        <time
-          dateTime={item.created_at}
-          className="mt-1 text-xs text-muted-foreground/70"
-        >
-          {formatRelative(item.created_at)}
+        <time dateTime={item.created_at} className="mt-1 text-xs text-muted-foreground/70">
+          {formatDateTime(item.created_at)}
         </time>
       </div>
-    </div>
+    </li>
   );
-
-  if (item.action_url) {
-    return (
-      <li>
-        <Link
-          href={item.action_url}
-          className="block hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={item.title}
-        >
-          {content}
-        </Link>
-      </li>
-    );
-  }
-
-  return <li>{content}</li>;
 }
 
 function NotificationSkeleton() {
   return (
     <div className="space-y-0">
-      {Array.from({ length: 4 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex items-start gap-3 py-3">
           <div className="mt-0.5 h-4 w-4 shrink-0 animate-pulse bg-muted rounded-none" />
           <div className="flex-1 space-y-1.5">
             <div className="h-4 w-40 animate-pulse bg-muted" />
             <div className="h-3 w-56 animate-pulse bg-muted" />
-            <div className="h-3 w-20 animate-pulse bg-muted" />
+            <div className="h-3 w-24 animate-pulse bg-muted" />
           </div>
         </div>
       ))}
@@ -93,6 +87,7 @@ function NotificationSkeleton() {
 interface NotificationsWidgetProps {
   notifications?: NotificationItem[];
   unreadCount?: number;
+  total?: number;
   loading?: boolean;
   error?: unknown;
   onRetry?: () => void;
@@ -101,6 +96,7 @@ interface NotificationsWidgetProps {
 export function NotificationsWidget({
   notifications,
   unreadCount = 0,
+  total,
   loading,
   error,
   onRetry,
@@ -141,16 +137,22 @@ export function NotificationsWidget({
             className="py-10"
           />
         ) : (
-          <ul
-            className="divide-y divide-border"
-            aria-label="Notifications list"
-            aria-live="polite"
-            aria-atomic="false"
+          <div
+            style={{ maxHeight: VISIBLE_HEIGHT }}
+            className="overflow-y-auto"
+            aria-label="Notifications"
           >
-            {notifications.map((item) => (
-              <NotificationRow key={item.id} item={item} />
-            ))}
-          </ul>
+            <ul
+              className="divide-y divide-border"
+              aria-label="Notifications list"
+              aria-live="polite"
+              aria-atomic="false"
+            >
+              {notifications.map((item) => (
+                <NotificationRow key={item.id} item={item} />
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>

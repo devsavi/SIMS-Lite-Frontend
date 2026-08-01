@@ -336,6 +336,90 @@ export const PieChart = React.memo(function PieChart({
 });
 
 // ---------------------------------------------------------------------------
+// HorizontalBarChart (Memoised)
+// For data where labels on Y axis are long strings (e.g. product names)
+// ---------------------------------------------------------------------------
+
+export interface HorizontalBarChartProps {
+  data: ChartDataPoint[];
+  /** Height in px. Defaults to 300 */
+  height?: number;
+  /** Key used as the category label (rendered on Y axis) */
+  yKey: string;
+  /** Data key to render as bars */
+  dataKey: string;
+  /** Bar fill colour */
+  color?: string;
+  /** Label for the data key in tooltip */
+  label?: string;
+  /** Value formatter for tooltip */
+  valueFormatter?: (value: number) => string;
+  className?: string;
+}
+
+export const HorizontalBarChart = React.memo(function HorizontalBarChart({
+  data,
+  height = 300,
+  yKey,
+  dataKey,
+  color = CHART_COLORS[0],
+  label,
+  valueFormatter,
+  className,
+}: HorizontalBarChartProps) {
+  // Truncate long labels so they don't overflow
+  const truncate = (str: string, max = 18) =>
+    str.length > max ? str.slice(0, max) + "…" : str;
+
+  const tickFormatter = (val: string) => truncate(val);
+
+  return (
+    <div className={cn("w-full", className)} role="img" aria-label="Horizontal bar chart">
+      <ResponsiveContainer width="100%" height={height}>
+        <ReBarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 4, right: 24, left: 8, bottom: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={valueFormatter}
+            allowDecimals={false}
+          />
+          <YAxis
+            type="category"
+            dataKey={yKey}
+            width={110}
+            tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={tickFormatter}
+          />
+          <Tooltip
+            contentStyle={{
+              background: "var(--color-popover)",
+              border: "1px solid var(--color-border)",
+              borderRadius: 0,
+              fontSize: 12,
+            }}
+            formatter={(value: unknown) => [
+              valueFormatter ? valueFormatter(value as number) : (value as number),
+              label ?? dataKey,
+            ]}
+            labelFormatter={(lbl: string) => lbl}
+          />
+          <Bar dataKey={dataKey} fill={color} radius={[0, 2, 2, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+});
+
+// ---------------------------------------------------------------------------
 // DonutChart (PieChart with inner radius)
 // ---------------------------------------------------------------------------
 
@@ -384,7 +468,7 @@ export const KpiCard = React.memo(function KpiCard({
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
+          <p className="mt-2 break-words text-2xl font-bold tracking-tight sm:text-3xl">{value}</p>
           {description && (
             <p className="mt-1 text-xs text-muted-foreground">{description}</p>
           )}

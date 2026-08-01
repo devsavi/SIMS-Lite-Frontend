@@ -60,7 +60,6 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
       <StatCard
         label="Inventory Value"
         value={loading ? "—" : formatCurrency(stats?.inventory_value)}
-        description="Total stock value"
         icon={<DollarSign className="h-5 w-5" aria-hidden="true" />}
         trend={
           stats?.trends?.inventory_value

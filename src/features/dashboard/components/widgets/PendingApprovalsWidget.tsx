@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/utils/cn";
-import { formatRelative, formatCurrency } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { Button } from "@/app/components/ui/button";
@@ -44,7 +44,7 @@ function ApprovalRow({ item }: ApprovalRowProps) {
         <p className="mt-0.5 text-xs text-muted-foreground truncate">{item.description}</p>
         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
           <span>By {item.requested_by}</span>
-          <span>{formatRelative(item.requested_at)}</span>
+          <span>{formatDateTime(item.requested_at)}</span>
           {item.amount != null && (
             <span className="font-medium text-foreground">{formatCurrency(item.amount)}</span>
           )}

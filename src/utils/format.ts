@@ -44,15 +44,24 @@ export function formatRelative(date: string | Date | null | undefined): string {
 // Number / currency formatting
 // ---------------------------------------------------------------------------
 
+function getSystemCurrency(): string {
+  try {
+    return useSystemSettingsStore.getState().baseCurrency || "USD";
+  } catch {
+    return "USD";
+  }
+}
+
 export function formatCurrency(
   amount: number | null | undefined,
-  currency = "USD",
+  currency?: string,
   locale = "en-US"
 ): string {
   if (amount == null) return "—";
+  const activeCurrency = currency ?? getSystemCurrency();
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency,
+    currency: activeCurrency,
     minimumFractionDigits: 2,
   }).format(amount);
 }

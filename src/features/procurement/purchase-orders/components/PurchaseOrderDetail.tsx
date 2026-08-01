@@ -17,6 +17,8 @@ import { POActionDialog } from "./POActionDialog";
 import type { PurchaseOrder } from "../types";
 import { canAccess } from "@/lib/auth/permissions";
 import { useAuthStore } from "@/stores/auth.store";
+import { formatCurrency } from "@/utils/format";
+import { useSystemSettingsStore } from "@/stores/settings.store";
 
 export interface PurchaseOrderDetailProps {
   po: PurchaseOrder;
@@ -39,6 +41,7 @@ export function PurchaseOrderDetail({
 }: PurchaseOrderDetailProps) {
   const { user } = useAuthStore();
   const userRole = user?.role || "viewer";
+  const baseCurrency = useSystemSettingsStore((s) => s.baseCurrency);
 
   const [activeDialog, setActiveDialog] = React.useState<
     "submit" | "approve" | "reject" | "cancel" | null
@@ -236,7 +239,7 @@ export function PurchaseOrderDetail({
         <div className="rounded-none border bg-card p-4">
           <p className="text-xs text-muted-foreground font-medium">Total Amount</p>
           <p className="text-xl font-bold text-primary mt-1">
-            ${po.totalAmount.toFixed(2)}
+            {formatCurrency(po.totalAmount)}
           </p>
         </div>
       </div>
@@ -261,8 +264,8 @@ export function PurchaseOrderDetail({
               <TableRow>
                 <TableHead>Product</TableHead>
                 <TableHead className="text-right">Quantity</TableHead>
-                <TableHead className="text-right">Unit Cost ($)</TableHead>
-                <TableHead className="text-right">Total Cost ($)</TableHead>
+                <TableHead className="text-right">Unit Cost ({baseCurrency})</TableHead>
+                <TableHead className="text-right">Total Cost ({baseCurrency})</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -281,9 +284,9 @@ export function PurchaseOrderDetail({
                       </div>
                     </TableCell>
                     <TableCell className="text-right">{item.quantity}</TableCell>
-                    <TableCell className="text-right">${item.unitCost.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(item.unitCost)}</TableCell>
                     <TableCell className="text-right font-semibold">
-                      ${total.toFixed(2)}
+                      {formatCurrency(total)}
                     </TableCell>
                   </TableRow>
                 );

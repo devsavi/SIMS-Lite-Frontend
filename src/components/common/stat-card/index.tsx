@@ -87,7 +87,7 @@ export function StatCard({
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+          <p className="mt-2 break-words text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {value}
           </p>
           {description && (

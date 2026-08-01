@@ -46,6 +46,7 @@ export function AdminDashboard() {
   const [period, setPeriod] = React.useState<Period>("today");
   const [fromDate, setFromDate] = React.useState<string>("");
   const [toDate, setToDate] = React.useState<string>("");
+  const [chartYear, setChartYear] = React.useState<number>(new Date().getFullYear());
   const queryClient = useQueryClient();
 
   const getIsoDate = (dateStr: string, timeSuffix: string) => {
@@ -66,13 +67,13 @@ export function AdminDashboard() {
   };
 
   const statsQuery = useDashboardStats(params);
-  const chartsQuery = useDashboardCharts(params);
-  const activitiesQuery = useRecentActivities(8);
-  const notificationsQuery = useDashboardNotifications(5);
-  const approvalsQuery = usePendingApprovals();
-  const purchaseOrdersQuery = useRecentPurchaseOrders(5);
-  const grnsQuery = useRecentGRNs(5);
-  const lowStockQuery = useLowStockItems(8);
+  const chartsQuery = useDashboardCharts({ year: chartYear });
+  const activitiesQuery = useRecentActivities(params);
+  const notificationsQuery = useDashboardNotifications(params);
+  const approvalsQuery = usePendingApprovals(params);
+  const purchaseOrdersQuery = useRecentPurchaseOrders(5, params);
+  const grnsQuery = useRecentGRNs(5, params);
+  const lowStockQuery = useLowStockItems();
 
   const isRefreshing =
     statsQuery.isFetching ||
@@ -124,12 +125,16 @@ export function AdminDashboard() {
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
         <MonthlyPurchaseOrdersChart
           data={chartsQuery.data?.monthly_purchase_orders}
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
       </div>
 
@@ -140,18 +145,24 @@ export function AdminDashboard() {
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
         <TopReleasedProductsChart
           data={chartsQuery.data?.top_released_products}
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
         <LowStockDistributionChart
           data={chartsQuery.data?.low_stock_distribution}
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
       </div>
 
@@ -191,6 +202,7 @@ export function AdminDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <RecentActivitiesWidget
           activities={activitiesQuery.data?.items}
+          total={activitiesQuery.data?.total}
           loading={activitiesQuery.isLoading}
           error={activitiesQuery.error}
           onRetry={() => activitiesQuery.refetch()}
@@ -198,6 +210,7 @@ export function AdminDashboard() {
         <NotificationsWidget
           notifications={notificationsQuery.data?.items}
           unreadCount={notificationsQuery.data?.unread_count}
+          total={notificationsQuery.data?.pagination?.total}
           loading={notificationsQuery.isLoading}
           error={notificationsQuery.error}
           onRetry={() => notificationsQuery.refetch()}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { createPortal } from "react-dom";
 import {
   MoreVertical,
   Shield,
@@ -24,6 +25,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
+
+/** Renders a dropdown menu via a portal so it escapes any overflow/scroll containers. */
+function DropdownPortal({
+  anchorRef,
+  onClose,
+  children,
+}: {
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const [coords, setCoords] = React.useState<{ top: number; right: number } | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [anchorRef]);
+
+  // Close on scroll or resize
+  React.useEffect(() => {
+    const close = () => onClose();
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [onClose]);
+
+  if (!coords) return null;
+
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div
+        className="fixed z-50 w-44 rounded-none border border-border bg-popover p-1 shadow-md text-popover-foreground text-xs"
+        style={{ top: coords.top, right: coords.right }}
+      >
+        {children}
+      </div>
+    </>,
+    document.body,
+  );
+}
 
 interface UserListProps {
   users: UserItem[];
@@ -57,6 +107,7 @@ export function UserList({
   onDeleteUser,
 }: UserListProps) {
   const [openDropdownId, setOpenDropdownId] = React.useState<string | null>(null);
+  const buttonRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFilterChange({ ...filters, search: e.target.value, page: 1 });
@@ -169,7 +220,7 @@ export function UserList({
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {formatDateTime(user.createdAt)}
                   </td>
-                  <td className="px-4 py-3 text-right relative">
+                  <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"
@@ -194,6 +245,7 @@ export function UserList({
                       <div className="relative">
                         <button
                           type="button"
+                          ref={(el) => { buttonRefs.current[user.id] = el; }}
                           onClick={() => setOpenDropdownId(openDropdownId === user.id ? null : user.id)}
                           aria-label={`More actions for ${user.name}`}
                           className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -202,67 +254,64 @@ export function UserList({
                         </button>
 
                         {openDropdownId === user.id && (
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setOpenDropdownId(null)}
-                            />
-                            <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-none border border-border bg-popover p-1 shadow-md text-popover-foreground text-xs">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenDropdownId(null);
-                                  onAssignRole(user);
-                                }}
-                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
-                              >
-                                <Shield className="h-3.5 w-3.5" />
-                                Assign Role
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenDropdownId(null);
-                                  onResetPassword(user);
-                                }}
-                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
-                              >
-                                <KeyRound className="h-3.5 w-3.5" />
-                                Reset Password
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenDropdownId(null);
-                                  onToggleStatus(user);
-                                }}
-                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
-                              >
-                                {user.status === "ACTIVE" ? (
-                                  <>
-                                    <XCircle className="h-3.5 w-3.5" />
-                                    Deactivate User
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
-                                    Activate User
-                                  </>
-                                )}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenDropdownId(null);
-                                  onDeleteUser(user.id);
-                                }}
-                                className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                                Delete User
-                              </button>
-                            </div>
-                          </>
+                          <DropdownPortal
+                            anchorRef={{ current: buttonRefs.current[user.id] ?? null }}
+                            onClose={() => setOpenDropdownId(null)}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenDropdownId(null);
+                                onAssignRole(user);
+                              }}
+                              className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <Shield className="h-3.5 w-3.5" />
+                              Assign Role
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenDropdownId(null);
+                                onResetPassword(user);
+                              }}
+                              className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
+                            >
+                              <KeyRound className="h-3.5 w-3.5" />
+                              Reset Password
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenDropdownId(null);
+                                onToggleStatus(user);
+                              }}
+                              className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
+                            >
+                              {user.status === "ACTIVE" ? (
+                                <>
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  Deactivate User
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                  Activate User
+                                </>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenDropdownId(null);
+                                onDeleteUser(user.id);
+                              }}
+                              className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete User
+                            </button>
+                          </DropdownPortal>
                         )}
                       </div>
                     </div>

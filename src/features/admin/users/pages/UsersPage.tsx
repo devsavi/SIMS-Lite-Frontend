@@ -21,6 +21,34 @@ import {
 import type { UserItem, UserFilterParams, CreateUserDTO, UpdateUserDTO } from "../types";
 import type { UserRole } from "@/lib/auth";
 
+/** Apply search, role, and status filters against an already-loaded list of users. */
+function applyClientFilters(users: UserItem[], filters: UserFilterParams): UserItem[] {
+  let result = users;
+
+  // Text search across name, email, and department
+  const search = filters.search?.trim().toLowerCase();
+  if (search) {
+    result = result.filter(
+      (u) =>
+        u.name.toLowerCase().includes(search) ||
+        u.email.toLowerCase().includes(search) ||
+        (u.department?.toLowerCase().includes(search) ?? false),
+    );
+  }
+
+  // Role filter
+  if (filters.role && filters.role !== "ALL") {
+    result = result.filter((u) => u.role === filters.role);
+  }
+
+  // Status filter
+  if (filters.status && filters.status !== "ALL") {
+    result = result.filter((u) => u.status === filters.status);
+  }
+
+  return result;
+}
+
 export function UsersPage() {
   const [filters, setFilters] = React.useState<UserFilterParams>({
     search: "",
@@ -30,7 +58,24 @@ export function UsersPage() {
     limit: 10,
   });
 
-  const { data, isLoading, refetch } = useUsersList(filters);
+  // Fetch all users once — no filter params sent to the API
+  const { data: rawData, isLoading, refetch } = useUsersList({ page: 1, limit: 100 });
+
+  // Apply client-side filtering and pagination
+  const allUsers = rawData?.data ?? [];
+  const filtered = applyClientFilters(allUsers, filters);
+  const pageSize = filters.limit ?? 10;
+  const currentPage = filters.page ?? 1;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pagedUsers = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const data = {
+    data: pagedUsers,
+    total: filtered.length,
+    page: currentPage,
+    limit: pageSize,
+    totalPages,
+  };
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = React.useState(false);

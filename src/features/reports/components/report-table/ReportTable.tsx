@@ -4,6 +4,7 @@ import * as React from "react";
 import { StatusBadge, type StatusVariant } from "@/components/common/status-badge";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
+import { formatCurrency } from "@/utils/format";
 import type {
   GrnReportRow,
   InventoryMovementReportRow,
@@ -224,7 +225,7 @@ export function ReportTable({
                   <td className="px-4 py-3">
                     <StatusBadge variant={getBadgeVariant(row.status)} />
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold">${row.totalAmount.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-right font-semibold">{formatCurrency(row.totalAmount)}</td>
                 </tr>
               ))}
 
@@ -288,7 +289,7 @@ export function ReportTable({
                   <td className="px-4 py-3 text-muted-foreground">{row.contactPerson}</td>
                   <td className="px-4 py-3 text-right font-medium">{row.poCount}</td>
                   <td className="px-4 py-3 text-right font-medium">{row.grnCount}</td>
-                  <td className="px-4 py-3 text-right font-semibold">${row.totalPurchaseValue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-right font-semibold">{formatCurrency(row.totalPurchaseValue)}</td>
                   <td className="px-4 py-3">
                     <StatusBadge variant={getBadgeVariant(row.status)} />
                   </td>

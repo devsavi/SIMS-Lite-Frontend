@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { formatRelative } from "@/utils/format";
+import { formatDateTime } from "@/utils/format";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { Badge } from "@/app/components/ui/badge";
@@ -29,7 +29,7 @@ function GRNRow({ item }: GRNRowProps) {
   return (
     <li>
       <Link
-        href={`/grn/${item.id}`}
+        href={`/procurement/grns/${item.id}`}
         className="flex items-center gap-3 py-3 hover:bg-muted/50 -mx-6 px-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={`GRN ${item.grn_number}`}
       >
@@ -49,7 +49,7 @@ function GRNRow({ item }: GRNRowProps) {
             <span>·</span>
             <span className="font-mono">{item.po_number}</span>
             <span>·</span>
-            <span>{formatRelative(item.received_at)}</span>
+            <span>{formatDateTime(item.received_at)}</span>
           </div>
         </div>
         <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -99,7 +99,7 @@ export function RecentGRNsWidget({
           <p className="mt-0.5 text-xs text-muted-foreground">Goods receipt notes</p>
         </div>
         <Link
-          href="/grn"
+          href="/procurement/grns"
           className="flex items-center gap-1 text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="View all GRNs"
         >

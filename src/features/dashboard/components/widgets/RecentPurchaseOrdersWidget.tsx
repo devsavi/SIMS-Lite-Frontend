@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/utils/cn";
-import { formatRelative, formatCurrency } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { Badge } from "@/app/components/ui/badge";
@@ -32,7 +32,7 @@ function PurchaseOrderRow({ item }: PurchaseOrderRowProps) {
   return (
     <li>
       <Link
-        href={`/purchase-orders/${item.id}`}
+        href={`/procurement/purchase-orders/${item.id}`}
         className="flex items-center gap-3 py-3 hover:bg-muted/50 -mx-6 px-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={`Purchase order ${item.po_number}`}
       >
@@ -50,7 +50,7 @@ function PurchaseOrderRow({ item }: PurchaseOrderRowProps) {
           <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
             <span className="truncate">{item.supplier_name}</span>
             <span>·</span>
-            <span>{formatRelative(item.created_at)}</span>
+            <span>{formatDateTime(item.created_at)}</span>
           </div>
         </div>
         <div className="shrink-0 text-right">
@@ -106,7 +106,7 @@ export function RecentPurchaseOrdersWidget({
           <p className="mt-0.5 text-xs text-muted-foreground">Latest purchase orders</p>
         </div>
         <Link
-          href="/purchase-orders"
+          href="/procurement/purchase-orders"
           className="flex items-center gap-1 text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="View all purchase orders"
         >

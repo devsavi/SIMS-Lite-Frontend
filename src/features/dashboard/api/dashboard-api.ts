@@ -13,6 +13,7 @@ import type {
   DashboardCharts,
   DashboardActivities,
   DashboardNotifications,
+  NotificationItem,
   PendingApproval,
   RecentPurchaseOrder,
   RecentGRN,
@@ -24,6 +25,7 @@ import type {
   OfficerDashboardData,
   StoreKeeperDashboardData,
   DashboardQueryParams,
+  ChartQueryParams,
 } from "../types";
 
 const BASE = "/dashboard";
@@ -77,10 +79,13 @@ export const dashboardApi = {
   /**
    * GET /dashboard/charts
    * Returns chart datasets for the dashboard.
+   * @param params.year - Year to filter data (> 2000 and ≤ current year). Defaults to current year.
    */
-  getCharts: async (params?: DashboardQueryParams): Promise<DashboardCharts> => {
+  getCharts: async (params?: ChartQueryParams): Promise<DashboardCharts> => {
+    const currentYear = new Date().getFullYear();
+    const year = params?.year ?? currentYear;
     const res = await get<SuccessResponse<DashboardCharts>>(`${BASE}/charts`, {
-      params,
+      params: { year },
     });
     return res.data;
   },
@@ -92,8 +97,9 @@ export const dashboardApi = {
   /**
    * GET /dashboard/activities
    * Returns recent system activity.
+   * Supports the same period / from_date / to_date filters as the stats section.
    */
-  getActivities: async (params?: { limit?: number }): Promise<DashboardActivities> => {
+  getActivities: async (params?: DashboardQueryParams): Promise<DashboardActivities> => {
     const res = await get<SuccessResponse<DashboardActivities>>(`${BASE}/activities`, {
       params,
     });
@@ -106,13 +112,20 @@ export const dashboardApi = {
 
   /**
    * GET /dashboard/notifications
-   * Returns unread notifications for the current user.
+   * Returns notifications for the current user.
+   * Supports the same period / from_date / to_date filters as the stats section.
+   * Response: { status, data: NotificationItem[], pagination: { ... } }
    */
-  getNotifications: async (params?: { limit?: number }): Promise<DashboardNotifications> => {
-    const res = await get<SuccessResponse<DashboardNotifications>>(`${BASE}/notifications`, {
+  getNotifications: async (params?: DashboardQueryParams): Promise<DashboardNotifications> => {
+    const res = await get<{ status: string; data: NotificationItem[]; pagination: { page: number; size: number; total: number; pages: number } }>(`${BASE}/notifications`, {
       params,
     });
-    return res.data;
+    const unread_count = res.data.filter((n) => !n.is_read).length;
+    return {
+      items: res.data,
+      unread_count,
+      pagination: res.pagination,
+    };
   },
 
   // ---------------------------------------------------------------------------
@@ -122,9 +135,12 @@ export const dashboardApi = {
   /**
    * GET /dashboard/pending-approvals
    * Returns items awaiting approval by the current user.
+   * Supports the same period / from_date / to_date filters as the stats section.
    */
-  getPendingApprovals: async (): Promise<PendingApproval[]> => {
-    const res = await get<SuccessResponse<PendingApproval[]>>(`${BASE}/pending-approvals`);
+  getPendingApprovals: async (params?: DashboardQueryParams): Promise<PendingApproval[]> => {
+    const res = await get<SuccessResponse<PendingApproval[]>>(`${BASE}/pending-approvals`, {
+      params,
+    });
     return res.data;
   },
 
@@ -135,8 +151,9 @@ export const dashboardApi = {
   /**
    * GET /dashboard/recent-purchase-orders
    * Returns recently created purchase orders.
+   * Supports the same period / from_date / to_date filters as the stats section.
    */
-  getRecentPurchaseOrders: async (params?: { limit?: number }): Promise<RecentPurchaseOrder[]> => {
+  getRecentPurchaseOrders: async (params?: DashboardQueryParams & { limit?: number }): Promise<RecentPurchaseOrder[]> => {
     const res = await get<SuccessResponse<RecentPurchaseOrder[]>>(`${BASE}/recent-purchase-orders`, {
       params,
     });
@@ -150,8 +167,9 @@ export const dashboardApi = {
   /**
    * GET /dashboard/recent-grns
    * Returns recently received goods.
+   * Supports the same period / from_date / to_date filters as the stats section.
    */
-  getRecentGRNs: async (params?: { limit?: number }): Promise<RecentGRN[]> => {
+  getRecentGRNs: async (params?: DashboardQueryParams & { limit?: number }): Promise<RecentGRN[]> => {
     const res = await get<SuccessResponse<RecentGRN[]>>(`${BASE}/recent-grns`, {
       params,
     });
@@ -164,12 +182,10 @@ export const dashboardApi = {
 
   /**
    * GET /dashboard/low-stock
-   * Returns products at or below reorder level.
+   * Returns all products at or below reorder level (no limit param — backend returns all).
    */
-  getLowStockItems: async (params?: { limit?: number }): Promise<LowStockItem[]> => {
-    const res = await get<SuccessResponse<LowStockItem[]>>(`${BASE}/low-stock`, {
-      params,
-    });
+  getLowStockItems: async (): Promise<LowStockItem[]> => {
+    const res = await get<SuccessResponse<LowStockItem[]>>(`${BASE}/low-stock`);
     return res.data;
   },
 

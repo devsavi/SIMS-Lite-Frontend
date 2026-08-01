@@ -27,6 +27,8 @@ import {
   type PurchaseOrderFormValues,
 } from "../schemas/po.schema";
 import type { PurchaseOrder } from "../types";
+import { formatCurrency } from "@/utils/format";
+import { useSystemSettingsStore } from "@/stores/settings.store";
 
 export interface SupplierOption {
   id: string;
@@ -60,6 +62,8 @@ export function PurchaseOrderForm({
     quantity: item.quantity,
     unitCost: item.unitCost,
   })) || [{ productId: "", quantity: 1, unitCost: 0 }];
+
+  const baseCurrency = useSystemSettingsStore((s) => s.baseCurrency);
 
   const {
     register,
@@ -180,8 +184,8 @@ export function PurchaseOrderForm({
               <TableRow>
                 <TableHead className="w-[40%]">Product *</TableHead>
                 <TableHead className="w-[20%] text-right">Quantity *</TableHead>
-                <TableHead className="w-[20%] text-right">Unit Cost ($) *</TableHead>
-                <TableHead className="w-[15%] text-right">Line Total ($)</TableHead>
+                <TableHead className="w-[20%] text-right">Unit Cost ({baseCurrency}) *</TableHead>
+                <TableHead className="w-[15%] text-right">Line Total ({baseCurrency})</TableHead>
                 <TableHead className="w-[5%]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -248,7 +252,7 @@ export function PurchaseOrderForm({
                       )}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      ${lineTotal.toFixed(2)}
+                      {formatCurrency(lineTotal)}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
@@ -276,7 +280,7 @@ export function PurchaseOrderForm({
               Estimated Total Amount:
             </span>
             <span className="text-xl font-bold text-primary">
-              ${grandTotal.toFixed(2)}
+              {formatCurrency(grandTotal)}
             </span>
           </div>
         </div>
