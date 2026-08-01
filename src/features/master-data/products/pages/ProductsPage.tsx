@@ -3,13 +3,28 @@
 /**
  * ProductsPage — full CRUD list page for products.
  * Supports server-side search, filtering by category/brand/supplier, pagination.
+ * Includes barcode download, Excel import/export template, and image management.
  */
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, RotateCcw, Eye } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  Download,
+  Upload,
+  FileSpreadsheet,
+} from "lucide-react";
 import { type SortingState } from "@tanstack/react-table";
-import { useProducts, useDeleteProduct, useRestoreProduct } from "../../hooks/use-products";
+import {
+  useProducts,
+  useDeleteProduct,
+  useDownloadBarcode,
+  useDownloadImportTemplate,
+  useBulkImportProducts,
+} from "../../hooks/use-products";
 import { useCategories } from "../../hooks/use-categories";
 import { useBrands } from "../../hooks/use-brands";
 import { useSuppliers } from "../../hooks/use-suppliers";
@@ -36,9 +51,19 @@ import {
   FilterBar,
 } from "@/components/common";
 import type { ColumnDef } from "@/components/common/data-table";
-import { formatDate } from "@/utils/format";
+import { formatDate, formatCurrency } from "@/utils/format";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Product, Category, Brand, Supplier } from "../../types";
+
+/** Trigger a blob download in the browser. */
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export function ProductsPage() {
   const router = useRouter();
@@ -64,6 +89,9 @@ export function ProductsPage() {
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Product | null>(null);
 
+  // ---- Import file ref ----
+  const importInputRef = React.useRef<HTMLInputElement>(null);
+
   // Automatically open dialog if query param create=true
   React.useEffect(() => {
     if (searchParams.get("create") === "true") {
@@ -80,21 +108,23 @@ export function ProductsPage() {
   // ---- Queries ----
   const { data, isLoading, error, refetch } = useProducts({
     page,
-    page_size: pageSize,
+    size: pageSize,
     search: debouncedSearch || undefined,
-    is_active: showInactive ? undefined : true,
+    active_only: showInactive ? undefined : true,
     ordering,
     category_id: categoryId,
     brand_id: brandId,
     supplier_id: supplierId,
   });
 
-  const { data: categoriesData } = useCategories({ page: 1, page_size: 200, is_active: true });
-  const { data: brandsData } = useBrands({ page: 1, page_size: 200, is_active: true });
-  const { data: suppliersData } = useSuppliers({ page: 1, page_size: 200, is_active: true });
+  const { data: categoriesData } = useCategories({ page: 1, page_size: 100, is_active: true });
+  const { data: brandsData } = useBrands({ page: 1, page_size: 100, is_active: true });
+  const { data: suppliersData } = useSuppliers({ page: 1, page_size: 100, is_active: true });
 
   const deleteMutation = useDeleteProduct();
-  const restoreMutation = useRestoreProduct();
+  const downloadBarcode = useDownloadBarcode();
+  const downloadTemplate = useDownloadImportTemplate();
+  const bulkImport = useBulkImportProducts();
 
   // Reset page on filter changes
   React.useEffect(() => { setPage(1); }, [debouncedSearch, categoryId, brandId, supplierId, showInactive]);
@@ -122,6 +152,29 @@ export function ProductsPage() {
     ...(showInactive ? [{ label: "Showing inactive", onRemove: () => setShowInactive(false) }] : []),
   ];
 
+  // ---- Handlers ----
+  async function handleDownloadBarcode(product: Product) {
+    const blob = await downloadBarcode.mutateAsync(product.id);
+    downloadBlob(blob, `barcode-${product.sku}.png`);
+  }
+
+  async function handleDownloadTemplate() {
+    const blob = await downloadTemplate.mutateAsync();
+    downloadBlob(blob, "products-import-template.xlsx");
+  }
+
+  function handleImportClick() {
+    importInputRef.current?.click();
+  }
+
+  async function handleImportFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await bulkImport.mutateAsync(file);
+    // reset so the same file can be re-selected
+    e.target.value = "";
+  }
+
   // ---- Columns ----
   const columns: ColumnDef<Product>[] = [
     {
@@ -132,13 +185,20 @@ export function ProductsPage() {
           {row.original.sku}
         </code>
       ),
-      size: 120,
+      size: 150,
     },
     {
       accessorKey: "name",
       header: "Name",
       cell: ({ row }) => (
-        <span className="font-medium text-foreground">{row.original.name}</span>
+        <div>
+          <p className="font-medium text-foreground">{row.original.name}</p>
+          {row.original.short_description && (
+            <p className="text-xs text-muted-foreground line-clamp-1">
+              {row.original.short_description}
+            </p>
+          )}
+        </div>
       ),
     },
     {
@@ -174,20 +234,15 @@ export function ProductsPage() {
       size: 80,
     },
     {
-      id: "stock",
-      header: "Stock",
-      cell: ({ row }) => {
-        const current = row.original.current_stock;
-        const min = row.original.min_stock_level;
-        if (current == null) return <span className="text-muted-foreground">—</span>;
-        const isLow = current <= min;
-        return (
-          <span className={isLow ? "text-destructive font-medium" : undefined}>
-            {current}
-          </span>
-        );
-      },
-      size: 80,
+      id: "selling_price",
+      accessorKey: "selling_price",
+      header: "Price",
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums">
+          {formatCurrency(row.original.selling_price)}
+        </span>
+      ),
+      size: 100,
     },
     {
       accessorKey: "is_active",
@@ -198,10 +253,10 @@ export function ProductsPage() {
       size: 100,
     },
     {
-      accessorKey: "createdAt",
+      accessorKey: "created_at",
       header: "Created",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">{formatDate(row.original.createdAt)}</span>
+        <span className="text-sm text-muted-foreground">{formatDate(row.original.created_at)}</span>
       ),
       size: 120,
     },
@@ -223,27 +278,25 @@ export function ProductsPage() {
             </Button>
           </PermissionGuard>
           <PermissionGuard permission="products.edit">
-            {row.original.is_active ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => { setEditingProduct(row.original); setDialogOpen(true); }}
-                aria-label={`Edit ${row.original.name}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => restoreMutation.mutate(row.original.id)}
-                aria-label={`Restore ${row.original.name}`}
-                disabled={restoreMutation.isPending}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setEditingProduct(row.original); setDialogOpen(true); }}
+              aria-label={`Edit ${row.original.name}`}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
           </PermissionGuard>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDownloadBarcode(row.original)}
+            aria-label={`Download barcode for ${row.original.name}`}
+            title="Download barcode"
+            disabled={downloadBarcode.isPending}
+          >
+            <Download className="h-4 w-4" />
+          </Button>
           <PermissionGuard permission="products.delete">
             {row.original.is_active && (
               <Button
@@ -259,7 +312,7 @@ export function ProductsPage() {
           </PermissionGuard>
         </div>
       ),
-      size: 120,
+      size: 160,
     },
   ];
 
@@ -269,14 +322,51 @@ export function ProductsPage() {
         title="Products"
         description="Manage your product catalogue."
         actions={
-          <PermissionGuard permission="products.create">
+          <div className="flex items-center gap-2">
+            {/* Import template */}
             <Button
-              onClick={() => { setEditingProduct(null); setDialogOpen(true); }}
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadTemplate}
+              disabled={downloadTemplate.isPending}
+              title="Download Excel import template"
             >
-              <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-              New Product
+              <FileSpreadsheet className="mr-2 h-4 w-4" aria-hidden="true" />
+              Template
             </Button>
-          </PermissionGuard>
+
+            {/* Bulk import */}
+            <PermissionGuard permission="products.create">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleImportClick}
+                disabled={bulkImport.isPending}
+                title="Bulk import products from Excel"
+              >
+                <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                Import
+              </Button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                className="hidden"
+                onChange={handleImportFileChange}
+                aria-label="Select Excel file for bulk import"
+              />
+            </PermissionGuard>
+
+            {/* New product */}
+            <PermissionGuard permission="products.create">
+              <Button
+                onClick={() => { setEditingProduct(null); setDialogOpen(true); }}
+              >
+                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                New Product
+              </Button>
+            </PermissionGuard>
+          </div>
         }
       />
 
@@ -370,7 +460,7 @@ export function ProductsPage() {
         error={error}
         onRetry={refetch}
         serverSide
-        totalRows={data?.total ?? 0}
+        totalRows={data?.pagination?.total ?? 0}
         page={page}
         pageSize={pageSize}
         onPageChange={setPage}

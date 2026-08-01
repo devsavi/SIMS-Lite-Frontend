@@ -58,10 +58,12 @@ export const suppliersApi = {
     return {
       status: res.status,
       data: (res.data || []).map(mapSupplier),
-      total: res.pagination?.total ?? 0,
-      page: res.pagination?.page ?? 1,
-      page_size: res.pagination?.size ?? 20,
-      total_pages: res.pagination?.pages ?? 1,
+      pagination: {
+        total: res.pagination?.total ?? 0,
+        page: res.pagination?.page ?? 1,
+        size: res.pagination?.size ?? 20,
+        pages: res.pagination?.pages ?? 1,
+      },
     };
   },
 

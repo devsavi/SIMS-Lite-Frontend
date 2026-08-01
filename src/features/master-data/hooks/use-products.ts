@@ -11,6 +11,10 @@ import { productKeys } from "./query-keys";
 import { QUERY_CACHE_TIMES } from "@/lib/query/query-client";
 import type { CreateProductRequest, UpdateProductRequest, ProductListParams } from "../types";
 
+// ---------------------------------------------------------------------------
+// Queries
+// ---------------------------------------------------------------------------
+
 export function useProducts(params?: ProductListParams) {
   return useQuery({
     queryKey: productKeys.list(params),
@@ -27,6 +31,10 @@ export function useProduct(id: string | null) {
     ...QUERY_CACHE_TIMES.MASTER_DATA,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Mutations
+// ---------------------------------------------------------------------------
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
@@ -75,17 +83,70 @@ export function useDeleteProduct() {
   });
 }
 
-export function useRestoreProduct() {
+export function useUploadProductImage(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => productsApi.restore(id),
-    onSuccess: () => {
+    mutationFn: (file: File) => productsApi.uploadImage(id, file),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(productKeys.detail(id), updated);
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      toast({ title: "Product restored", variant: "success" });
+      toast({ title: "Image uploaded", variant: "success" });
     },
     onError: () => {
-      toast({ title: "Failed to restore product", variant: "destructive" });
+      toast({ title: "Failed to upload image", variant: "destructive" });
+    },
+  });
+}
+
+export function useDeleteProductImage(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => productsApi.deleteImage(id),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(productKeys.detail(id), updated);
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      toast({ title: "Image removed", variant: "success" });
+    },
+    onError: () => {
+      toast({ title: "Failed to remove image", variant: "destructive" });
+    },
+  });
+}
+
+export function useDownloadBarcode() {
+  return useMutation({
+    mutationFn: (id: string) => productsApi.downloadBarcode(id),
+    onError: () => {
+      toast({ title: "Failed to download barcode", variant: "destructive" });
+    },
+  });
+}
+
+export function useDownloadImportTemplate() {
+  return useMutation({
+    mutationFn: () => productsApi.downloadImportTemplate(),
+    onError: () => {
+      toast({ title: "Failed to download template", variant: "destructive" });
+    },
+  });
+}
+
+export function useBulkImportProducts() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => productsApi.bulkImport(file),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      toast({
+        title: `Import complete — ${result.imported} imported, ${result.failed} failed`,
+        variant: result.failed > 0 ? "destructive" : "success",
+      });
+    },
+    onError: () => {
+      toast({ title: "Failed to import products", variant: "destructive" });
     },
   });
 }

@@ -42,7 +42,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     href: "/products?create=true",
     icon: Package,
     permission: "products.create",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    // created chip — blue
+    color: "bg-[#DCEBFC] text-[#1D63C4] dark:bg-[rgba(96,165,250,0.15)] dark:text-[#60A5FA]",
   },
   {
     id: "create-supplier",
@@ -51,7 +52,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     href: "/suppliers?create=true",
     icon: Truck,
     permission: "suppliers.create",
-    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    // approved chip — green
+    color: "bg-[#D6F5DE] text-[#1B8A4C] dark:bg-[rgba(52,211,153,0.15)] dark:text-[#34D399]",
   },
   {
     id: "create-po",
@@ -60,7 +62,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     href: "/procurement/purchase-orders/new",
     icon: ShoppingCart,
     permission: "purchase_orders.create",
-    color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    // updated chip — amber-orange
+    color: "bg-[#FEEAD3] text-[#C1650F] dark:bg-[rgba(251,146,60,0.15)] dark:text-[#FB923C]",
   },
   {
     id: "view-inventory",
@@ -69,7 +72,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     href: "/inventory",
     icon: Archive,
     permission: "inventory.view",
-    color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    // deleted chip — charcoal grey
+    color: "bg-[#E7E7E7] text-[#4A4A4A] dark:bg-[rgba(148,163,184,0.15)] dark:text-[#94A3B8]",
   },
   {
     id: "view-reports",
@@ -78,7 +82,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     href: "/reports",
     icon: BarChart2,
     permission: "reports.view",
-    color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
+    // received chip — teal
+    color: "bg-[#D3F3F1] text-[#12796F] dark:bg-[rgba(45,212,191,0.15)] dark:text-[#2DD4BF]",
   },
 ];
 
@@ -90,7 +95,8 @@ const OFFICER_ACTIONS: QuickAction[] = [
     href: "/procurement/purchase-orders/new",
     icon: ShoppingCart,
     permission: "purchase_orders.create",
-    color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    // updated chip — amber-orange
+    color: "bg-[#FEEAD3] text-[#C1650F] dark:bg-[rgba(251,146,60,0.15)] dark:text-[#FB923C]",
   },
   {
     id: "receive-goods",
@@ -99,7 +105,8 @@ const OFFICER_ACTIONS: QuickAction[] = [
     href: "/grn/new",
     icon: ClipboardList,
     permission: "grn.create",
-    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    // received chip — teal
+    color: "bg-[#D3F3F1] text-[#12796F] dark:bg-[rgba(45,212,191,0.15)] dark:text-[#2DD4BF]",
   },
   {
     id: "view-inventory",
@@ -108,7 +115,8 @@ const OFFICER_ACTIONS: QuickAction[] = [
     href: "/inventory",
     icon: Archive,
     permission: "inventory.view",
-    color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    // deleted chip — charcoal grey
+    color: "bg-[#E7E7E7] text-[#4A4A4A] dark:bg-[rgba(148,163,184,0.15)] dark:text-[#94A3B8]",
   },
 ];
 
@@ -120,7 +128,8 @@ const STORE_KEEPER_ACTIONS: QuickAction[] = [
     href: "/inventory/adjust",
     icon: Settings,
     permission: "inventory.adjust",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    // created chip — blue
+    color: "bg-[#DCEBFC] text-[#1D63C4] dark:bg-[rgba(96,165,250,0.15)] dark:text-[#60A5FA]",
   },
   {
     id: "stock-release",
@@ -129,7 +138,8 @@ const STORE_KEEPER_ACTIONS: QuickAction[] = [
     href: "/stock-release/new",
     icon: ArrowUpFromLine,
     permission: "stock_release.create",
-    color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    // released chip — purple
+    color: "bg-[#EAE1FB] text-[#6D28D9] dark:bg-[rgba(167,139,250,0.15)] dark:text-[#A78BFA]",
   },
   {
     id: "view-inventory",
@@ -138,7 +148,8 @@ const STORE_KEEPER_ACTIONS: QuickAction[] = [
     href: "/inventory",
     icon: Archive,
     permission: "inventory.view",
-    color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    // deleted chip — charcoal grey
+    color: "bg-[#E7E7E7] text-[#4A4A4A] dark:bg-[rgba(148,163,184,0.15)] dark:text-[#94A3B8]",
   },
 ];
 

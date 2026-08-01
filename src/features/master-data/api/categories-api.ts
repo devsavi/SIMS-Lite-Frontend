@@ -16,7 +16,37 @@ const BASE = "/categories";
 
 export const categoriesApi = {
   list: async (params?: ListParams): Promise<PaginatedListResponse<Category>> => {
-    return get<PaginatedListResponse<Category>>(BASE, { params });
+    const apiParams: Record<string, unknown> = {};
+    if (params) {
+      if (params.page !== undefined) apiParams.page = params.page;
+      if (params.page_size !== undefined) apiParams.size = params.page_size;
+      if (params.is_active !== undefined) apiParams.active_only = params.is_active;
+      if (params.search !== undefined) apiParams.search = params.search;
+      if (params.ordering !== undefined) apiParams.ordering = params.ordering;
+    }
+
+    interface RawPaginatedResponse {
+      status: "success";
+      data: Category[];
+      pagination: {
+        page: number;
+        size: number;
+        total: number;
+        pages: number;
+      };
+    }
+
+    const res = await get<RawPaginatedResponse>(BASE, { params: apiParams });
+    return {
+      status: res.status,
+      data: res.data || [],
+      pagination: {
+        total: res.pagination?.total ?? 0,
+        page: res.pagination?.page ?? 1,
+        size: res.pagination?.size ?? 20,
+        pages: res.pagination?.pages ?? 1,
+      },
+    };
   },
 
   getById: async (id: string): Promise<Category> => {

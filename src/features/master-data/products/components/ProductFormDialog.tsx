@@ -46,14 +46,16 @@ export function ProductFormDialog({
   const defaultValues: Partial<ProductFormValues> = product
     ? {
         name: product.name,
-        sku: product.sku,
-        barcode: product.barcode ?? "",
+        short_description: product.short_description ?? "",
         description: product.description ?? "",
-        category_id: product.category_id ?? null,
-        brand_id: product.brand_id ?? null,
-        uom_id: product.uom_id ?? null,
-        supplier_id: product.supplier_id ?? null,
-        min_stock_level: product.min_stock_level,
+        category_id: product.category?.id ?? null,
+        brand_id: product.brand?.id ?? null,
+        uom_id: product.uom?.id ?? null,
+        supplier_id: product.supplier?.id ?? null,
+        cost_price: product.cost_price,
+        selling_price: product.selling_price,
+        reorder_level: product.reorder_level,
+        reorder_quantity: product.reorder_quantity,
         is_active: product.is_active,
       }
     : undefined!;
@@ -66,7 +68,7 @@ export function ProductFormDialog({
           <DialogDescription>
             {isEditing
               ? "Update product information."
-              : "Add a new product to the catalogue."}
+              : "Add a new product to the catalogue. The SKU will be auto-generated."}
           </DialogDescription>
         </DialogHeader>
 

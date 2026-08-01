@@ -178,7 +178,6 @@ describe("productSchema", () => {
   it("accepts a minimal valid product", () => {
     const result = productSchema.safeParse({
       name: "USB Cable",
-      sku: "USB-001",
       is_active: true,
     });
     expect(result.success).toBe(true);
@@ -187,43 +186,46 @@ describe("productSchema", () => {
   it("accepts a full product", () => {
     const result = productSchema.safeParse({
       name: "USB-C Cable 2m",
-      sku: "USB-C-2M-BLK",
-      barcode: "012345678901",
+      short_description: "A 2m USB-C cable",
       description: "High quality USB-C cable",
       category_id: "550e8400-e29b-41d4-a716-446655440000",
       brand_id: "550e8400-e29b-41d4-a716-446655440001",
       uom_id: "550e8400-e29b-41d4-a716-446655440002",
       supplier_id: "550e8400-e29b-41d4-a716-446655440003",
-      min_stock_level: 10,
+      cost_price: 50,
+      selling_price: 100,
+      reorder_level: 10,
+      reorder_quantity: 15,
       is_active: true,
     });
     expect(result.success).toBe(true);
   });
 
   it("rejects empty name", () => {
-    const result = productSchema.safeParse({ name: "", sku: "SKU-001" });
+    const result = productSchema.safeParse({ name: "" });
     expect(result.success).toBe(false);
   });
 
-  it("rejects empty SKU", () => {
-    const result = productSchema.safeParse({ name: "Product", sku: "" });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects negative min_stock_level", () => {
+  it("rejects negative cost_price", () => {
     const result = productSchema.safeParse({
       name: "Product",
-      sku: "P-001",
-      min_stock_level: -1,
+      cost_price: -1,
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects non-integer min_stock_level", () => {
+  it("rejects negative reorder_level", () => {
     const result = productSchema.safeParse({
       name: "Product",
-      sku: "P-001",
-      min_stock_level: 1.5,
+      reorder_level: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer reorder_quantity", () => {
+    const result = productSchema.safeParse({
+      name: "Product",
+      reorder_quantity: 1.5,
     });
     expect(result.success).toBe(false);
   });
@@ -231,7 +233,6 @@ describe("productSchema", () => {
   it("rejects invalid category UUID", () => {
     const result = productSchema.safeParse({
       name: "Product",
-      sku: "P-001",
       category_id: "not-a-uuid",
     });
     expect(result.success).toBe(false);
@@ -240,17 +241,19 @@ describe("productSchema", () => {
   it("accepts null category_id", () => {
     const result = productSchema.safeParse({
       name: "Product",
-      sku: "P-001",
       category_id: null,
     });
     expect(result.success).toBe(true);
   });
 
-  it("defaults min_stock_level to 0", () => {
-    const result = productSchema.safeParse({ name: "Product", sku: "P-001" });
+  it("defaults numeric fields to 0", () => {
+    const result = productSchema.safeParse({ name: "Product" });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.min_stock_level).toBe(0);
+      expect(result.data.cost_price).toBe(0);
+      expect(result.data.selling_price).toBe(0);
+      expect(result.data.reorder_level).toBe(0);
+      expect(result.data.reorder_quantity).toBe(0);
     }
   });
 });

@@ -2,7 +2,7 @@
 
 /**
  * ProductDetailPage — detail view for a single product.
- * Shows general info, classification, inventory status, and metadata.
+ * Shows general info, classification, pricing, inventory thresholds, image, and metadata.
  */
 
 import * as React from "react";
@@ -11,22 +11,28 @@ import {
   ArrowLeft,
   Pencil,
   Trash2,
-  RotateCcw,
   Package,
   Tag,
   Barcode,
-  TrendingDown,
   Building2,
   Ruler,
   Truck,
-  AlertCircle,
+  DollarSign,
+  Download,
+  ImageIcon,
+  X,
 } from "lucide-react";
-import { useProduct, useDeleteProduct, useRestoreProduct } from "../../hooks/use-products";
+import {
+  useProduct,
+  useDeleteProduct,
+  useUploadProductImage,
+  useDeleteProductImage,
+  useDownloadBarcode,
+} from "../../hooks/use-products";
 import { ProductFormDialog } from "../components/ProductFormDialog";
 import { Button } from "@/app/components/ui/button";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { Separator } from "@/app/components/ui/separator";
-import { Badge } from "@/app/components/ui/badge";
 import {
   PageContainer,
   PageHeader,
@@ -37,8 +43,9 @@ import {
   ErrorState,
 } from "@/components/common";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { formatDate } from "@/utils/format";
+import { formatDate, formatCurrency } from "@/utils/format";
 import { usePageTitle } from "@/hooks/use-page-title";
+
 interface ProductDetailPageProps {
   productId: string;
 }
@@ -89,6 +96,16 @@ function ProductDetailSkeleton() {
   );
 }
 
+/** Trigger a blob download in the browser */
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function ProductDetailPage({ productId }: ProductDetailPageProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = React.useState(false);
@@ -96,7 +113,11 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
 
   const { data: product, isLoading, error, refetch } = useProduct(productId);
   const deleteMutation = useDeleteProduct();
-  const restoreMutation = useRestoreProduct();
+  const uploadImage = useUploadProductImage(productId);
+  const deleteImage = useDeleteProductImage(productId);
+  const downloadBarcode = useDownloadBarcode();
+
+  const imageInputRef = React.useRef<HTMLInputElement>(null);
 
   usePageTitle(product?.name);
 
@@ -113,13 +134,23 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
     router.push("/products");
   }
 
-  const isLowStock = product.current_stock != null && product.current_stock <= product.min_stock_level;
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadImage.mutateAsync(file);
+    e.target.value = "";
+  }
+
+  async function handleDownloadBarcode() {
+    const blob = await downloadBarcode.mutateAsync(productId);
+    downloadBlob(blob, `barcode-${product!.sku}.png`);
+  }
 
   return (
     <PageContainer>
       <PageHeader
         title={product.name}
-        description={product.description ?? `SKU: ${product.sku}`}
+        description={product.short_description ?? `SKU: ${product.sku}`}
         breadcrumb={
           <Breadcrumb
             items={[
@@ -134,24 +165,26 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
               <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
               Back
             </Button>
+
+            {/* Download barcode */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadBarcode}
+              disabled={downloadBarcode.isPending}
+              title="Download barcode PNG"
+            >
+              <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+              Barcode
+            </Button>
+
             <PermissionGuard permission="products.edit">
-              {product.is_active ? (
-                <Button size="sm" onClick={() => setEditOpen(true)}>
-                  <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Edit
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => restoreMutation.mutate(productId)}
-                  disabled={restoreMutation.isPending}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Restore
-                </Button>
-              )}
+              <Button size="sm" onClick={() => setEditOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
+                Edit
+              </Button>
             </PermissionGuard>
+
             <PermissionGuard permission="products.delete">
               {product.is_active && (
                 <Button
@@ -187,13 +220,28 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
             <DetailRow
               icon={<Tag className="h-4 w-4" />}
               label="SKU"
-              value={<code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">{product.sku}</code>}
+              value={
+                <code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">
+                  {product.sku}
+                </code>
+              }
             />
             {product.barcode && (
               <DetailRow
                 icon={<Barcode className="h-4 w-4" />}
                 label="Barcode"
-                value={<code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">{product.barcode}</code>}
+                value={
+                  <code className="rounded-none bg-muted px-1.5 py-0.5 text-xs font-mono">
+                    {product.barcode}
+                  </code>
+                }
+              />
+            )}
+            {product.short_description && (
+              <DetailRow
+                icon={<Package className="h-4 w-4" />}
+                label="Short Description"
+                value={product.short_description}
               />
             )}
             {product.description && (
@@ -244,56 +292,150 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
             <DetailRow
               icon={<Truck className="h-4 w-4" />}
               label="Supplier"
-              value={product.supplier?.company_name ?? "—"}
+              value={
+                product.supplier ? (
+                  <span>
+                    {product.supplier.name}
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      #{product.supplier.supplier_code}
+                    </span>
+                  </span>
+                ) : (
+                  "—"
+                )
+              }
             />
           </CardContent>
         </Card>
 
-        {/* Inventory */}
+        {/* Pricing */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <DollarSign className="h-4 w-4" aria-hidden="true" />
+              Pricing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y divide-border">
+            <DetailRow
+              icon={<DollarSign className="h-4 w-4" />}
+              label="Cost Price"
+              value={<span className="font-medium tabular-nums">{formatCurrency(product.cost_price)}</span>}
+            />
+            <DetailRow
+              icon={<DollarSign className="h-4 w-4" />}
+              label="Selling Price"
+              value={<span className="font-medium tabular-nums">{formatCurrency(product.selling_price)}</span>}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Inventory thresholds */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Package className="h-4 w-4" aria-hidden="true" />
-              Inventory
+              Inventory Thresholds
             </CardTitle>
           </CardHeader>
           <CardContent className="divide-y divide-border">
             <DetailRow
               icon={<Package className="h-4 w-4" />}
-              label="Current Stock"
+              label="Reorder Level"
               value={
-                product.current_stock != null ? (
-                  <div className="flex items-center gap-2">
-                    <span className={isLowStock ? "text-destructive font-semibold" : "font-medium"}>
-                      {product.current_stock}
-                    </span>
-                    {product.uom && <span className="text-xs text-muted-foreground">{product.uom.symbol}</span>}
-                    {isLowStock && (
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                        Low Stock
-                      </Badge>
-                    )}
-                  </div>
-                ) : (
-                  "Not tracked"
-                )
+                <span>
+                  {product.reorder_level}
+                  {product.uom && (
+                    <span className="text-xs text-muted-foreground ml-1">{product.uom.symbol}</span>
+                  )}
+                </span>
               }
             />
             <DetailRow
-              icon={<TrendingDown className="h-4 w-4" />}
-              label="Minimum Stock Level"
+              icon={<Package className="h-4 w-4" />}
+              label="Reorder Quantity"
               value={
                 <span>
-                  {product.min_stock_level}
-                  {product.uom && <span className="text-xs text-muted-foreground ml-1">{product.uom.symbol}</span>}
+                  {product.reorder_quantity}
+                  {product.uom && (
+                    <span className="text-xs text-muted-foreground ml-1">{product.uom.symbol}</span>
+                  )}
                 </span>
               }
             />
           </CardContent>
         </Card>
 
-        {/* Meta */}
+        {/* Product Image */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ImageIcon className="h-4 w-4" aria-hidden="true" />
+              Product Image
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {product.image_path ? (
+              <div className="flex flex-col gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={product.image_path}
+                  alt={product.name}
+                  className="max-h-48 w-auto rounded object-contain border border-border"
+                />
+                <PermissionGuard permission="products.edit">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => imageInputRef.current?.click()}
+                      disabled={uploadImage.isPending}
+                    >
+                      <ImageIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+                      Replace
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => deleteImage.mutate()}
+                      disabled={deleteImage.isPending}
+                    >
+                      <X className="mr-2 h-4 w-4" aria-hidden="true" />
+                      Remove
+                    </Button>
+                  </div>
+                </PermissionGuard>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 py-8 text-center text-muted-foreground">
+                <ImageIcon className="h-10 w-10 opacity-30" aria-hidden="true" />
+                <p className="text-sm">No image uploaded</p>
+                <PermissionGuard permission="products.edit">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={uploadImage.isPending}
+                  >
+                    <ImageIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Upload Image
+                  </Button>
+                </PermissionGuard>
+              </div>
+            )}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+              aria-label="Select product image"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Record Info */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Record Info</CardTitle>
@@ -306,11 +448,11 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Created</span>
-              <span>{formatDate(product.createdAt)}</span>
+              <span>{formatDate(product.created_at)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Last Updated</span>
-              <span>{formatDate(product.updatedAt)}</span>
+              <span>{formatDate(product.updated_at)}</span>
             </div>
           </CardContent>
         </Card>
@@ -328,7 +470,7 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         itemName={product.name}
-        description={`Are you sure you want to delete "${product.name}" (SKU: ${product.sku})? This action cannot be undone and will affect inventory records.`}
+        description={`Are you sure you want to delete "${product.name}" (SKU: ${product.sku})? This action cannot be undone.`}
         loading={deleteMutation.isPending}
         onConfirm={handleDelete}
       />

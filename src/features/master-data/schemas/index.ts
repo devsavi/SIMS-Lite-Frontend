@@ -118,14 +118,9 @@ export const productSchema = z.object({
     .min(1, "Product name is required")
     .max(200, "Product name must not exceed 200 characters")
     .trim(),
-  sku: z
+  short_description: z
     .string()
-    .min(1, "SKU is required")
-    .max(100, "SKU must not exceed 100 characters")
-    .trim(),
-  barcode: z
-    .string()
-    .max(100, "Barcode must not exceed 100 characters")
+    .max(500, "Short description must not exceed 500 characters")
     .optional()
     .or(z.literal(""))
     .nullable(),
@@ -139,10 +134,23 @@ export const productSchema = z.object({
   brand_id: z.string().uuid("Invalid brand").nullable().optional(),
   uom_id: z.string().uuid("Invalid unit of measure").nullable().optional(),
   supplier_id: z.string().uuid("Invalid supplier").nullable().optional(),
-  min_stock_level: z
+  cost_price: z
+    .number({ invalid_type_error: "Must be a number" })
+    .min(0, "Cost price cannot be negative")
+    .default(0),
+  selling_price: z
+    .number({ invalid_type_error: "Must be a number" })
+    .min(0, "Selling price cannot be negative")
+    .default(0),
+  reorder_level: z
     .number({ invalid_type_error: "Must be a number" })
     .int("Must be a whole number")
-    .min(0, "Minimum stock level cannot be negative")
+    .min(0, "Reorder level cannot be negative")
+    .default(0),
+  reorder_quantity: z
+    .number({ invalid_type_error: "Must be a number" })
+    .int("Must be a whole number")
+    .min(0, "Reorder quantity cannot be negative")
     .default(0),
   is_active: z.boolean().default(true),
 });

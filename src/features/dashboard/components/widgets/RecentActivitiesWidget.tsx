@@ -25,15 +25,55 @@ const ACTIVITY_ICONS: Record<ActivityItem["type"], React.ComponentType<{ classNa
   user: User,
 };
 
-const ACTION_COLORS: Record<string, string> = {
-  created: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  submitted: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  approved: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  rejected: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-  updated: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  deleted: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-  received: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  released: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+const ACTION_CHIP: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+  created: {
+    bg:     "bg-[#DCEBFC] dark:bg-[rgba(96,165,250,0.15)]",
+    text:   "text-[#1D63C4] dark:text-[#60A5FA]",
+    border: "border border-[#B4D5F8] dark:border-[rgba(96,165,250,0.4)]",
+    dot:    "bg-[#1D63C4] dark:bg-[#60A5FA]",
+  },
+  submitted: {
+    bg:     "bg-[#E0E3FC] dark:bg-[rgba(129,140,248,0.15)]",
+    text:   "text-[#4338CA] dark:text-[#818CF8]",
+    border: "border border-[#C1C7F8] dark:border-[rgba(129,140,248,0.4)]",
+    dot:    "bg-[#4338CA] dark:bg-[#818CF8]",
+  },
+  approved: {
+    bg:     "bg-[#D6F5DE] dark:bg-[rgba(52,211,153,0.15)]",
+    text:   "text-[#1B8A4C] dark:text-[#34D399]",
+    border: "border border-[#AEE8C0] dark:border-[rgba(52,211,153,0.4)]",
+    dot:    "bg-[#1B8A4C] dark:bg-[#34D399]",
+  },
+  rejected: {
+    bg:     "bg-[#FDE2E2] dark:bg-[rgba(248,113,113,0.15)]",
+    text:   "text-[#C0362C] dark:text-[#F87171]",
+    border: "border border-[#F8C1BC] dark:border-[rgba(248,113,113,0.4)]",
+    dot:    "bg-[#C0362C] dark:bg-[#F87171]",
+  },
+  updated: {
+    bg:     "bg-[#FEEAD3] dark:bg-[rgba(251,146,60,0.15)]",
+    text:   "text-[#C1650F] dark:text-[#FB923C]",
+    border: "border border-[#FBD2A0] dark:border-[rgba(251,146,60,0.4)]",
+    dot:    "bg-[#C1650F] dark:bg-[#FB923C]",
+  },
+  deleted: {
+    bg:     "bg-[#E7E7E7] dark:bg-[rgba(148,163,184,0.15)]",
+    text:   "text-[#4A4A4A] dark:text-[#94A3B8]",
+    border: "border border-[#CFCFCF] dark:border-[rgba(148,163,184,0.4)]",
+    dot:    "bg-[#4A4A4A] dark:bg-[#94A3B8]",
+  },
+  received: {
+    bg:     "bg-[#D3F3F1] dark:bg-[rgba(45,212,191,0.15)]",
+    text:   "text-[#12796F] dark:text-[#2DD4BF]",
+    border: "border border-[#A7E5E0] dark:border-[rgba(45,212,191,0.4)]",
+    dot:    "bg-[#12796F] dark:bg-[#2DD4BF]",
+  },
+  released: {
+    bg:     "bg-[#EAE1FB] dark:bg-[rgba(167,139,250,0.15)]",
+    text:   "text-[#6D28D9] dark:text-[#A78BFA]",
+    border: "border border-[#D3C0F5] dark:border-[rgba(167,139,250,0.4)]",
+    dot:    "bg-[#6D28D9] dark:bg-[#A78BFA]",
+  },
 };
 
 // Height of one row ≈ 64px; show 5 rows initially
@@ -45,7 +85,7 @@ interface ActivityItemRowProps {
 
 function ActivityItemRow({ item }: ActivityItemRowProps) {
   const Icon = ACTIVITY_ICONS[item.type] ?? Activity;
-  const actionColor = ACTION_COLORS[item.action] ?? "bg-muted text-muted-foreground";
+  const chip = ACTION_CHIP[item.action];
   const label = item.resource_name || item.reference;
 
   return (
@@ -58,21 +98,28 @@ function ActivityItemRow({ item }: ActivityItemRowProps) {
           <span className="text-sm font-medium text-foreground truncate">
             {item.user_name}
           </span>
-          <span
-            className={cn(
-              "inline-flex items-center px-1.5 py-0.5 text-xs font-medium",
-              actionColor
-            )}
-          >
-            {item.action}
-          </span>
-          {label && (
-            <span className="text-xs text-muted-foreground font-mono">
-              {label}
+          {chip ? (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-semibold",
+                chip.bg, chip.text, chip.border
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", chip.dot)} aria-hidden="true" />
+              {item.action}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium border border-border bg-muted text-muted-foreground">
+              {item.action}
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-xs text-muted-foreground truncate">
+        {label && (
+          <p className="mt-0.5 text-xs text-muted-foreground font-mono truncate">
+            {label}
+          </p>
+        )}
+        <p className="mt-0.5 text-xs text-muted-foreground truncate" title={item.description ?? undefined}>
           {item.description}
         </p>
       </div>

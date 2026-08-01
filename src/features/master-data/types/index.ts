@@ -19,10 +19,12 @@ export interface SuccessResponse<T> {
 export interface PaginatedListResponse<T> {
   status: "success";
   data: T[];
-  total: number;
-  page: number;
-  page_size: number;
-  total_pages: number;
+  pagination: {
+    page: number;
+    size: number;
+    total: number;
+    pages: number;
+  };
 }
 
 /** Common list query params */
@@ -146,29 +148,30 @@ export interface UpdateSupplierRequest extends Partial<CreateSupplierRequest> {}
 // Product
 // ---------------------------------------------------------------------------
 
-export interface Product extends AuditFields {
+export interface Product {
   id: string;
-  name: string;
   sku: string;
   barcode: string | null;
+  name: string;
   description: string | null;
-  category_id: string | null;
-  category?: CategorySummary | null;
-  brand_id: string | null;
-  brand?: BrandSummary | null;
-  uom_id: string | null;
-  uom?: UomSummary | null;
-  supplier_id: string | null;
-  supplier?: SupplierSummary | null;
-  min_stock_level: number;
-  current_stock?: number;
+  short_description: string | null;
+  category: CategorySummary | null;
+  brand: BrandSummary | null;
+  uom: UomSummary | null;
+  supplier: SupplierSummary | null;
+  cost_price: number;
+  selling_price: number;
+  reorder_level: number;
+  reorder_quantity: number;
+  image_path: string | null;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BrandSummary {
   id: string;
   name: string;
-  slug: string;
 }
 
 export interface UomSummary {
@@ -179,27 +182,53 @@ export interface UomSummary {
 
 export interface SupplierSummary {
   id: string;
-  company_name: string;
+  supplier_code: string;
+  name: string;
 }
 
 export interface CreateProductRequest {
   name: string;
-  sku: string;
-  barcode?: string | null;
   description?: string | null;
+  short_description?: string | null;
   category_id?: string | null;
   brand_id?: string | null;
   uom_id?: string | null;
   supplier_id?: string | null;
-  min_stock_level?: number;
+  cost_price?: number;
+  selling_price?: number;
+  reorder_level?: number;
+  reorder_quantity?: number;
   is_active?: boolean;
 }
 
-export interface UpdateProductRequest extends Partial<CreateProductRequest> {}
+export interface UpdateProductRequest {
+  name?: string;
+  description?: string | null;
+  short_description?: string | null;
+  category_id?: string | null;
+  brand_id?: string | null;
+  uom_id?: string | null;
+  supplier_id?: string | null;
+  cost_price?: number;
+  selling_price?: number;
+  reorder_level?: number;
+  reorder_quantity?: number;
+  is_active?: boolean;
+}
 
-export interface ProductListParams extends ListParams {
+export interface ProductListParams {
+  page?: number;
+  size?: number;
+  search?: string;
+  ordering?: string;
+  active_only?: boolean;
   category_id?: string;
   brand_id?: string;
   supplier_id?: string;
-  uom_id?: string;
+}
+
+export interface BulkImportResult {
+  imported: number;
+  failed: number;
+  errors: Array<{ row: number; message: string }>;
 }

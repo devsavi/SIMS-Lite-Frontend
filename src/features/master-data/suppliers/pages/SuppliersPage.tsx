@@ -242,7 +242,7 @@ export function SuppliersPage() {
         error={error}
         onRetry={refetch}
         serverSide
-        totalRows={data?.total ?? 0}
+        totalRows={data?.pagination?.total ?? 0}
         page={page}
         pageSize={pageSize}
         onPageChange={setPage}
