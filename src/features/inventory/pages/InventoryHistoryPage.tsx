@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { Button } from "@/app/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { InventoryHistoryTable } from "../components/inventory-history/InventoryHistoryTable";
 import { LedgerFilters } from "../components/filters/LedgerFilters";
 import { useInventoryLedger } from "../hooks/use-inventory";
@@ -16,12 +17,15 @@ export interface InventoryHistoryPageProps {
 }
 
 export function InventoryHistoryPage({ initialProductId }: InventoryHistoryPageProps) {
+  const router = useRouter();
+
   const [filters, setFilters] = React.useState<LedgerFilterParams>({
     page: 1,
     size: 20,
     product_id: initialProductId,
     entry_type: "ALL",
     reference_type: "ALL",
+    period: "day",
     from_date: "",
     to_date: "",
     search: "",
@@ -45,6 +49,7 @@ export function InventoryHistoryPage({ initialProductId }: InventoryHistoryPageP
       product_id: initialProductId,
       entry_type: "ALL",
       reference_type: "ALL",
+      period: "day",
       from_date: "",
       to_date: "",
       search: "",
@@ -53,23 +58,27 @@ export function InventoryHistoryPage({ initialProductId }: InventoryHistoryPageP
 
   return (
     <PageContainer className="space-y-6">
-      <div>
-        <Link
-          href="/inventory"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Inventory Overview
-        </Link>
-      </div>
-
       <PageHeader
         title="Inventory Movement History"
         description="Complete audit ledger of all stock movements — receipts, releases, and adjustments — across the store."
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Inventory", href: "/inventory" },
+              { label: "Movement History" },
+            ]}
+          />
+        }
         actions={
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => router.back()}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Refresh
+            </Button>
+          </div>
         }
       />
 

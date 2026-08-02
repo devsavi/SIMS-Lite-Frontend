@@ -77,25 +77,25 @@ export function InventoryTable({
         },
       },
       {
-        accessorKey: "product.category_name",
+        accessorKey: "product.category",
         header: "Category & Brand",
         cell: ({ row }) => {
           const p = row.original.product;
           return (
             <div className="flex flex-col text-xs">
               <span className="font-medium text-foreground">
-                {p?.category_name ?? "Uncategorized"}
+                {p?.category?.name ?? "Uncategorized"}
               </span>
-              <span className="text-muted-foreground">{p?.brand_name ?? "No Brand"}</span>
+              <span className="text-muted-foreground">{p?.brand?.name ?? "No Brand"}</span>
             </div>
           );
         },
       },
       {
-        accessorKey: "product.supplier_name",
+        accessorKey: "product.supplier",
         header: "Supplier",
         cell: ({ row }) => {
-          const supplierName = row.original.product?.supplier_name;
+          const supplierName = row.original.product?.supplier?.name;
           return (
             <span className="text-xs text-muted-foreground">
               {supplierName ?? "—"}
@@ -108,15 +108,14 @@ export function InventoryTable({
         header: "Current Stock",
         cell: ({ row }) => {
           const qty = row.original.quantity_on_hand;
-          const uomCode = row.original.product?.uom_code;
-          const uomName = row.original.product?.uom_name;
-          const uom = uomCode ?? uomName;
+          const uom = row.original.product?.uom;
+          const uomLabel = uom?.symbol ?? uom?.name;
           return (
             <div className="flex flex-col">
               <span className="font-semibold text-foreground">
                 {formatQuantity(qty)}{" "}
-                {uom && (
-                  <span className="text-xs font-normal text-muted-foreground">{uom}</span>
+                {uomLabel && (
+                  <span className="text-xs font-normal text-muted-foreground">{uomLabel}</span>
                 )}
               </span>
             </div>
@@ -142,6 +141,7 @@ export function InventoryTable({
             <StockStatusBadge
               quantityOnHand={item.quantity_on_hand}
               reorderLevel={item.product?.reorder_level ?? 0}
+              showIcon={false}
             />
           );
         },

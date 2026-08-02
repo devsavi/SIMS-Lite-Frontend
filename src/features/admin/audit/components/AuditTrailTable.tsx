@@ -16,13 +16,16 @@ export function AuditTrailTable({ records, isLoading, onViewDiff }: AuditTrailTa
   const getActionBadgeClass = (action: AuditAction) => {
     switch (action) {
       case "CREATE":
-        return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200";
+        // active / green
+        return "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]";
       case "UPDATE":
-        return "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200";
+        // updated / amber-orange
+        return "bg-[#FEEAD3] text-[#C1650F] border-[#FBD2A0] dark:bg-[rgba(251,146,60,0.15)] dark:text-[#FB923C] dark:border-[rgba(251,146,60,0.4)]";
       case "DELETE":
-        return "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border-rose-200";
+        // deleted / charcoal
+        return "bg-[#E7E7E7] text-[#4A4A4A] border-[#CFCFCF] dark:bg-[rgba(148,163,184,0.15)] dark:text-[#94A3B8] dark:border-[rgba(148,163,184,0.4)]";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]";
     }
   };
 

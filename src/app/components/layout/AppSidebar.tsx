@@ -14,6 +14,7 @@ import {
   ClipboardList,
   Archive,
   ArrowUpFromLine,
+  SlidersHorizontal,
   BarChart2,
   Settings,
   Bell,
@@ -117,6 +118,12 @@ const NAV_ITEMS: NavItem[] = [
     permissions: ["inventory.view"],
   },
   {
+    label: "Stock Adjustments",
+    href: "/inventory/adjustments",
+    icon: SlidersHorizontal,
+    permissions: ["inventory.view"],
+  },
+  {
     label: "Stock Release",
     href: "/stock-release",
     icon: ArrowUpFromLine,
@@ -161,8 +168,18 @@ interface NavLinkProps {
 
 function NavLink({ item, collapsed, onClick, indent = false }: NavLinkProps) {
   const pathname = usePathname();
-  const isActive =
-    pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  // For the base Inventory route, don't mark it active when we're on the adjustments sub-route
+  const isActive = (() => {
+    if (item.href === "/inventory") {
+      return (
+        pathname === "/inventory" ||
+        (pathname.startsWith("/inventory/") &&
+          !pathname.startsWith("/inventory/adjustments"))
+      );
+    }
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  })();
   const Icon = item.icon;
 
   return (

@@ -2,6 +2,7 @@ export interface GeneralSettings {
   app_title: string;
   support_email: string | null;
   date_format: string;
+  timezone: string;
 }
 
 export interface InventorySettings {

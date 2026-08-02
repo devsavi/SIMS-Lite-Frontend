@@ -1,5 +1,28 @@
 export type StockStatus = "in_stock" | "low_stock" | "out_of_stock";
 
+export interface CategoryRef {
+  id: string;
+  name: string;
+  slug?: string | null;
+}
+
+export interface BrandRef {
+  id: string;
+  name: string;
+}
+
+export interface UomRef {
+  id: string;
+  name: string;
+  symbol: string;
+}
+
+export interface SupplierRef {
+  id: string;
+  supplier_code: string;
+  name: string;
+}
+
 export interface ProductRef {
   id: string;
   sku: string;
@@ -8,14 +31,10 @@ export interface ProductRef {
   reorder_level: number;
   cost_price: number | null;
   selling_price: number | null;
-  category_id?: string | null;
-  category_name?: string | null;
-  brand_id?: string | null;
-  brand_name?: string | null;
-  supplier_id?: string | null;
-  supplier_name?: string | null;
-  uom_name?: string | null;
-  uom_code?: string | null;
+  category?: CategoryRef | null;
+  brand?: BrandRef | null;
+  uom?: UomRef | null;
+  supplier?: SupplierRef | null;
 }
 
 export interface UserRef {
@@ -63,13 +82,17 @@ export interface InventoryValuationSummary {
 }
 
 export type LedgerEntryType =
-  | "GRN_RECEIPT"
+  | "PURCHASE_RECEIPT"
+  | "ADJUSTMENT_IN"
+  | "ADJUSTMENT_OUT"
   | "STOCK_RELEASE"
-  | "ADJUSTMENT_INCREASE"
-  | "ADJUSTMENT_DECREASE"
-  | "INITIAL_STOCK"
-  | "RETURN"
-  | "TRANSFER";
+  | "INITIAL_STOCK";
+
+export type LedgerReferenceType =
+  | "GRN"
+  | "STOCK_ADJUSTMENT"
+  | "STOCK_RELEASE"
+  | "INITIAL";
 
 export interface InventoryLedgerEntry {
   id: string;
@@ -87,9 +110,12 @@ export interface InventoryLedgerEntry {
   created_at: string;
 }
 
-export type StockAdjustmentType = "increase" | "decrease" | "damage" | "loss" | "found" | "cycle_count" | "write_off";
+// New API-aligned adjustment types
+export type StockAdjustmentType = "INCREASE" | "DECREASE" | "RECOUNT";
 
 export type StockAdjustmentStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "CANCELLED";
+
+export type StockAdjustmentPeriod = "day" | "week" | "month" | "custom";
 
 export interface StockAdjustmentItemCreate {
   product_id: string;
@@ -109,6 +135,19 @@ export interface StockAdjustmentItem {
   updated_at: string;
 }
 
+/** List-view summary (no items, no audit trail) */
+export interface StockAdjustmentSummary {
+  id: string;
+  adjustment_number: string;
+  adjustment_type: StockAdjustmentType;
+  status: StockAdjustmentStatus;
+  reason: string;
+  item_count: number;
+  created_by: UserRef | null;
+  created_at: string;
+}
+
+/** Full detail response (includes items + full audit trail) */
 export interface StockAdjustment {
   id: string;
   adjustment_number: string;
@@ -136,6 +175,24 @@ export interface StockAdjustmentCreatePayload {
   items: StockAdjustmentItemCreate[];
 }
 
+export interface StockAdjustmentUpdatePayload {
+  adjustment_type?: StockAdjustmentType;
+  reason?: string;
+  notes?: string | null;
+  items?: StockAdjustmentItemCreate[];
+}
+
+export interface StockAdjustmentFilterParams {
+  page?: number;
+  size?: number;
+  search?: string;
+  status?: StockAdjustmentStatus | "ALL";
+  adjustment_type?: StockAdjustmentType | "ALL";
+  period?: StockAdjustmentPeriod | "ALL";
+  from_date?: string;
+  to_date?: string;
+}
+
 export interface InventoryFilterParams {
   page?: number;
   size?: number;
@@ -150,12 +207,15 @@ export interface InventoryFilterParams {
   sort_order?: "asc" | "desc";
 }
 
+export type LedgerPeriod = "day" | "week" | "month" | "custom";
+
 export interface LedgerFilterParams {
   page?: number;
   size?: number;
   product_id?: string;
   entry_type?: string;
   reference_type?: string;
+  period?: LedgerPeriod | "ALL";
   from_date?: string;
   to_date?: string;
   search?: string;

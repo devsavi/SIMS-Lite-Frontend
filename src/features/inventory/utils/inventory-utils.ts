@@ -41,14 +41,14 @@ export function calculateNewQuantity(
   adjustmentType: StockAdjustmentType,
   adjustedQty: number
 ): number {
-  if (
-    adjustmentType === "increase" ||
-    adjustmentType === "found" ||
-    adjustmentType === "cycle_count"
-  ) {
+  if (adjustmentType === "INCREASE") {
     return currentQty + adjustedQty;
   }
-  return currentQty - adjustedQty;
+  if (adjustmentType === "DECREASE") {
+    return currentQty - adjustedQty;
+  }
+  // RECOUNT — set to exact value
+  return adjustedQty;
 }
 
 /**
@@ -59,14 +59,7 @@ export function isNegativeStockViolation(
   adjustmentType: StockAdjustmentType,
   adjustedQty: number
 ): boolean {
-  const isDecrease = [
-    "decrease",
-    "damage",
-    "loss",
-    "write_off",
-  ].includes(adjustmentType);
-
-  if (isDecrease && currentQty - adjustedQty < 0) {
+  if (adjustmentType === "DECREASE" && currentQty - adjustedQty < 0) {
     return true;
   }
   return false;
@@ -77,20 +70,34 @@ export function isNegativeStockViolation(
  */
 export function getLedgerEntryTypeLabel(type: LedgerEntryType | string): string {
   switch (type) {
-    case "GRN_RECEIPT":
-      return "GRN Receipt";
+    case "PURCHASE_RECEIPT":
+      return "Purchase Receipt";
     case "STOCK_RELEASE":
       return "Stock Release";
-    case "ADJUSTMENT_INCREASE":
+    case "ADJUSTMENT_IN":
       return "Adjustment (+)";
-    case "ADJUSTMENT_DECREASE":
+    case "ADJUSTMENT_OUT":
       return "Adjustment (-)";
     case "INITIAL_STOCK":
       return "Initial Stock";
-    case "RETURN":
-      return "Customer Return";
-    case "TRANSFER":
-      return "Stock Transfer";
+    default:
+      return type.replace(/_/g, " ");
+  }
+}
+
+/**
+ * Human readable label for ledger reference types.
+ */
+export function getLedgerReferenceTypeLabel(type: string): string {
+  switch (type) {
+    case "GRN":
+      return "GRN";
+    case "STOCK_ADJUSTMENT":
+      return "Stock Adjustment";
+    case "STOCK_RELEASE":
+      return "Stock Release";
+    case "INITIAL":
+      return "Initial Stock";
     default:
       return type.replace(/_/g, " ");
   }

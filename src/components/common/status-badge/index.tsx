@@ -18,11 +18,14 @@ const statusBadgeVariants = cva(
           "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]",
         pending:
           "bg-[#FFF3D6] text-[#B9791A] border-[#FCE3A0] dark:bg-[rgba(251,191,36,0.15)] dark:text-[#FBBF24] dark:border-[rgba(251,191,36,0.4)]",
-        approved: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50",
+        approved:
+          "bg-[#D6F5DE] text-[#1B8A4C] border-[#AEE8C0] dark:bg-[rgba(52,211,153,0.15)] dark:text-[#34D399] dark:border-[rgba(52,211,153,0.4)]",
         rejected:
           "bg-[#FDE2E2] text-[#C0362C] border-[#F8C1BC] dark:bg-[rgba(248,113,113,0.15)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.4)]",
-        draft: "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]",
-        cancelled: "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/50",
+        draft:
+          "bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA] dark:bg-[rgba(255,255,255,0.08)] dark:text-[#9CA3AF] dark:border-[rgba(156,163,175,0.35)]",
+        cancelled:
+          "bg-[#FDE2E2] text-[#C0362C] border-[#F8C1BC] dark:bg-[rgba(248,113,113,0.15)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.4)]",
         // Inventory
         "in-stock":
           "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]",
@@ -31,7 +34,7 @@ const statusBadgeVariants = cva(
         "out-of-stock":
           "bg-[#FDE2E2] text-[#C0362C] border-[#F8C1BC] dark:bg-[rgba(248,113,113,0.15)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.4)]",
         // Notifications
-        info: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50",
+        info: "bg-[#DCEBFC] text-[#1D63C4] border-[#B4D5F8] dark:bg-[rgba(96,165,250,0.15)] dark:text-[#60A5FA] dark:border-[rgba(96,165,250,0.4)]",
         success:
           "bg-[#D1F5E0] text-[#0F9D58] border-[#A6E9C4] dark:bg-[rgba(46,204,113,0.15)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.4)]",
         warning:
@@ -56,14 +59,14 @@ const dotColours: Record<string, string> = {
   active: "bg-[#0F9D58] dark:bg-[#4ADE80]",
   inactive: "bg-[#6B6B6B] dark:bg-[#9CA3AF]",
   pending: "bg-[#B9791A] dark:bg-[#FBBF24]",
-  approved: "bg-blue-500 dark:bg-blue-400",
+  approved: "bg-[#1B8A4C] dark:bg-[#34D399]",
   rejected: "bg-[#C0362C] dark:bg-[#F87171]",
   draft: "bg-[#6B6B6B] dark:bg-[#9CA3AF]",
-  cancelled: "bg-orange-500 dark:bg-orange-400",
+  cancelled: "bg-[#C0362C] dark:bg-[#F87171]",
   "in-stock": "bg-[#0F9D58] dark:bg-[#4ADE80]",
   "low-stock": "bg-[#B9791A] dark:bg-[#FBBF24]",
   "out-of-stock": "bg-[#C0362C] dark:bg-[#F87171]",
-  info: "bg-blue-500 dark:bg-blue-400",
+  info: "bg-[#1D63C4] dark:bg-[#60A5FA]",
   success: "bg-[#0F9D58] dark:bg-[#4ADE80]",
   warning: "bg-[#B9791A] dark:bg-[#FBBF24]",
   error: "bg-[#C0362C] dark:bg-[#F87171]",

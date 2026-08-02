@@ -91,13 +91,13 @@ export function InventoryHistoryTable({
           let variant: "active" | "approved" | "pending" | "cancelled" | "default" =
             "default";
           if (
-            entryType.includes("INCREASE") ||
-            entryType === "GRN_RECEIPT" ||
+            entryType === "PURCHASE_RECEIPT" ||
+            entryType === "ADJUSTMENT_IN" ||
             entryType === "INITIAL_STOCK"
           ) {
             variant = "active";
           } else if (
-            entryType.includes("DECREASE") ||
+            entryType === "ADJUSTMENT_OUT" ||
             entryType === "STOCK_RELEASE"
           ) {
             variant = "cancelled";
@@ -116,21 +116,15 @@ export function InventoryHistoryTable({
             row.original;
           const refText =
             reference_number ||
-            (reference_type ? `${reference_type}` : "Manual Adjustment");
+            (reference_type ? reference_type : "Manual");
 
           let targetHref: string | null = null;
-          if (reference_type === "GRN" || reference_type === "goods_received_note") {
-            targetHref = `/procurement/grn/${reference_id ?? ""}`;
-          } else if (
-            reference_type === "PURCHASE_ORDER" ||
-            reference_type === "purchase_order"
-          ) {
-            targetHref = `/procurement/purchase-orders/${reference_id ?? ""}`;
-          } else if (
-            reference_type === "STOCK_RELEASE" ||
-            reference_type === "stock_release"
-          ) {
+          if (reference_type === "GRN") {
+            targetHref = `/procurement/grns/${reference_id ?? ""}`;
+          } else if (reference_type === "STOCK_RELEASE") {
             targetHref = `/stock-release/${reference_id ?? ""}`;
+          } else if (reference_type === "STOCK_ADJUSTMENT") {
+            targetHref = `/inventory/adjustments/${reference_id ?? ""}`;
           }
 
           return (

@@ -92,6 +92,28 @@ export function GeneralSettingsForm({
             <option value="MM/DD/YYYY">MM/DD/YYYY (US standard)</option>
           </select>
         </div>
+
+        <div>
+          <label className="block font-medium mb-1">Timezone</label>
+          <select
+            value={formData.timezone}
+            onChange={(e) => handleChange("timezone", e.target.value)}
+            className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="UTC">UTC</option>
+            <option value="Asia/Colombo">Asia/Colombo (UTC+5:30)</option>
+            <option value="Asia/Kolkata">Asia/Kolkata (UTC+5:30)</option>
+            <option value="Asia/Dubai">Asia/Dubai (UTC+4:00)</option>
+            <option value="Asia/Singapore">Asia/Singapore (UTC+8:00)</option>
+            <option value="Asia/Tokyo">Asia/Tokyo (UTC+9:00)</option>
+            <option value="Europe/London">Europe/London (UTC+0:00)</option>
+            <option value="Europe/Paris">Europe/Paris (UTC+1:00)</option>
+            <option value="America/New_York">America/New_York (UTC-5:00)</option>
+            <option value="America/Chicago">America/Chicago (UTC-6:00)</option>
+            <option value="America/Los_Angeles">America/Los_Angeles (UTC-8:00)</option>
+            <option value="Australia/Sydney">Australia/Sydney (UTC+10:00)</option>
+          </select>
+        </div>
       </div>
 
       <div className="flex items-center justify-end border-t border-border pt-4">

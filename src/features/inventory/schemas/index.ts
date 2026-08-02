@@ -1,14 +1,6 @@
 import { z } from "zod";
 
-export const stockAdjustmentTypeEnum = z.enum([
-  "increase",
-  "decrease",
-  "damage",
-  "loss",
-  "found",
-  "cycle_count",
-  "write_off",
-]);
+export const stockAdjustmentTypeEnum = z.enum(["INCREASE", "DECREASE", "RECOUNT"]);
 
 export const stockAdjustmentItemSchema = z.object({
   product_id: z.string().uuid("Please select a valid product"),

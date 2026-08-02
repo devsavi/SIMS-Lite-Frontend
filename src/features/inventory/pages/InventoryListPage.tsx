@@ -5,12 +5,14 @@ import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
 import { Button } from "@/app/components/ui/button";
-import { History } from "lucide-react";
+import { History, SlidersHorizontal } from "lucide-react";
 import { InventorySummaryCards } from "../components/inventory-summary/InventorySummaryCards";
 import { InventoryFilters } from "../components/filters/InventoryFilters";
 import { InventoryTable } from "../components/inventory-table/InventoryTable";
 import { StockAdjustmentDialog } from "../components/adjustment-dialog/StockAdjustmentDialog";
 import { useInventoryList, useInventorySummary } from "../hooks/use-inventory";
+import { useCategories } from "@/features/master-data/hooks/use-categories";
+import { useSuppliers } from "@/features/master-data/hooks/use-suppliers";
 import { useAuthStore } from "@/stores/auth.store";
 import type { InventoryFilterParams, InventoryItem } from "../types";
 
@@ -44,6 +46,19 @@ export function InventoryListPage() {
     isRefetching,
   } = useInventoryList(filters);
 
+  // Fetch categories and suppliers for filter dropdowns
+  const { data: categoriesData } = useCategories({ page: 1, page_size: 100 });
+  const { data: suppliersData } = useSuppliers({ page: 1, page_size: 100 });
+
+  const categories = React.useMemo(
+    () => (categoriesData?.data ?? []).map((c) => ({ id: c.id, name: c.name })),
+    [categoriesData]
+  );
+  const suppliers = React.useMemo(
+    () => (suppliersData?.data ?? []).map((s) => ({ id: s.id, name: s.company_name })),
+    [suppliersData]
+  );
+
   const handleFilterChange = (updated: Partial<InventoryFilterParams>) => {
     setFilters((prev) => ({ ...prev, ...updated }));
   };
@@ -71,6 +86,12 @@ export function InventoryListPage() {
         description="Store-wide real-time visibility into inventory stock levels, valuations, and stock adjustments."
         actions={
           <div className="flex items-center gap-2">
+            <Link href="/inventory/adjustments">
+              <Button variant="outline" className="gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>Stock Adjustments</span>
+              </Button>
+            </Link>
             <Link href="/inventory/history">
               <Button variant="outline" className="gap-2">
                 <History className="h-4 w-4" />
@@ -91,6 +112,8 @@ export function InventoryListPage() {
         onReset={handleResetFilters}
         onRefresh={() => refetchList()}
         isRefreshing={isRefetching}
+        categories={categories}
+        suppliers={suppliers}
       />
 
       {/* Inventory Table */}

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -19,10 +20,10 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { AppCard } from "@/components/common/app-card";
 import { StatCard } from "@/components/common/stat-card";
 import { Button } from "@/app/components/ui/button";
-import { StockStatusBadge } from "../components/stock-status/StockStatusBadge";
 import { InventoryHistoryTable } from "../components/inventory-history/InventoryHistoryTable";
 import { StockAdjustmentDialog } from "../components/adjustment-dialog/StockAdjustmentDialog";
 import { useInventoryDetail, useProductLedger } from "../hooks/use-inventory";
@@ -35,6 +36,7 @@ export interface InventoryDetailPageProps {
 }
 
 export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
+  const router = useRouter();
   const { user } = useAuthStore();
   // ADMIN: inventory:write | STORE_KEEPER: inventory:write | OFFICER: inventory:read only
   const canAdjust =
@@ -55,7 +57,7 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
     data: ledgerData,
     isLoading: isLedgerLoading,
     refetch: refetchLedger,
-  } = useProductLedger(productId, 1, 10);
+  } = useProductLedger(productId, { page: 1, size: 10 });
 
   const product = inventoryItem?.product;
 
@@ -87,9 +89,10 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
     return (
       <PageContainer className="space-y-6">
         <div className="flex items-center gap-2">
-          <Link href="/inventory" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" /> Back to Inventory
-          </Link>
+          <Button variant="outline" size="sm" onClick={() => router.back()}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
         </div>
         <div className="h-48 rounded-none bg-card animate-pulse border border-border" />
       </PageContainer>
@@ -100,9 +103,10 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
     return (
       <PageContainer className="space-y-6">
         <div className="flex items-center gap-2">
-          <Link href="/inventory" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" /> Back to Inventory
-          </Link>
+          <Button variant="outline" size="sm" onClick={() => router.back()}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
         </div>
         <AppCard className="p-8 text-center space-y-4">
           <Package className="h-12 w-12 text-muted-foreground mx-auto" />
@@ -118,44 +122,42 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
 
   return (
     <PageContainer className="space-y-6">
-      {/* Back button & Header */}
-      <div className="space-y-2">
-        <Link
-          href="/inventory"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Inventory Overview
-        </Link>
-
-        <PageHeader
-          title={product?.name ?? "Product Inventory Details"}
-          description={`SKU: ${product?.sku ?? "N/A"} ${product?.barcode ? `• Barcode: ${product.barcode}` : ""}`}
-          actions={
-            <div className="flex items-center gap-2">
-              <StockStatusBadge
-                quantityOnHand={inventoryItem.quantity_on_hand}
-                reorderLevel={product?.reorder_level ?? 0}
-              />
-              {canAdjust && (
-                <Button
-                  onClick={() => setAdjustmentDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <span>Adjust Stock</span>
-                </Button>
-              )}
-            </div>
-          }
-        />
-      </div>
+      <PageHeader
+        title={product?.name ?? "Product Inventory Details"}
+        description={`SKU: ${product?.sku ?? "N/A"} ${product?.barcode ? `• Barcode: ${product.barcode}` : ""}`}
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Inventory", href: "/inventory" },
+              { label: product?.name ?? "Details" },
+            ]}
+          />
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => router.back()}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            {canAdjust && (
+              <Button
+                size="sm"
+                onClick={() => setAdjustmentDialogOpen(true)}
+                className="gap-2"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>Adjust Stock</span>
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Current Quantity"
-          value={`${formatQuantity(inventoryItem.quantity_on_hand)} ${product?.uom_code ?? ""}`}
+          value={`${formatQuantity(inventoryItem.quantity_on_hand)} ${product?.uom?.symbol ?? product?.uom?.name ?? ""}`}
           description={`Minimum reorder level: ${formatQuantity(product?.reorder_level ?? 0)}`}
           icon={<Package className="h-5 w-5 text-primary" />}
         />
@@ -205,7 +207,7 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
               <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
                 <div className="text-xs text-muted-foreground">Category</div>
-                <div className="font-medium text-foreground">{product?.category_name ?? "Uncategorized"}</div>
+                <div className="font-medium text-foreground">{product?.category?.name ?? "Uncategorized"}</div>
               </div>
             </div>
 
@@ -213,7 +215,7 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
               <Building className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
                 <div className="text-xs text-muted-foreground">Brand</div>
-                <div className="font-medium text-foreground">{product?.brand_name ?? "—"}</div>
+                <div className="font-medium text-foreground">{product?.brand?.name ?? "—"}</div>
               </div>
             </div>
 
@@ -221,7 +223,7 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
               <Truck className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
                 <div className="text-xs text-muted-foreground">Supplier</div>
-                <div className="font-medium text-foreground">{product?.supplier_name ?? "—"}</div>
+                <div className="font-medium text-foreground">{product?.supplier?.name ?? "—"}</div>
               </div>
             </div>
 
@@ -229,7 +231,7 @@ export function InventoryDetailPage({ productId }: InventoryDetailPageProps) {
               <Scale className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
                 <div className="text-xs text-muted-foreground">Unit of Measure</div>
-                <div className="font-medium text-foreground">{product?.uom_name ?? product?.uom_code ?? "—"}</div>
+                <div className="font-medium text-foreground">{product?.uom?.name ?? "—"}{product?.uom?.symbol ? ` (${product.uom.symbol})` : ""}</div>
               </div>
             </div>
           </div>

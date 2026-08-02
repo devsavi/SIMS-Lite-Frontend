@@ -1,49 +1,76 @@
 "use client";
 
 import * as React from "react";
-import { Badge } from "@/app/components/ui/badge";
+import { cn } from "@/utils/cn";
 import type { POStatus, POEmailStatus } from "../types";
 
 export interface POStatusBadgeProps {
   status: POStatus;
+  className?: string;
 }
 
-export function POStatusBadge({ status }: POStatusBadgeProps) {
-  switch (status) {
-    case "DRAFT":
-      return (
-        <Badge variant="outline" className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-          Draft
-        </Badge>
-      );
-    case "SUBMITTED":
-      return (
-        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300">
-          Submitted
-        </Badge>
-      );
-    case "APPROVED":
-      return (
-        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300">
-          Approved
-        </Badge>
-      );
-    case "REJECTED":
-      return (
-        <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300">
-          Rejected
-        </Badge>
-      );
-    case "CANCELLED":
-      return (
-        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300">
-          Cancelled
-        </Badge>
-      );
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
+const poStatusConfig: Record<POStatus, { bg: string; text: string; border: string; label: string }> = {
+  DRAFT: {
+    bg: "bg-[#F1F1F1] dark:bg-[rgba(255,255,255,0.08)]",
+    text: "text-[#6B6B6B] dark:text-[#9CA3AF]",
+    border: "border-[#DADADA] dark:border-[rgba(156,163,175,0.35)]",
+    label: "Draft",
+  },
+  SUBMITTED: {
+    bg: "bg-[#E0E3FC] dark:bg-[rgba(129,140,248,0.15)]",
+    text: "text-[#4338CA] dark:text-[#818CF8]",
+    border: "border-[#C1C7F8] dark:border-[rgba(129,140,248,0.4)]",
+    label: "Submitted",
+  },
+  APPROVED: {
+    bg: "bg-[#D6F5DE] dark:bg-[rgba(52,211,153,0.15)]",
+    text: "text-[#1B8A4C] dark:text-[#34D399]",
+    border: "border-[#AEE8C0] dark:border-[rgba(52,211,153,0.4)]",
+    label: "Approved",
+  },
+  REJECTED: {
+    bg: "bg-[#FDE2E2] dark:bg-[rgba(248,113,113,0.15)]",
+    text: "text-[#C0362C] dark:text-[#F87171]",
+    border: "border-[#F8C1BC] dark:border-[rgba(248,113,113,0.4)]",
+    label: "Rejected",
+  },
+  CANCELLED: {
+    bg: "bg-[#FDE2E2] dark:bg-[rgba(248,113,113,0.15)]",
+    text: "text-[#C0362C] dark:text-[#F87171]",
+    border: "border-[#F8C1BC] dark:border-[rgba(248,113,113,0.4)]",
+    label: "Cancelled",
+  },
+};
+
+export function POStatusBadge({ status, className }: POStatusBadgeProps) {
+  const config = poStatusConfig[status];
+
+  if (!config) {
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-none border bg-[#F1F1F1] text-[#6B6B6B] border-[#DADADA]">
+        {status}
+      </span>
+    );
   }
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-none border transition-colors",
+        config.bg,
+        config.text,
+        config.border,
+        className
+      )}
+    >
+      {config.label}
+    </span>
+  );
 }
+
+// ---------------------------------------------------------------------------
+// Email status badge
+// ---------------------------------------------------------------------------
 
 export interface POEmailStatusBadgeProps {
   status?: POEmailStatus;
@@ -51,45 +78,55 @@ export interface POEmailStatusBadgeProps {
   isRetrying?: boolean;
 }
 
-export function POEmailStatusBadge({
-  status,
-  onRetry,
-  isRetrying,
-}: POEmailStatusBadgeProps) {
+export function POEmailStatusBadge({ status, onRetry, isRetrying }: POEmailStatusBadgeProps) {
   if (!status) return null;
 
-  switch (status) {
-    case "SENT":
-      return (
-        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-          Email Sent
-        </Badge>
-      );
-    case "PENDING":
-      return (
-        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-          Email Pending
-        </Badge>
-      );
-    case "FAILED":
-      return (
-        <div className="inline-flex items-center gap-1.5">
-          <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">
-            Email Failed
-          </Badge>
-          {onRetry && (
-            <button
-              type="button"
-              onClick={onRetry}
-              disabled={isRetrying}
-              className="text-xs text-blue-600 hover:underline disabled:opacity-50"
-            >
-              {isRetrying ? "Retrying..." : "Retry"}
-            </button>
-          )}
-        </div>
-      );
-    default:
-      return null;
-  }
+  const configs: Record<POEmailStatus, { bg: string; text: string; border: string; label: string }> = {
+    SENT: {
+      bg: "bg-[#D6F5DE] dark:bg-[rgba(52,211,153,0.15)]",
+      text: "text-[#1B8A4C] dark:text-[#34D399]",
+      border: "border-[#AEE8C0] dark:border-[rgba(52,211,153,0.4)]",
+      label: "Email Sent",
+    },
+    PENDING: {
+      bg: "bg-[#FFF3D6] dark:bg-[rgba(251,191,36,0.15)]",
+      text: "text-[#B9791A] dark:text-[#FBBF24]",
+      border: "border-[#FCE3A0] dark:border-[rgba(251,191,36,0.4)]",
+      label: "Email Pending",
+    },
+    FAILED: {
+      bg: "bg-[#FDE2E2] dark:bg-[rgba(248,113,113,0.15)]",
+      text: "text-[#C0362C] dark:text-[#F87171]",
+      border: "border-[#F8C1BC] dark:border-[rgba(248,113,113,0.4)]",
+      label: "Email Failed",
+    },
+  };
+
+  const config = configs[status];
+  if (!config) return null;
+
+  return (
+    <div className="inline-flex items-center gap-1.5">
+      <span
+        className={cn(
+          "inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-none border transition-colors",
+          config.bg,
+          config.text,
+          config.border
+        )}
+      >
+        {config.label}
+      </span>
+      {status === "FAILED" && onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isRetrying}
+          className="text-xs text-[#1D63C4] dark:text-[#60A5FA] hover:underline disabled:opacity-50"
+        >
+          {isRetrying ? "Retrying..." : "Retry"}
+        </button>
+      )}
+    </div>
+  );
 }
