@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Eye, Printer, Copy, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -20,21 +21,33 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { POStatusBadge, POEmailStatusBadge } from "./POStatusBadge";
-import type { PurchaseOrder, POFilters, POStatus } from "../types";
+import { PermissionGuard, RowActionsMenu, RowActionsMenuItem } from "@/components/common";
+import { POStatusBadge } from "./POStatusBadge";
+import type { PurchaseOrderListItem, POFilters, POStatus, POPeriod } from "../types";
 import { canAccess } from "@/lib/auth/permissions";
 import { useAuthStore } from "@/stores/auth.store";
 import { formatCurrency } from "@/utils/format";
 
 export interface PurchaseOrderTableProps {
-  data?: PurchaseOrder[];
+  data?: PurchaseOrderListItem[];
   total?: number;
   isLoading?: boolean;
   filters: POFilters;
   onFilterChange: (filters: Partial<POFilters>) => void;
   onRefresh?: () => void;
   suppliers?: Array<{ id: string; name: string }>;
+  onPrint?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  onDelete?: (po: PurchaseOrderListItem) => void;
+  isPrintLoading?: string | null;
 }
+
+const PERIOD_OPTIONS: Array<{ value: POPeriod; label: string }> = [
+  { value: "day", label: "Today" },
+  { value: "week", label: "This Week" },
+  { value: "month", label: "This Month" },
+  { value: "custom", label: "Custom Range" },
+];
 
 export function PurchaseOrderTable({
   data = [],
@@ -44,47 +57,52 @@ export function PurchaseOrderTable({
   onFilterChange,
   onRefresh,
   suppliers = [],
+  onPrint,
+  onDuplicate,
+  onDelete,
+  isPrintLoading = null,
 }: PurchaseOrderTableProps) {
   const { user } = useAuthStore();
   const userRole = user?.role || "viewer";
 
-  const [columnVisibility, setColumnVisibility] = React.useState({
-    poNumber: true,
-    supplier: true,
-    createdBy: true,
-    createdDate: true,
-    totalItems: true,
-    totalAmount: true,
-    emailStatus: true,
-    status: true,
-    actions: true,
-  });
-
   const page = filters.page || 1;
-  const limit = filters.limit || 10;
-  const totalPages = Math.ceil(total / limit) || 1;
-
+  const size = filters.size || 20;
+  const totalPages = Math.ceil(total / size) || 1;
   const canCreatePO = canAccess(userRole, "purchase_orders.create");
+
+  const handlePeriodChange = (val: string) => {
+    const period = val === "ALL" ? undefined : (val as POPeriod);
+    onFilterChange({
+      period,
+      from_date: undefined,
+      to_date: undefined,
+      page: 1,
+    });
+  };
 
   return (
     <div className="space-y-4">
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-1 flex-wrap items-end gap-2">
+          {/* Search */}
           <Input
             placeholder="Search PO number..."
             value={filters.search || ""}
-            onChange={(e) => onFilterChange({ search: e.target.value, page: 1 })}
+            onChange={(e) =>
+              onFilterChange({ search: e.target.value, page: 1 })
+            }
             className="w-full sm:w-[220px]"
           />
 
+          {/* Status */}
           <Select
             value={filters.status || "ALL"}
             onValueChange={(val) =>
               onFilterChange({ status: val as POStatus | "ALL", page: 1 })
             }
           >
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[175px]">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -94,14 +112,19 @@ export function PurchaseOrderTable({
               <SelectItem value="APPROVED">Approved</SelectItem>
               <SelectItem value="REJECTED">Rejected</SelectItem>
               <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="PARTIALLY_RECEIVED">
+                Partially Received
+              </SelectItem>
+              <SelectItem value="FULLY_RECEIVED">Fully Received</SelectItem>
             </SelectContent>
           </Select>
 
+          {/* Supplier */}
           {suppliers.length > 0 && (
             <Select
-              value={filters.supplierId || "ALL"}
+              value={filters.supplier_id || "ALL"}
               onValueChange={(val) =>
-                onFilterChange({ supplierId: val, page: 1 })
+                onFilterChange({ supplier_id: val, page: 1 })
               }
             >
               <SelectTrigger className="w-[180px]">
@@ -118,25 +141,45 @@ export function PurchaseOrderTable({
             </Select>
           )}
 
-          <div className="flex items-center gap-1">
-            <Input
-              type="date"
-              value={filters.startDate || ""}
-              onChange={(e) =>
-                onFilterChange({ startDate: e.target.value, page: 1 })
-              }
-              className="w-[140px]"
-            />
-            <span className="text-sm text-slate-500">to</span>
-            <Input
-              type="date"
-              value={filters.endDate || ""}
-              onChange={(e) =>
-                onFilterChange({ endDate: e.target.value, page: 1 })
-              }
-              className="w-[140px]"
-            />
-          </div>
+          {/* Period */}
+          <Select
+            value={filters.period || "day"}
+            onValueChange={handlePeriodChange}
+          >
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Period" />
+            </SelectTrigger>
+            <SelectContent>
+              {PERIOD_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Custom date range */}
+          {filters.period === "custom" && (
+            <div className="flex items-center gap-1">
+              <Input
+                type="date"
+                value={filters.from_date || ""}
+                onChange={(e) =>
+                  onFilterChange({ from_date: e.target.value, page: 1 })
+                }
+                className="w-[140px]"
+              />
+              <span className="text-sm text-slate-500">to</span>
+              <Input
+                type="date"
+                value={filters.to_date || ""}
+                onChange={(e) =>
+                  onFilterChange({ to_date: e.target.value, page: 1 })
+                }
+                className="w-[140px]"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -147,9 +190,7 @@ export function PurchaseOrderTable({
           )}
           {canCreatePO && (
             <Button asChild size="sm">
-              <Link href="/procurement/purchase-orders/new">
-                + Create PO
-              </Link>
+              <Link href="/procurement/purchase-orders/new">+ Create PO</Link>
             </Button>
           )}
         </div>
@@ -160,92 +201,117 @@ export function PurchaseOrderTable({
         <Table>
           <TableHeader>
             <TableRow>
-              {columnVisibility.poNumber && <TableHead>PO Number</TableHead>}
-              {columnVisibility.supplier && <TableHead>Supplier</TableHead>}
-              {columnVisibility.createdBy && <TableHead>Created By</TableHead>}
-              {columnVisibility.createdDate && <TableHead>Created Date</TableHead>}
-              {columnVisibility.totalItems && <TableHead className="text-right">Total Items</TableHead>}
-              {columnVisibility.totalAmount && <TableHead className="text-right">Total Amount</TableHead>}
-              {columnVisibility.emailStatus && <TableHead>Email Status</TableHead>}
-              {columnVisibility.status && <TableHead>Status</TableHead>}
-              {columnVisibility.actions && <TableHead className="text-right">Actions</TableHead>}
+              <TableHead>PO Number</TableHead>
+              <TableHead>Supplier</TableHead>
+              <TableHead>Order Date</TableHead>
+              <TableHead>Expected Delivery</TableHead>
+              <TableHead className="text-right">Items</TableHead>
+              <TableHead className="text-right">Total Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                  {Array.from({ length: 8 }).map((__, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
             ) : data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={9}
+                  colSpan={8}
                   className="h-32 text-center text-muted-foreground"
                 >
-                  No purchase orders found matching the filter criteria.
+                  No purchase orders found.
                 </TableCell>
               </TableRow>
             ) : (
               data.map((po) => (
                 <TableRow key={po.id}>
-                  {columnVisibility.poNumber && (
-                    <TableCell className="font-medium text-primary">
-                      <Link
-                        href={`/procurement/purchase-orders/${po.id}`}
-                        className="hover:underline"
-                      >
-                        {po.poNumber}
-                      </Link>
-                    </TableCell>
-                  )}
-                  {columnVisibility.supplier && (
-                    <TableCell>{po.supplierName || po.supplierId}</TableCell>
-                  )}
-                  {columnVisibility.createdBy && (
-                    <TableCell>{po.createdBy?.name || "System"}</TableCell>
-                  )}
-                  {columnVisibility.createdDate && (
-                    <TableCell>
-                      {new Date(po.createdAt).toLocaleDateString()}
-                    </TableCell>
-                  )}
-                  {columnVisibility.totalItems && (
-                    <TableCell className="text-right">{po.totalItems}</TableCell>
-                  )}
-                  {columnVisibility.totalAmount && (
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(po.totalAmount)}
-                    </TableCell>
-                  )}
-                  {columnVisibility.emailStatus && (
-                    <TableCell>
-                      <POEmailStatusBadge status={po.emailStatus} />
-                    </TableCell>
-                  )}
-                  {columnVisibility.status && (
-                    <TableCell>
-                      <POStatusBadge status={po.status} />
-                    </TableCell>
-                  )}
-                  {columnVisibility.actions && (
-                    <TableCell className="text-right">
-                      <Button asChild variant="ghost" size="sm">
-                        <Link href={`/procurement/purchase-orders/${po.id}`}>
-                          View
+                  <TableCell className="font-medium text-primary">
+                    <Link
+                      href={`/procurement/purchase-orders/${po.id}`}
+                      className="hover:underline"
+                    >
+                      {po.po_number}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{po.supplier.name}</TableCell>
+                  <TableCell>
+                    {new Date(po.order_date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {po.expected_delivery_date
+                      ? new Date(po.expected_delivery_date).toLocaleDateString()
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="text-right">{po.item_count}</TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {formatCurrency(po.total_amount)}
+                  </TableCell>
+                  <TableCell>
+                    <POStatusBadge status={po.status} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      {/* View */}
+                      <PermissionGuard permission="purchase_orders.view">
+                        <Link
+                          href={`/procurement/purchase-orders/${po.id}`}
+                          title="View details"
+                          aria-label={`View ${po.po_number}`}
+                          className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                        >
+                          <Eye className="h-4 w-4" />
                         </Link>
-                      </Button>
-                    </TableCell>
-                  )}
+                      </PermissionGuard>
+
+                      {/* Print */}
+                      {onPrint && (
+                        <button
+                          type="button"
+                          onClick={() => onPrint(po.id)}
+                          title="Print purchase order"
+                          aria-label={`Print ${po.po_number}`}
+                          disabled={isPrintLoading === po.id}
+                          className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-50"
+                        >
+                          <Printer className="h-4 w-4" />
+                        </button>
+                      )}
+
+                      {/* Overflow */}
+                      {(onDuplicate || onDelete) && (
+                        <RowActionsMenu label={`More actions for ${po.po_number}`}>
+                          {onDuplicate && (
+                            <RowActionsMenuItem
+                              icon={<Copy className="h-3.5 w-3.5" />}
+                              onClick={() => onDuplicate(po.id)}
+                            >
+                              Duplicate
+                            </RowActionsMenuItem>
+                          )}
+                          {onDelete && po.status === "DRAFT" && (
+                            <PermissionGuard permission="purchase_orders.delete">
+                              <RowActionsMenuItem
+                                icon={<Trash2 className="h-3.5 w-3.5" />}
+                                onClick={() => onDelete(po)}
+                                destructive
+                              >
+                                Delete
+                              </RowActionsMenuItem>
+                            </PermissionGuard>
+                          )}
+                        </RowActionsMenu>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -253,10 +319,10 @@ export function PurchaseOrderTable({
         </Table>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="text-xs text-muted-foreground">
-          Showing page {page} of {totalPages} ({total} total orders)
+          Page {page} of {totalPages} ({total} total)
         </div>
         <div className="flex items-center gap-2">
           <Button

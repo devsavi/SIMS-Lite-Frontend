@@ -4,7 +4,10 @@ import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GRNForm } from "@/features/procurement/grns/components/GRNForm";
 import { useCreateGRN } from "@/features/procurement/grns/hooks/use-grns";
-import { usePurchaseOrders } from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
+import {
+  usePurchaseOrders,
+  usePurchaseOrder,
+} from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
 import type { GRNFormValues } from "@/features/procurement/grns/schemas/grn.schema";
 
 export default function NewGRNPage() {
@@ -18,16 +21,16 @@ export default function NewGRNPage() {
 
   const { data: posData } = usePurchaseOrders({
     status: "APPROVED",
-    limit: 100,
+    size: 100,
   });
 
   const approvedPOs = React.useMemo(() => {
     return posData?.data || [];
   }, [posData]);
 
-  const selectedPO = React.useMemo(() => {
-    return approvedPOs.find((p) => p.id === selectedPOId);
-  }, [approvedPOs, selectedPOId]);
+  // Fetch full detail of the selected PO so we can access its items
+  const { data: selectedPOResponse } = usePurchaseOrder(selectedPOId);
+  const selectedPO = selectedPOResponse?.data;
 
   const handleSubmit = (values: GRNFormValues, isDraft: boolean) => {
     createMutation.mutate(

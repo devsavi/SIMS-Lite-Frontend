@@ -17,10 +17,13 @@ import {
 } from "@/app/components/ui/table";
 import { grnSchema, type GRNFormValues } from "../schemas/grn.schema";
 import type { GoodsReceivedNote } from "../types";
-import type { PurchaseOrder } from "../../purchase-orders/types";
+import type {
+  PurchaseOrderListItem,
+  PurchaseOrder,
+} from "../../purchase-orders/types";
 
 export interface GRNFormProps {
-  approvedPOs: PurchaseOrder[];
+  approvedPOs: PurchaseOrderListItem[];
   selectedPO?: PurchaseOrder;
   onPOSelect?: (poId: string) => void;
   onSubmit: (values: GRNFormValues, isDraft: boolean) => void;
@@ -37,11 +40,11 @@ export function GRNForm({
   const initialItems = React.useMemo(() => {
     if (!selectedPO) return [];
     return selectedPO.items.map((item) => ({
-      productId: item.productId,
-      productName: item.productName,
-      productSku: item.productSku,
-      orderedQuantity: item.quantity,
-      receivedQuantity: item.quantity, // Default to full receive
+      productId: item.product.id,
+      productName: item.product.name,
+      productSku: item.product.sku,
+      orderedQuantity: item.quantity_ordered,
+      receivedQuantity: item.quantity_ordered, // Default to full receive
       notes: "",
     }));
   }, [selectedPO]);
@@ -67,9 +70,9 @@ export function GRNForm({
       setValue(
         "items",
         selectedPO.items.map((item) => ({
-          productId: item.productId,
-          orderedQuantity: item.quantity,
-          receivedQuantity: item.quantity,
+          productId: item.product.id,
+          orderedQuantity: item.quantity_ordered,
+          receivedQuantity: item.quantity_ordered,
           notes: "",
         }))
       );
@@ -84,7 +87,7 @@ export function GRNForm({
   const handleReceiveAll = () => {
     if (!selectedPO) return;
     selectedPO.items.forEach((item, index) => {
-      setValue(`items.${index}.receivedQuantity`, item.quantity);
+      setValue(`items.${index}.receivedQuantity`, item.quantity_ordered);
     });
   };
 
@@ -110,8 +113,8 @@ export function GRNForm({
             <option value="">-- Choose Approved PO --</option>
             {approvedPOs.map((po) => (
               <option key={po.id} value={po.id}>
-                {po.poNumber} - {po.supplierName || po.supplierId} (
-                {po.items.length} items)
+                {po.po_number} - {po.supplier.name} (
+                {po.item_count} items)
               </option>
             ))}
           </select>
@@ -127,7 +130,7 @@ export function GRNForm({
             <div>
               <Label className="text-xs text-muted-foreground">Supplier</Label>
               <p className="text-base font-semibold mt-1">
-                {selectedPO.supplierName || selectedPO.supplierId}
+                {selectedPO.supplier.name}
               </p>
             </div>
             <div>
@@ -182,16 +185,16 @@ export function GRNForm({
                     <TableRow key={field.id}>
                       <TableCell>
                         <p className="font-medium">
-                          {poItem?.productName || field.productId}
+                          {poItem?.product.name || field.productId}
                         </p>
-                        {poItem?.productSku && (
+                        {poItem?.product.sku && (
                           <p className="text-xs text-muted-foreground">
-                            SKU: {poItem.productSku}
+                            SKU: {poItem.product.sku}
                           </p>
                         )}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {poItem?.quantity ?? field.orderedQuantity}
+                        {poItem?.quantity_ordered ?? field.orderedQuantity}
                       </TableCell>
                       <TableCell>
                         <Input

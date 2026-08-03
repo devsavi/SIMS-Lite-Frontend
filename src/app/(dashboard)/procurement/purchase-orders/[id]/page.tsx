@@ -10,27 +10,32 @@ import {
   useApprovePurchaseOrder,
   useRejectPurchaseOrder,
   useCancelPurchaseOrder,
-  useResendPOEmail,
+  useDuplicatePurchaseOrder,
+  useEmailPurchaseOrder,
 } from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
 
 export default function PurchaseOrderDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
 
-  const { data: po, isLoading, error } = usePurchaseOrder(id);
+  const { data: response, isLoading, error } = usePurchaseOrder(id);
+  const po = response?.data;
 
   const submitMutation = useSubmitPurchaseOrder();
   const approveMutation = useApprovePurchaseOrder();
   const rejectMutation = useRejectPurchaseOrder();
   const cancelMutation = useCancelPurchaseOrder();
-  const resendEmailMutation = useResendPOEmail();
+  const duplicateMutation = useDuplicatePurchaseOrder();
+  const emailMutation = useEmailPurchaseOrder();
 
   const isActionLoading =
     submitMutation.isPending ||
     approveMutation.isPending ||
     rejectMutation.isPending ||
     cancelMutation.isPending ||
-    resendEmailMutation.isPending;
+    duplicateMutation.isPending ||
+    emailMutation.isPending;
 
   if (isLoading) {
     return (
@@ -59,11 +64,25 @@ export default function PurchaseOrderDetailPage() {
     <div className="max-w-5xl mx-auto py-2">
       <PurchaseOrderDetail
         po={po}
+        onBack={() => router.back()}
         onSubmit={() => submitMutation.mutate(po.id)}
         onApprove={() => approveMutation.mutate(po.id)}
-        onReject={(reason) => rejectMutation.mutate({ id: po.id, reason })}
-        onCancel={(reason) => cancelMutation.mutate({ id: po.id, reason })}
-        onResendEmail={() => resendEmailMutation.mutate(po.id)}
+        onReject={(reason) =>
+          rejectMutation.mutate({ id: po.id, body: { reason } })
+        }
+        onCancel={(reason) =>
+          cancelMutation.mutate({ id: po.id, body: { reason } })
+        }
+        onDuplicate={() =>
+          duplicateMutation.mutate(po.id, {
+            onSuccess: (newPo) => {
+              router.push(`/procurement/purchase-orders/${newPo.id}`);
+            },
+          })
+        }
+        onEmail={(toEmail, message) =>
+          emailMutation.mutate({ id: po.id, body: { to_email: toEmail, message } })
+        }
         isActionLoading={isActionLoading}
       />
     </div>

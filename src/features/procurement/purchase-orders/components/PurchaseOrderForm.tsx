@@ -39,17 +39,56 @@ export interface ProductOption {
   id: string;
   name: string;
   sku: string;
-  costPrice?: number;
+  cost_price?: number;
 }
 
 export interface PurchaseOrderFormProps {
   initialData?: PurchaseOrder;
   suppliers: SupplierOption[];
   products: ProductOption[];
-  onSubmit: (values: PurchaseOrderFormValues, isDraft: boolean) => void;
+  onSubmit: (values: PurchaseOrderFormValues) => void;
   isLoading?: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// Per-row numeric values — kept in plain React state so updates are instant.
+// ---------------------------------------------------------------------------
+interface RowValues {
+  quantity_ordered: number;
+  unit_price: number;
+  discount_percent: number;
+  tax_percent: number;
+}
+
+function calcLineTotal(row: RowValues): number {
+  const base = row.quantity_ordered * row.unit_price;
+  const afterDisc = base - base * (row.discount_percent / 100);
+  return afterDisc + afterDisc * (row.tax_percent / 100);
+}
+
+function calcTotals(rows: RowValues[]) {
+  let subtotal = 0;
+  let discountAmount = 0;
+  let taxAmount = 0;
+  for (const row of rows) {
+    const base = row.quantity_ordered * row.unit_price;
+    const disc = base * (row.discount_percent / 100);
+    const afterDisc = base - disc;
+    const tax = afterDisc * (row.tax_percent / 100);
+    subtotal += base;
+    discountAmount += disc;
+    taxAmount += tax;
+  }
+  return { subtotal, discountAmount, taxAmount, total: subtotal - discountAmount + taxAmount };
+}
+
+function todayISO() {
+  return new Date().toISOString().split("T")[0];
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 export function PurchaseOrderForm({
   initialData,
   suppliers,
@@ -57,120 +96,211 @@ export function PurchaseOrderForm({
   onSubmit,
   isLoading = false,
 }: PurchaseOrderFormProps) {
-  const defaultItems = initialData?.items.map((item) => ({
-    productId: item.productId,
-    quantity: item.quantity,
-    unitCost: item.unitCost,
-  })) || [{ productId: "", quantity: 1, unitCost: 0 }];
-
   const baseCurrency = useSystemSettingsStore((s) => s.baseCurrency);
 
+  const defaultItemsForms =
+    initialData?.items.map((item) => ({
+      product_id: item.product.id,
+      quantity_ordered: item.quantity_ordered,
+      unit_price: item.unit_price,
+      discount_percent: item.discount_percent,
+      tax_percent: item.tax_percent,
+      notes: item.notes || "",
+    })) || [
+      {
+        product_id: "",
+        quantity_ordered: 1,
+        unit_price: 0,
+        discount_percent: 0,
+        tax_percent: 0,
+        notes: "",
+      },
+    ];
+
+  // ── RHF — handles validation & submission only ──
   const {
     register,
     control,
     handleSubmit,
     setValue,
-    watch,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<PurchaseOrderFormValues>({
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: {
-      supplierId: initialData?.supplierId || "",
-      expectedDeliveryDate: initialData?.expectedDeliveryDate || "",
+      supplier_id: initialData?.supplier.id || "",
+      order_date: initialData?.order_date
+        ? initialData.order_date.split("T")[0]
+        : todayISO(),
+      expected_delivery_date: initialData?.expected_delivery_date
+        ? initialData.expected_delivery_date.split("T")[0]
+        : "",
       notes: initialData?.notes || "",
-      items: defaultItems,
+      terms_conditions: initialData?.terms_conditions || "",
+      shipping_address: initialData?.shipping_address || "",
+      items: defaultItemsForms,
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "items",
-  });
+  const { fields, append, remove } = useFieldArray({ control, name: "items" });
 
-  const watchedItems = watch("items");
+  // ── Plain React state for numeric values — drives instant UI updates ──
+  const [rowValues, setRowValues] = React.useState<RowValues[]>(
+    defaultItemsForms.map((i) => ({
+      quantity_ordered: i.quantity_ordered,
+      unit_price: i.unit_price,
+      discount_percent: i.discount_percent,
+      tax_percent: i.tax_percent,
+    }))
+  );
 
-  // Calculate line totals and grand total
-  const grandTotal = React.useMemo(() => {
-    if (!watchedItems) return 0;
-    return watchedItems.reduce((acc, item) => {
-      const q = Number(item.quantity) || 0;
-      const c = Number(item.unitCost) || 0;
-      return acc + q * c;
-    }, 0);
-  }, [watchedItems]);
+  // Keep rowValues in sync when rows are added / removed
+  const appendRow = () => {
+    const blank = {
+      product_id: "",
+      quantity_ordered: 1,
+      unit_price: 0,
+      discount_percent: 0,
+      tax_percent: 0,
+      notes: "",
+    };
+    append(blank);
+    setRowValues((prev) => [
+      ...prev,
+      { quantity_ordered: 1, unit_price: 0, discount_percent: 0, tax_percent: 0 },
+    ]);
+  };
+
+  const removeRow = (index: number) => {
+    remove(index);
+    setRowValues((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Update a single numeric field in both RHF and local state simultaneously
+  const handleNumericChange = (
+    index: number,
+    field: keyof RowValues,
+    raw: string
+  ) => {
+    const num = parseFloat(raw) || 0;
+    setValue(`items.${index}.${field}` as any, num);
+    setRowValues((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: num };
+      return next;
+    });
+  };
 
   const handleProductSelect = (index: number, productId: string) => {
-    setValue(`items.${index}.productId`, productId);
-    const selectedProd = products.find((p) => p.id === productId);
-    if (selectedProd && selectedProd.costPrice !== undefined) {
-      setValue(`items.${index}.unitCost`, selectedProd.costPrice);
+    setValue(`items.${index}.product_id`, productId);
+    const selected = products.find((p) => p.id === productId);
+    if (selected?.cost_price !== undefined) {
+      const price = selected.cost_price;
+      setValue(`items.${index}.unit_price`, price);
+      setRowValues((prev) => {
+        const next = [...prev];
+        next[index] = { ...next[index], unit_price: price };
+        return next;
+      });
     }
   };
 
-  const onFormSubmit = (isDraft: boolean) => (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSubmit((values) => {
-      onSubmit(values, isDraft);
-    })(e);
-  };
+  // Derived — computed directly from rowValues with no memoisation lag
+  const totals = calcTotals(rowValues);
+
+  const onFormSubmit = handleSubmit((values) => onSubmit(values));
 
   return (
-    <form className="space-y-6">
-      {/* Header Fields */}
+    <form onSubmit={onFormSubmit} className="space-y-6">
+      {/* ── Header Fields ── */}
       <div className="grid gap-6 rounded-none border p-4 sm:grid-cols-2">
+        {/* Supplier */}
         <div className="space-y-2">
-          <Label htmlFor="supplierId">Supplier *</Label>
+          <Label htmlFor="supplier_id">Supplier *</Label>
           <Select
-            defaultValue={initialData?.supplierId}
-            onValueChange={(val) => setValue("supplierId", val, { shouldValidate: true })}
+            defaultValue={initialData?.supplier.id}
+            onValueChange={(val) =>
+              setValue("supplier_id", val, { shouldValidate: true })
+            }
           >
-            <SelectTrigger id="supplierId">
+            <SelectTrigger id="supplier_id">
               <SelectValue placeholder="Select supplier" />
             </SelectTrigger>
             <SelectContent>
-              {suppliers.map((supplier) => (
-                <SelectItem key={supplier.id} value={supplier.id}>
-                  {supplier.name}
+              {suppliers.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.supplierId && (
-            <p className="text-xs text-rose-500">{errors.supplierId.message}</p>
+          {errors.supplier_id && (
+            <p className="text-xs text-rose-500">{errors.supplier_id.message}</p>
           )}
         </div>
 
+        {/* Order Date */}
         <div className="space-y-2">
-          <Label htmlFor="expectedDeliveryDate">Expected Delivery Date</Label>
+          <Label htmlFor="order_date">Order Date *</Label>
+          <Input id="order_date" type="date" {...register("order_date")} />
+          {errors.order_date && (
+            <p className="text-xs text-rose-500">{errors.order_date.message}</p>
+          )}
+        </div>
+
+        {/* Expected Delivery Date */}
+        <div className="space-y-2">
+          <Label htmlFor="expected_delivery_date">Expected Delivery Date *</Label>
           <Input
-            id="expectedDeliveryDate"
+            id="expected_delivery_date"
             type="date"
-            {...register("expectedDeliveryDate")}
+            {...register("expected_delivery_date")}
+          />
+          {errors.expected_delivery_date && (
+            <p className="text-xs text-rose-500">
+              {errors.expected_delivery_date.message}
+            </p>
+          )}
+        </div>
+
+        {/* Shipping Address */}
+        <div className="space-y-2">
+          <Label htmlFor="shipping_address">Shipping Address</Label>
+          <Input
+            id="shipping_address"
+            placeholder="Delivery address..."
+            {...register("shipping_address")}
           />
         </div>
 
+        {/* Notes */}
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="notes">Notes & Instructions</Label>
+          <Label htmlFor="notes">Notes</Label>
           <Textarea
             id="notes"
-            placeholder="Add internal notes or order details..."
-            rows={3}
+            placeholder="Internal notes or order details..."
+            rows={2}
             {...register("notes")}
+          />
+        </div>
+
+        {/* Terms & Conditions */}
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="terms_conditions">Terms & Conditions</Label>
+          <Textarea
+            id="terms_conditions"
+            placeholder="Payment terms, delivery conditions..."
+            rows={2}
+            {...register("terms_conditions")}
           />
         </div>
       </div>
 
-      {/* Dynamic Line Items Table */}
+      {/* ── Line Items ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Order Items</h3>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => append({ productId: "", quantity: 1, unitCost: 0 })}
-          >
-            + Add Product Line
+          <Button type="button" variant="outline" size="sm" onClick={appendRow}>
+            + Add Item
           </Button>
         </div>
 
@@ -178,28 +308,40 @@ export function PurchaseOrderForm({
           <p className="text-xs text-rose-500">{errors.items.root.message}</p>
         )}
 
-        <div className="rounded-none border bg-card">
+        <div className="rounded-none border bg-card overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">Product *</TableHead>
-                <TableHead className="w-[20%] text-right">Quantity *</TableHead>
-                <TableHead className="w-[20%] text-right">Unit Cost ({baseCurrency}) *</TableHead>
-                <TableHead className="w-[15%] text-right">Line Total ({baseCurrency})</TableHead>
-                <TableHead className="w-[5%]"></TableHead>
+                <TableHead className="w-[28%]">Product *</TableHead>
+                <TableHead className="w-[12%] text-right">Qty *</TableHead>
+                <TableHead className="w-[14%] text-right">
+                  Unit Price ({baseCurrency}) *
+                </TableHead>
+                <TableHead className="w-[10%] text-right">Disc %</TableHead>
+                <TableHead className="w-[10%] text-right">Tax %</TableHead>
+                <TableHead className="w-[14%] text-right">
+                  Line Total ({baseCurrency})
+                </TableHead>
+                <TableHead className="w-[7%]">Notes</TableHead>
+                <TableHead className="w-[5%]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {fields.map((field, index) => {
-                const qty = Number(watchedItems[index]?.quantity) || 0;
-                const cost = Number(watchedItems[index]?.unitCost) || 0;
-                const lineTotal = qty * cost;
+                const row = rowValues[index] ?? {
+                  quantity_ordered: 0,
+                  unit_price: 0,
+                  discount_percent: 0,
+                  tax_percent: 0,
+                };
+                const lineTotal = calcLineTotal(row);
 
                 return (
                   <TableRow key={field.id}>
+                    {/* Product */}
                     <TableCell>
                       <Select
-                        defaultValue={field.productId}
+                        defaultValue={field.product_id}
                         onValueChange={(val) => handleProductSelect(index, val)}
                       >
                         <SelectTrigger>
@@ -213,54 +355,102 @@ export function PurchaseOrderForm({
                           ))}
                         </SelectContent>
                       </Select>
-                      {errors.items?.[index]?.productId && (
+                      {errors.items?.[index]?.product_id && (
                         <p className="mt-1 text-xs text-rose-500">
-                          {errors.items[index]?.productId?.message}
+                          {errors.items[index]?.product_id?.message}
                         </p>
                       )}
                     </TableCell>
+
+                    {/* Quantity */}
                     <TableCell>
                       <Input
                         type="number"
                         min="1"
                         step="1"
                         className="text-right"
-                        {...register(`items.${index}.quantity`, {
-                          valueAsNumber: true,
-                        })}
+                        value={row.quantity_ordered}
+                        onChange={(e) =>
+                          handleNumericChange(index, "quantity_ordered", e.target.value)
+                        }
                       />
-                      {errors.items?.[index]?.quantity && (
+                      {errors.items?.[index]?.quantity_ordered && (
                         <p className="mt-1 text-xs text-rose-500">
-                          {errors.items[index]?.quantity?.message}
+                          {errors.items[index]?.quantity_ordered?.message}
                         </p>
                       )}
                     </TableCell>
+
+                    {/* Unit Price */}
                     <TableCell>
                       <Input
                         type="number"
                         min="0"
                         step="0.01"
                         className="text-right"
-                        {...register(`items.${index}.unitCost`, {
-                          valueAsNumber: true,
-                        })}
+                        value={row.unit_price}
+                        onChange={(e) =>
+                          handleNumericChange(index, "unit_price", e.target.value)
+                        }
                       />
-                      {errors.items?.[index]?.unitCost && (
+                      {errors.items?.[index]?.unit_price && (
                         <p className="mt-1 text-xs text-rose-500">
-                          {errors.items[index]?.unitCost?.message}
+                          {errors.items[index]?.unit_price?.message}
                         </p>
                       )}
                     </TableCell>
+
+                    {/* Discount % */}
+                    <TableCell>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        className="text-right"
+                        value={row.discount_percent}
+                        onChange={(e) =>
+                          handleNumericChange(index, "discount_percent", e.target.value)
+                        }
+                      />
+                    </TableCell>
+
+                    {/* Tax % */}
+                    <TableCell>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        className="text-right"
+                        value={row.tax_percent}
+                        onChange={(e) =>
+                          handleNumericChange(index, "tax_percent", e.target.value)
+                        }
+                      />
+                    </TableCell>
+
+                    {/* Line Total — reads from rowValues, updates instantly */}
                     <TableCell className="text-right font-medium">
                       {formatCurrency(lineTotal)}
                     </TableCell>
+
+                    {/* Notes */}
+                    <TableCell>
+                      <Input
+                        placeholder="Note"
+                        {...register(`items.${index}.notes`)}
+                      />
+                    </TableCell>
+
+                    {/* Remove */}
                     <TableCell className="text-center">
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         disabled={fields.length === 1}
-                        onClick={() => remove(index)}
+                        onClick={() => removeRow(index)}
                         className="text-rose-500 hover:text-rose-700"
                       >
                         ✕
@@ -273,35 +463,29 @@ export function PurchaseOrderForm({
           </Table>
         </div>
 
-        {/* Grand Total Bar */}
+        {/* ── Totals — reads from rowValues, no RHF watch involved ── */}
         <div className="flex justify-end rounded-none border bg-muted/40 p-4">
-          <div className="text-right">
-            <span className="text-sm font-medium text-muted-foreground mr-4">
-              Estimated Total Amount:
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-right">
+            <span className="text-muted-foreground">Subtotal:</span>
+            <span className="font-medium">{formatCurrency(totals.subtotal)}</span>
+            <span className="text-muted-foreground">Discount:</span>
+            <span className="font-medium text-rose-600">
+              -{formatCurrency(totals.discountAmount)}
             </span>
+            <span className="text-muted-foreground">Tax:</span>
+            <span className="font-medium">{formatCurrency(totals.taxAmount)}</span>
+            <span className="font-semibold text-base">Total:</span>
             <span className="text-xl font-bold text-primary">
-              {formatCurrency(grandTotal)}
+              {formatCurrency(totals.total)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Form Action Buttons */}
+      {/* ── Actions ── */}
       <div className="flex items-center justify-end gap-3 pt-4 border-t">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onFormSubmit(true)}
-          disabled={isLoading}
-        >
-          Save Draft
-        </Button>
-        <Button
-          type="button"
-          onClick={onFormSubmit(false)}
-          disabled={isLoading}
-        >
-          {isLoading ? "Saving..." : "Submit PO"}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Saving..." : "Save"}
         </Button>
       </div>
     </form>

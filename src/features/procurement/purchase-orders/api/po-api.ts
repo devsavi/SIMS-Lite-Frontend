@@ -1,88 +1,175 @@
-import { get, post, put, patch } from "@/lib/api/client";
+import { get, post, put, patch, del } from "@/lib/api/client";
 import type {
-  PurchaseOrder,
+  PaginatedPOsResponse,
+  PODetailResponse,
+  POPrintResponse,
   POFilters,
   CreatePORequest,
   UpdatePORequest,
+  RejectPORequest,
+  CancelPORequest,
+  EmailPORequest,
+  PurchaseOrder,
+  PurchaseOrderListItem,
 } from "../types";
 
-export interface PaginatedPOsResponse {
-  data: PurchaseOrder[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+// ---------------------------------------------------------------------------
+// GET /purchase-orders — list with filters
+// ---------------------------------------------------------------------------
 
 export async function fetchPurchaseOrders(
   filters: POFilters = {}
 ): Promise<PaginatedPOsResponse> {
   const params: Record<string, string | number | undefined> = {
-    search: filters.search || undefined,
-    status: filters.status !== "ALL" ? filters.status : undefined,
-    supplier_id: filters.supplierId !== "ALL" ? filters.supplierId : undefined,
-    start_date: filters.startDate || undefined,
-    end_date: filters.endDate || undefined,
-    page: filters.page || 1,
-    limit: filters.limit || 10,
-    sort_by: filters.sortBy || "createdAt",
-    sort_order: filters.sortOrder || "desc",
+    page: filters.page ?? 1,
+    size: filters.size ?? 20,
   };
 
-  return get<PaginatedPOsResponse>("/api/v1/purchase-orders", { params });
+  if (filters.search) params.search = filters.search;
+  if (filters.status && filters.status !== "ALL") params.status = filters.status;
+  if (filters.supplier_id && filters.supplier_id !== "ALL")
+    params.supplier_id = filters.supplier_id;
+  if (filters.period) params.period = filters.period;
+  if (filters.period === "custom") {
+    if (filters.from_date) params.from_date = filters.from_date;
+    if (filters.to_date) params.to_date = filters.to_date;
+  }
+
+  return get<PaginatedPOsResponse>("/purchase-orders", { params });
 }
 
-export async function fetchPurchaseOrderById(id: string): Promise<PurchaseOrder> {
-  return get<PurchaseOrder>(`/api/v1/purchase-orders/${id}`);
+// ---------------------------------------------------------------------------
+// GET /purchase-orders/{po_id} — detail
+// ---------------------------------------------------------------------------
+
+export async function fetchPurchaseOrderById(
+  id: string
+): Promise<PODetailResponse> {
+  return get<PODetailResponse>(`/purchase-orders/${id}`);
 }
+
+// ---------------------------------------------------------------------------
+// POST /purchase-orders — create
+// ---------------------------------------------------------------------------
 
 export async function createPurchaseOrder(
   data: CreatePORequest
 ): Promise<PurchaseOrder> {
-  return post<PurchaseOrder>("/api/v1/purchase-orders", data);
+  const res = await post<{ status: string; data: PurchaseOrder }>(
+    "/purchase-orders",
+    data
+  );
+  return res.data;
 }
+
+// ---------------------------------------------------------------------------
+// PUT /purchase-orders/{po_id} — update draft
+// ---------------------------------------------------------------------------
 
 export async function updatePurchaseOrder(
   id: string,
   data: UpdatePORequest
 ): Promise<PurchaseOrder> {
-  return put<PurchaseOrder>(`/api/v1/purchase-orders/${id}`, data);
+  const res = await put<{ status: string; data: PurchaseOrder }>(
+    `/purchase-orders/${id}`,
+    data
+  );
+  return res.data;
 }
+
+// ---------------------------------------------------------------------------
+// DELETE /purchase-orders/{po_id} — delete draft
+// ---------------------------------------------------------------------------
+
+export async function deletePurchaseOrder(id: string): Promise<void> {
+  await del(`/purchase-orders/${id}`);
+}
+
+// ---------------------------------------------------------------------------
+// PATCH /purchase-orders/{po_id}/submit
+// ---------------------------------------------------------------------------
 
 export async function submitPurchaseOrder(id: string): Promise<PurchaseOrder> {
-  return post<PurchaseOrder>(`/api/v1/purchase-orders/${id}/submit`);
+  const res = await patch<{ status: string; data: PurchaseOrder }>(
+    `/purchase-orders/${id}/submit`
+  );
+  return res.data;
 }
 
+// ---------------------------------------------------------------------------
+// PATCH /purchase-orders/{po_id}/approve
+// ---------------------------------------------------------------------------
+
 export async function approvePurchaseOrder(id: string): Promise<PurchaseOrder> {
-  return post<PurchaseOrder>(`/api/v1/purchase-orders/${id}/approve`);
+  const res = await patch<{ status: string; data: PurchaseOrder }>(
+    `/purchase-orders/${id}/approve`
+  );
+  return res.data;
 }
+
+// ---------------------------------------------------------------------------
+// PATCH /purchase-orders/{po_id}/reject
+// ---------------------------------------------------------------------------
 
 export async function rejectPurchaseOrder(
   id: string,
-  reason?: string
+  body: RejectPORequest
 ): Promise<PurchaseOrder> {
-  return post<PurchaseOrder>(`/api/v1/purchase-orders/${id}/reject`, { reason });
+  const res = await patch<{ status: string; data: PurchaseOrder }>(
+    `/purchase-orders/${id}/reject`,
+    body
+  );
+  return res.data;
 }
+
+// ---------------------------------------------------------------------------
+// PATCH /purchase-orders/{po_id}/cancel
+// ---------------------------------------------------------------------------
 
 export async function cancelPurchaseOrder(
   id: string,
-  reason?: string
+  body: CancelPORequest
 ): Promise<PurchaseOrder> {
-  return post<PurchaseOrder>(`/api/v1/purchase-orders/${id}/cancel`, { reason });
-}
-
-export async function resendPOEmail(id: string): Promise<{ success: boolean; message: string }> {
-  return post<{ success: boolean; message: string }>(
-    `/api/v1/purchase-orders/${id}/resend-email`
+  const res = await patch<{ status: string; data: PurchaseOrder }>(
+    `/purchase-orders/${id}/cancel`,
+    body
   );
+  return res.data;
 }
 
-export async function exportPurchaseOrders(filters: POFilters = {}): Promise<Blob> {
-  const response = await get<Blob>("/api/v1/purchase-orders/export", {
-    params: filters,
-    responseType: "blob",
-  });
-  return response;
+// ---------------------------------------------------------------------------
+// POST /purchase-orders/{po_id}/duplicate
+// ---------------------------------------------------------------------------
+
+export async function duplicatePurchaseOrder(
+  id: string
+): Promise<PurchaseOrder> {
+  const res = await post<{ status: string; data: PurchaseOrder }>(
+    `/purchase-orders/${id}/duplicate`
+  );
+  return res.data;
+}
+
+// ---------------------------------------------------------------------------
+// GET /purchase-orders/{po_id}/print
+// ---------------------------------------------------------------------------
+
+export async function fetchPurchaseOrderPrint(
+  id: string
+): Promise<POPrintResponse> {
+  return get<POPrintResponse>(`/purchase-orders/${id}/print`);
+}
+
+// ---------------------------------------------------------------------------
+// POST /purchase-orders/{po_id}/email
+// ---------------------------------------------------------------------------
+
+export async function emailPurchaseOrder(
+  id: string,
+  body: EmailPORequest
+): Promise<{ status: string; message: string }> {
+  return post<{ status: string; message: string }>(
+    `/purchase-orders/${id}/email`,
+    body
+  );
 }

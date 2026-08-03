@@ -4,6 +4,7 @@ export * from "./hooks/use-purchase-orders";
 export * from "./schemas/po.schema";
 export * from "./components/POStatusBadge";
 export * from "./components/POActionDialog";
+export * from "./components/POPrintDialog";
 export * from "./components/PurchaseOrderTable";
 export * from "./components/PurchaseOrderForm";
 export * from "./components/PurchaseOrderDetail";
