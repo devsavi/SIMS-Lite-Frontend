@@ -2,63 +2,42 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { ReleaseTable } from "../components/release-table/ReleaseTable";
-import type { StockRelease } from "../types/stock-release-types";
+import type { StockReleaseSummary } from "../types/stock-release-types";
 
-const mockReleases: StockRelease[] = [
+const mockReleases: StockReleaseSummary[] = [
   {
     id: "rel-101",
     release_number: "REL-2026-0001",
+    purpose: "INTERNAL_USE",
     release_date: "2026-07-28T00:00:00Z",
-    status: "submitted",
-    requested_by: "John Storekeeper",
-    requested_by_user: {
+    status: "SUBMITTED",
+    total_quantity: 45,
+    total_cost: 0,
+    item_count: 2,
+    created_by: {
       id: "u-1",
-      full_name: "John Storekeeper",
+      first_name: "John",
+      last_name: "Storekeeper",
       email: "john@store.com",
     },
-    approved_by: null,
-    total_items: 2,
-    total_quantity: 45,
-    items: [
-      {
-        id: "item-1",
-        product_id: "prod-1",
-        product_name: "Safety Helmet",
-        sku: "SH-001",
-        quantity: 20,
-        unit_of_measure: "pcs",
-      },
-      {
-        id: "item-2",
-        product_id: "prod-2",
-        product_name: "Work Gloves",
-        sku: "WG-002",
-        quantity: 25,
-        unit_of_measure: "pairs",
-      },
-    ],
-    notes: "Site construction release",
     created_at: "2026-07-28T00:00:00Z",
-    updated_at: "2026-07-28T00:00:00Z",
   },
   {
     id: "rel-102",
     release_number: "REL-2026-0002",
+    purpose: "PRODUCTION",
     release_date: "2026-07-27T00:00:00Z",
-    status: "approved",
-    requested_by: "Alice Officer",
-    approved_by: "Manager Smith",
-    approved_by_user: {
-      id: "u-2",
-      full_name: "Manager Smith",
-      email: "smith@store.com",
-    },
-    total_items: 1,
+    status: "APPROVED",
     total_quantity: 100,
-    items: [],
-    notes: "Monthly inventory release",
+    total_cost: 500,
+    item_count: 1,
+    created_by: {
+      id: "u-2",
+      first_name: "Alice",
+      last_name: "Officer",
+      email: "alice@store.com",
+    },
     created_at: "2026-07-27T00:00:00Z",
-    updated_at: "2026-07-27T00:00:00Z",
   },
 ];
 
@@ -81,7 +60,7 @@ describe("ReleaseTable", () => {
     expect(screen.getByText("Approved")).toBeInTheDocument();
   }, 15000);
 
-  it("renders requester and approver names correctly", () => {
+  it("renders creator names correctly", () => {
     render(
       <ReleaseTable
         data={mockReleases}
@@ -94,7 +73,7 @@ describe("ReleaseTable", () => {
     );
 
     expect(screen.getByText("John Storekeeper")).toBeInTheDocument();
-    expect(screen.getByText("Manager Smith")).toBeInTheDocument();
+    expect(screen.getByText("Alice Officer")).toBeInTheDocument();
   });
 
   it("renders empty state when no data is provided", () => {

@@ -1,13 +1,13 @@
-import type { StockReleaseStatus, StockReleaseItem } from "../types/stock-release-types";
+import type { StockReleaseStatus, StockReleasePurpose, StockReleaseItem } from "../types/stock-release-types";
 import type { UserRole } from "@/lib/auth";
 
 export function normalizeStatus(status?: string): StockReleaseStatus {
-  if (!status) return "draft";
-  const s = status.toLowerCase();
-  if (s === "submitted") return "submitted";
-  if (s === "approved") return "approved";
-  if (s === "cancelled" || s === "canceled" || s === "rejected") return "cancelled";
-  return "draft";
+  if (!status) return "DRAFT";
+  const s = status.toUpperCase();
+  if (s === "SUBMITTED") return "SUBMITTED";
+  if (s === "APPROVED") return "APPROVED";
+  if (s === "CANCELLED" || s === "CANCELED" || s === "REJECTED") return "CANCELLED";
+  return "DRAFT";
 }
 
 export function getStatusBadgeVariant(
@@ -15,13 +15,13 @@ export function getStatusBadgeVariant(
 ): "default" | "secondary" | "success" | "destructive" | "outline" | "warning" {
   const norm = normalizeStatus(status);
   switch (norm) {
-    case "draft":
+    case "DRAFT":
       return "secondary";
-    case "submitted":
+    case "SUBMITTED":
       return "warning";
-    case "approved":
+    case "APPROVED":
       return "success";
-    case "cancelled":
+    case "CANCELLED":
       return "destructive";
     default:
       return "outline";
@@ -31,21 +31,42 @@ export function getStatusBadgeVariant(
 export function getStatusLabel(status: StockReleaseStatus | string): string {
   const norm = normalizeStatus(status);
   switch (norm) {
-    case "draft":
+    case "DRAFT":
       return "Draft";
-    case "submitted":
+    case "SUBMITTED":
       return "Submitted";
-    case "approved":
+    case "APPROVED":
       return "Approved";
-    case "cancelled":
+    case "CANCELLED":
       return "Cancelled";
     default:
       return status;
   }
 }
 
+export function getPurposeLabel(purpose: StockReleasePurpose | string): string {
+  switch (purpose) {
+    case "INTERNAL_USE":
+      return "Internal Use";
+    case "PRODUCTION":
+      return "Production";
+    case "MAINTENANCE":
+      return "Maintenance";
+    case "SALES":
+      return "Sales";
+    case "SAMPLE":
+      return "Sample";
+    case "DISPOSAL":
+      return "Disposal";
+    case "OTHER":
+      return "Other";
+    default:
+      return purpose;
+  }
+}
+
 export function calculateTotalQuantity(items: StockReleaseItem[] = []): number {
-  return items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  return items.reduce((sum, item) => sum + (Number(item.quantity_requested) || 0), 0);
 }
 
 export function canEditRelease(
@@ -53,14 +74,17 @@ export function canEditRelease(
   userRole?: UserRole | string
 ): boolean {
   const norm = normalizeStatus(status);
-  if (norm !== "draft") return false;
+  if (norm !== "DRAFT") return false;
   if (!userRole) return false;
-  const role = userRole.toLowerCase();
-  // ADMIN: full access | STORE_KEEPER: inventory:write | OFFICER: no edit
-  return (
-    role === "admin" ||
-    role === "store_keeper"
-  );
+  const role = (userRole as string).toLowerCase();
+  return role === "admin" || role === "store_keeper";
+}
+
+export function canDeleteRelease(
+  status: StockReleaseStatus | string,
+  userRole?: UserRole | string
+): boolean {
+  return canEditRelease(status, userRole);
 }
 
 export function canSubmitRelease(
@@ -68,14 +92,10 @@ export function canSubmitRelease(
   userRole?: UserRole | string
 ): boolean {
   const norm = normalizeStatus(status);
-  if (norm !== "draft") return false;
+  if (norm !== "DRAFT") return false;
   if (!userRole) return false;
-  const role = userRole.toLowerCase();
-  // ADMIN: full access | STORE_KEEPER: inventory:write | OFFICER: no submit
-  return (
-    role === "admin" ||
-    role === "store_keeper"
-  );
+  const role = (userRole as string).toLowerCase();
+  return role === "admin" || role === "store_keeper";
 }
 
 export function canApproveRelease(
@@ -83,14 +103,10 @@ export function canApproveRelease(
   userRole?: UserRole | string
 ): boolean {
   const norm = normalizeStatus(status);
-  if (norm !== "submitted") return false;
+  if (norm !== "SUBMITTED") return false;
   if (!userRole) return false;
-  const role = userRole.toLowerCase();
-  // ADMIN: inventory:approve | STORE_KEEPER: inventory:approve | OFFICER: no approve
-  return (
-    role === "admin" ||
-    role === "store_keeper"
-  );
+  const role = (userRole as string).toLowerCase();
+  return role === "admin" || role === "store_keeper";
 }
 
 export function canCancelRelease(
@@ -98,13 +114,8 @@ export function canCancelRelease(
   userRole?: UserRole | string
 ): boolean {
   const norm = normalizeStatus(status);
-  if (norm !== "draft" && norm !== "submitted") return false;
+  if (norm !== "DRAFT" && norm !== "SUBMITTED") return false;
   if (!userRole) return false;
-  const role = userRole.toLowerCase();
-  // ADMIN: full access | STORE_KEEPER: inventory:write | OFFICER: no cancel
-  return (
-    role === "admin" ||
-    role === "store_keeper"
-  );
+  const role = (userRole as string).toLowerCase();
+  return role === "admin" || role === "store_keeper";
 }
-

@@ -1,31 +1,27 @@
 import * as React from "react";
 import Link from "next/link";
-import { Eye, Edit3, Send, CheckCircle, XCircle, MoreHorizontal } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/app/components/ui/dropdown-menu";
+import { Eye, Edit3, Send, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { RowActionsMenu, RowActionsMenuItem } from "@/components/common";
 import { StockReleaseStatusBadge } from "../release-status/StockReleaseStatusBadge";
 import {
   canEditRelease,
+  canDeleteRelease,
   canSubmitRelease,
   canApproveRelease,
   canCancelRelease,
+  getPurposeLabel,
 } from "../../utils/stock-release-utils";
 import type { ColumnDef } from "@/components/common/data-table";
-import type { StockRelease } from "../../types/stock-release-types";
+import type { StockReleaseSummary } from "../../types/stock-release-types";
 import type { UserRole } from "@/lib/auth";
 
 export interface GetReleaseTableColumnsOptions {
   userRole?: UserRole;
-  onEdit?: (release: StockRelease) => void;
-  onSubmit?: (release: StockRelease) => void;
-  onApprove?: (release: StockRelease) => void;
-  onCancel?: (release: StockRelease) => void;
+  onEdit?: (release: StockReleaseSummary) => void;
+  onSubmit?: (release: StockReleaseSummary) => void;
+  onApprove?: (release: StockReleaseSummary) => void;
+  onCancel?: (release: StockReleaseSummary) => void;
+  onDelete?: (release: StockReleaseSummary) => void;
 }
 
 export function getReleaseTableColumns({
@@ -34,7 +30,8 @@ export function getReleaseTableColumns({
   onSubmit,
   onApprove,
   onCancel,
-}: GetReleaseTableColumnsOptions = {}): ColumnDef<StockRelease>[] {
+  onDelete,
+}: GetReleaseTableColumnsOptions = {}): ColumnDef<StockReleaseSummary>[] {
   return [
     {
       accessorKey: "release_number",
@@ -58,104 +55,65 @@ export function getReleaseTableColumns({
         const val = row.getValue("release_date") as string;
         if (!val) return <span className="text-muted-foreground text-xs">—</span>;
         return (
-          <span className="text-xs text-foreground font-medium">
+          <span className="text-xs text-foreground">
             {new Date(val).toLocaleDateString()}
           </span>
         );
       },
     },
     {
-      accessorKey: "requested_by",
-      header: "Requested By",
+      accessorKey: "purpose",
+      header: "Purpose",
+      cell: ({ row }) => (
+        <span className="text-xs text-foreground">
+          {getPurposeLabel(row.getValue("purpose") as string)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "created_by",
+      header: "Created By",
       cell: ({ row }) => {
-        const release = row.original;
-        const name =
-          release.requested_by_user?.full_name ||
-          release.created_by_user?.full_name ||
-          release.requested_by ||
-          release.created_by ||
-          "System";
-
+        const actor = row.original.created_by;
+        if (!actor) return <span className="text-muted-foreground text-xs">—</span>;
+        const fullName = `${actor.first_name} ${actor.last_name}`.trim();
         return (
           <div className="flex flex-col text-xs">
-            <span className="font-medium text-foreground">{name}</span>
-            {release.requested_by_user?.email && (
-              <span className="text-[11px] text-muted-foreground">
-                {release.requested_by_user.email}
-              </span>
+            <span className="font-medium text-foreground">{fullName}</span>
+            {actor.email && (
+              <span className="text-[11px] text-muted-foreground">{actor.email}</span>
             )}
           </div>
         );
       },
     },
     {
-      accessorKey: "approved_by",
-      header: "Approved By",
+      accessorKey: "item_count",
+      header: "Items",
       cell: ({ row }) => {
-        const release = row.original;
-        const name =
-          release.approved_by_user?.full_name || release.approved_by;
-
-        if (!name) return <span className="text-muted-foreground text-xs">—</span>;
-
-        return (
-          <div className="flex flex-col text-xs">
-            <span className="font-medium text-emerald-700 dark:text-emerald-400">
-              {name}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "total_items",
-      header: "Total Items",
-      cell: ({ row }) => {
-        const items = row.original.items || [];
-        const count = row.original.total_items ?? items.length;
+        const count = row.original.item_count ?? 0;
         return (
           <span className="inline-flex items-center px-2 py-0.5 rounded-none text-xs font-mono font-medium bg-muted">
-            {count} {count === 1 ? "item" : "items"}
+            {count}
           </span>
         );
       },
     },
     {
       accessorKey: "total_quantity",
-      header: "Released Qty",
-      cell: ({ row }) => {
-        const items = row.original.items || [];
-        const qty =
-          row.original.total_quantity ??
-          items.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
-
-        return (
-          <span className="font-mono text-xs font-semibold text-foreground">
-            {qty}
-          </span>
-        );
-      },
+      header: "Total Qty",
+      cell: ({ row }) => (
+        <span className="font-mono text-xs font-semibold text-foreground">
+          {row.original.total_quantity ?? 0}
+        </span>
+      ),
     },
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        return <StockReleaseStatusBadge status={status} />;
-      },
-    },
-    {
-      accessorKey: "notes",
-      header: "Notes",
-      cell: ({ row }) => {
-        const notes = row.getValue("notes") as string;
-        if (!notes) return <span className="text-muted-foreground text-xs">—</span>;
-        return (
-          <span className="text-xs text-muted-foreground truncate max-w-44 block">
-            {notes}
-          </span>
-        );
-      },
+      cell: ({ row }) => (
+        <StockReleaseStatusBadge status={row.getValue("status") as string} />
+      ),
     },
     {
       id: "actions",
@@ -165,77 +123,85 @@ export function getReleaseTableColumns({
         const status = release.status;
 
         const editable = canEditRelease(status, userRole);
+        const deletable = canDeleteRelease(status, userRole);
         const submittable = canSubmitRelease(status, userRole);
         const approvable = canApproveRelease(status, userRole);
         const cancellable = canCancelRelease(status, userRole);
 
+        const hasOverflow =
+          (submittable && onSubmit) ||
+          (approvable && onApprove) ||
+          (cancellable && onCancel) ||
+          (deletable && onDelete);
+
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                aria-label={`Actions for release ${release.release_number}`}
+          <div className="flex items-center justify-end gap-1">
+            {/* View — always visible */}
+            <Link
+              href={`/stock-release/${release.id}`}
+              title="View details"
+              aria-label={`View ${release.release_number}`}
+              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <Eye className="h-4 w-4" />
+            </Link>
+
+            {/* Edit — only for draft */}
+            {editable && onEdit && (
+              <button
+                type="button"
+                onClick={() => onEdit(release)}
+                title="Edit draft"
+                aria-label={`Edit ${release.release_number}`}
+                className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/stock-release/${release.id}`}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  <span>View Details</span>
-                </Link>
-              </DropdownMenuItem>
+                <Edit3 className="h-4 w-4" />
+              </button>
+            )}
 
-              {editable && onEdit && (
-                <DropdownMenuItem
-                  onClick={() => onEdit(release)}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <Edit3 className="h-3.5 w-3.5" />
-                  <span>Edit Draft</span>
-                </DropdownMenuItem>
-              )}
-
-              {submittable && onSubmit && (
-                <DropdownMenuItem
-                  onClick={() => onSubmit(release)}
-                  className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  <span>Submit Release</span>
-                </DropdownMenuItem>
-              )}
-
-              {approvable && onApprove && (
-                <DropdownMenuItem
-                  onClick={() => onApprove(release)}
-                  className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold"
-                >
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  <span>Approve Release</span>
-                </DropdownMenuItem>
-              )}
-
-              {cancellable && onCancel && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => onCancel(release)}
-                    className="flex items-center gap-2 text-xs text-destructive"
+            {/* Overflow — workflow + destructive actions */}
+            {hasOverflow && (
+              <RowActionsMenu label={`More actions for ${release.release_number}`}>
+                {submittable && onSubmit && (
+                  <RowActionsMenuItem
+                    icon={<Send className="h-3.5 w-3.5" />}
+                    onClick={() => onSubmit(release)}
                   >
-                    <XCircle className="h-3.5 w-3.5" />
-                    <span>Cancel Release</span>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    Submit for Approval
+                  </RowActionsMenuItem>
+                )}
+
+                {approvable && onApprove && (
+                  <RowActionsMenuItem
+                    icon={<CheckCircle className="h-3.5 w-3.5" />}
+                    onClick={() => onApprove(release)}
+                  >
+                    Approve Release
+                  </RowActionsMenuItem>
+                )}
+
+                {cancellable && onCancel && (
+                  <RowActionsMenuItem
+                    icon={<XCircle className="h-3.5 w-3.5" />}
+                    onClick={() => onCancel(release)}
+                    destructive
+                  >
+                    Cancel Release
+                  </RowActionsMenuItem>
+                )}
+
+                {deletable && onDelete && (
+                  <RowActionsMenuItem
+                    icon={<Trash2 className="h-3.5 w-3.5" />}
+                    onClick={() => onDelete(release)}
+                    destructive
+                  >
+                    Delete Draft
+                  </RowActionsMenuItem>
+                )}
+              </RowActionsMenu>
+            )}
+          </div>
         );
       },
     },

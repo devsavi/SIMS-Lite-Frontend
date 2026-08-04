@@ -2,22 +2,48 @@
  * Stock Release feature — TypeScript type definitions
  */
 
-export type StockReleaseStatus = "draft" | "submitted" | "approved" | "cancelled";
+export type StockReleaseStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "CANCELLED";
+
+export type StockReleasePurpose =
+  | "INTERNAL_USE"
+  | "PRODUCTION"
+  | "MAINTENANCE"
+  | "SALES"
+  | "SAMPLE"
+  | "DISPOSAL"
+  | "OTHER";
+
+export type StockReleasePeriod = "day" | "week" | "month" | "custom";
+
+export interface ReleaseActor {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+export interface StockReleaseItemProduct {
+  id: string;
+  sku: string;
+  name: string;
+  barcode?: string | null;
+  reorder_level?: number;
+  cost_price?: number;
+  selling_price?: number;
+}
 
 export interface StockReleaseItem {
   id?: string;
-  release_id?: string;
-  product_id: string;
-  product_name?: string;
-  product_sku?: string;
-  sku?: string;
-  quantity: number;
-  available_quantity?: number;
-  unit_of_measure: string;
-  uom_code?: string;
-  unit_price?: number;
-  total_price?: number;
-  notes?: string;
+  stock_release_id?: string;
+  product: StockReleaseItemProduct;
+  /** For backward compat with older parts of the UI that read item.product_id */
+  product_id?: string;
+  quantity_requested: number;
+  unit_cost: number;
+  line_total: number;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ActivityHistoryItem {
@@ -30,36 +56,39 @@ export interface ActivityHistoryItem {
   notes?: string;
 }
 
+/** Shape returned by GET /stock-releases (list) */
+export interface StockReleaseSummary {
+  id: string;
+  release_number: string;
+  purpose: StockReleasePurpose;
+  status: StockReleaseStatus;
+  release_date: string;
+  total_quantity: number;
+  total_cost: number;
+  item_count: number;
+  created_by: ReleaseActor;
+  created_at: string;
+}
+
+/** Shape returned by GET /stock-releases/{id} (detail) */
 export interface StockRelease {
   id: string;
   release_number: string;
-  release_date: string;
+  purpose: StockReleasePurpose;
   status: StockReleaseStatus;
+  release_date: string;
   notes?: string | null;
-  requested_by?: string | null;
-  requested_by_user?: {
-    id: string;
-    full_name: string;
-    email: string;
-  } | null;
-  created_by?: string | null;
-  created_by_user?: {
-    id: string;
-    full_name: string;
-    email: string;
-  } | null;
-  approved_by?: string | null;
-  approved_by_user?: {
-    id: string;
-    full_name: string;
-    email: string;
-  } | null;
+  reference_document?: string | null;
+  total_quantity: number;
+  total_cost: number;
+  created_by: ReleaseActor | null;
+  submitted_by?: ReleaseActor | null;
   submitted_at?: string | null;
+  approved_by?: ReleaseActor | null;
   approved_at?: string | null;
+  cancelled_by?: ReleaseActor | null;
   cancelled_at?: string | null;
   cancellation_reason?: string | null;
-  total_items: number;
-  total_quantity: number;
   items: StockReleaseItem[];
   history?: ActivityHistoryItem[];
   created_at: string;
@@ -71,27 +100,30 @@ export interface StockReleaseFilterParams {
   size?: number;
   search?: string;
   status?: StockReleaseStatus | "ALL";
+  purpose?: StockReleasePurpose | "ALL";
+  period?: StockReleasePeriod | "ALL";
   from_date?: string;
   to_date?: string;
-  sort_by?: string;
-  sort_order?: "asc" | "desc";
 }
 
 export interface CreateStockReleaseItemPayload {
   product_id: string;
-  quantity: number;
-  unit_of_measure: string;
+  quantity_requested: number;
   notes?: string;
 }
 
 export interface CreateStockReleasePayload {
+  purpose: StockReleasePurpose;
   release_date: string;
   notes?: string;
+  reference_document?: string;
   items: CreateStockReleaseItemPayload[];
 }
 
 export interface UpdateStockReleasePayload {
+  purpose?: StockReleasePurpose;
   release_date?: string;
   notes?: string;
+  reference_document?: string;
   items?: CreateStockReleaseItemPayload[];
 }

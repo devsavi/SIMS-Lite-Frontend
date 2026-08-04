@@ -1,18 +1,15 @@
-import { get, post, put, patch } from "@/lib/api/client";
+import { get, post, put, patch, del } from "@/lib/api/client";
 import type {
   StockRelease,
+  StockReleaseSummary,
   StockReleaseFilterParams,
   CreateStockReleasePayload,
   UpdateStockReleasePayload,
 } from "../types/stock-release-types";
 
 export interface PaginatedStockReleaseResponse {
-  data: StockRelease[];
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  totalPages?: number;
-  pagination?: {
+  data: StockReleaseSummary[];
+  pagination: {
     page: number;
     size: number;
     total: number;
@@ -26,50 +23,49 @@ export interface ApiSuccessWrapper<T> {
   status?: string;
 }
 
-const STOCK_RELEASE_BASE = "/api/v1/stock-releases";
+const BASE = "/stock-releases";
 
 export const stockReleaseApi = {
   /**
-   * Fetch paginated list of stock releases with filters
+   * GET /stock-releases — paginated list with filters
    */
   async getStockReleases(
     params?: StockReleaseFilterParams
   ): Promise<PaginatedStockReleaseResponse> {
-    const queryParams: Record<string, unknown> = {
+    const query: Record<string, unknown> = {
       page: params?.page ?? 1,
       size: params?.size ?? 20,
     };
 
-    if (params?.search) queryParams.search = params.search;
-    if (params?.status && params.status !== "ALL") queryParams.status = params.status;
-    if (params?.from_date) queryParams.from_date = params.from_date;
-    if (params?.to_date) queryParams.to_date = params.to_date;
-    if (params?.sort_by) queryParams.sort_by = params.sort_by;
-    if (params?.sort_order) queryParams.sort_order = params.sort_order;
+    if (params?.search) query.search = params.search;
+    if (params?.status && params.status !== "ALL") query.status = params.status;
+    if (params?.purpose && params.purpose !== "ALL") query.purpose = params.purpose;
 
-    const res = await get<PaginatedStockReleaseResponse | ApiSuccessWrapper<PaginatedStockReleaseResponse> | StockRelease[]>(
-      STOCK_RELEASE_BASE,
-      { params: queryParams }
-    );
-
-    if (Array.isArray(res)) {
-      return {
-        data: res,
-        total: res.length,
-        page: params?.page ?? 1,
-        pageSize: params?.size ?? 20,
-        totalPages: 1,
-      };
+    // Period handling
+    if (params?.period && params.period !== "ALL") {
+      query.period = params.period;
+      if (params.period === "custom") {
+        if (params.from_date) query.from_date = params.from_date;
+        if (params.to_date) query.to_date = params.to_date;
+      }
     }
 
+    const res = await get<ApiSuccessWrapper<StockReleaseSummary[]> | PaginatedStockReleaseResponse>(
+      BASE,
+      { params: query }
+    );
+
+    // Normalise: API wraps data under { status, data, pagination }
     if ("data" in res && Array.isArray(res.data)) {
+      const r = res as PaginatedStockReleaseResponse;
       return {
-        data: res.data,
-        total: (res as PaginatedStockReleaseResponse).total ?? (res as PaginatedStockReleaseResponse).pagination?.total ?? res.data.length,
-        page: (res as PaginatedStockReleaseResponse).page ?? (res as PaginatedStockReleaseResponse).pagination?.page ?? 1,
-        pageSize: (res as PaginatedStockReleaseResponse).pageSize ?? (res as PaginatedStockReleaseResponse).pagination?.size ?? 20,
-        totalPages: (res as PaginatedStockReleaseResponse).totalPages ?? (res as PaginatedStockReleaseResponse).pagination?.pages ?? 1,
-        pagination: (res as PaginatedStockReleaseResponse).pagination,
+        data: r.data,
+        pagination: r.pagination ?? {
+          page: params?.page ?? 1,
+          size: params?.size ?? 20,
+          total: r.data.length,
+          pages: 1,
+        },
       };
     }
 
@@ -77,87 +73,94 @@ export const stockReleaseApi = {
   },
 
   /**
-   * Fetch stock release detail by ID
+   * GET /stock-releases/{id} — single release detail
    */
   async getStockReleaseById(id: string): Promise<StockRelease> {
     const res = await get<ApiSuccessWrapper<StockRelease> | StockRelease>(
-      `${STOCK_RELEASE_BASE}/${id}`
+      `${BASE}/${id}`
     );
-    if ("data" in res && res.data) {
-      return res.data;
+    if ("data" in res && res.data && !Array.isArray(res.data)) {
+      return (res as ApiSuccessWrapper<StockRelease>).data;
     }
     return res as StockRelease;
   },
 
   /**
-   * Create new stock release draft
+   * POST /stock-releases — create draft
    */
   async createStockRelease(
     payload: CreateStockReleasePayload
   ): Promise<StockRelease> {
     const res = await post<ApiSuccessWrapper<StockRelease> | StockRelease>(
-      STOCK_RELEASE_BASE,
+      BASE,
       payload
     );
-    if ("data" in res && res.data) {
-      return res.data;
+    if ("data" in res && res.data && !Array.isArray(res.data)) {
+      return (res as ApiSuccessWrapper<StockRelease>).data;
     }
     return res as StockRelease;
   },
 
   /**
-   * Update draft stock release
+   * PUT /stock-releases/{id} — update draft
    */
   async updateStockRelease(
     id: string,
     payload: UpdateStockReleasePayload
   ): Promise<StockRelease> {
     const res = await put<ApiSuccessWrapper<StockRelease> | StockRelease>(
-      `${STOCK_RELEASE_BASE}/${id}`,
+      `${BASE}/${id}`,
       payload
     );
-    if ("data" in res && res.data) {
-      return res.data;
+    if ("data" in res && res.data && !Array.isArray(res.data)) {
+      return (res as ApiSuccessWrapper<StockRelease>).data;
     }
     return res as StockRelease;
   },
 
   /**
-   * Submit draft stock release
+   * DELETE /stock-releases/{id} — delete a draft release
+   */
+  async deleteStockRelease(id: string): Promise<void> {
+    await del<unknown>(`${BASE}/${id}`);
+  },
+
+  /**
+   * PATCH /stock-releases/{id}/submit
    */
   async submitStockRelease(id: string): Promise<StockRelease> {
     const res = await patch<ApiSuccessWrapper<StockRelease> | StockRelease>(
-      `${STOCK_RELEASE_BASE}/${id}/submit`
+      `${BASE}/${id}/submit`
     );
-    if ("data" in res && res.data) {
-      return res.data;
+    if ("data" in res && res.data && !Array.isArray(res.data)) {
+      return (res as ApiSuccessWrapper<StockRelease>).data;
     }
     return res as StockRelease;
   },
 
   /**
-   * Approve stock release (deducts stock and updates inventory)
+   * PATCH /stock-releases/{id}/approve
    */
   async approveStockRelease(id: string): Promise<StockRelease> {
     const res = await patch<ApiSuccessWrapper<StockRelease> | StockRelease>(
-      `${STOCK_RELEASE_BASE}/${id}/approve`
+      `${BASE}/${id}/approve`
     );
-    if ("data" in res && res.data) {
-      return res.data;
+    if ("data" in res && res.data && !Array.isArray(res.data)) {
+      return (res as ApiSuccessWrapper<StockRelease>).data;
     }
     return res as StockRelease;
   },
 
   /**
-   * Cancel stock release
+   * PATCH /stock-releases/{id}/cancel
    */
   async cancelStockRelease(id: string, reason?: string): Promise<StockRelease> {
     const res = await patch<ApiSuccessWrapper<StockRelease> | StockRelease>(
-      `${STOCK_RELEASE_BASE}/${id}/cancel`,
-      { reason }
+      `${BASE}/${id}/cancel`,
+      reason ? { reason } : undefined
     );
-    if ("data" in res && res.data) {
-      return res.data;
+    if ("data" in res && res.data && !Array.isArray(res.data)) {
+      return (res as ApiSuccessWrapper<StockRelease>).data;
     }
     return res as StockRelease;
   },

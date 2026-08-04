@@ -3,11 +3,11 @@
 import * as React from "react";
 import { DataTable } from "@/components/common/data-table";
 import { getReleaseTableColumns } from "./ReleaseTableColumns";
-import type { StockRelease } from "../../types/stock-release-types";
+import type { StockReleaseSummary } from "../../types/stock-release-types";
 import type { UserRole } from "@/lib/auth";
 
 export interface ReleaseTableProps {
-  data: StockRelease[];
+  data: StockReleaseSummary[];
   loading?: boolean;
   error?: unknown;
   page: number;
@@ -16,10 +16,11 @@ export interface ReleaseTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   userRole?: UserRole;
-  onEdit?: (release: StockRelease) => void;
-  onSubmit?: (release: StockRelease) => void;
-  onApprove?: (release: StockRelease) => void;
-  onCancel?: (release: StockRelease) => void;
+  onEdit?: (release: StockReleaseSummary) => void;
+  onSubmit?: (release: StockReleaseSummary) => void;
+  onApprove?: (release: StockReleaseSummary) => void;
+  onCancel?: (release: StockReleaseSummary) => void;
+  onDelete?: (release: StockReleaseSummary) => void;
   onRefresh?: () => void;
 }
 
@@ -37,6 +38,7 @@ export function ReleaseTable({
   onSubmit,
   onApprove,
   onCancel,
+  onDelete,
   onRefresh,
 }: ReleaseTableProps) {
   const columns = React.useMemo(
@@ -47,8 +49,9 @@ export function ReleaseTable({
         onSubmit,
         onApprove,
         onCancel,
+        onDelete,
       }),
-    [userRole, onEdit, onSubmit, onApprove, onCancel]
+    [userRole, onEdit, onSubmit, onApprove, onCancel, onDelete]
   );
 
   return (

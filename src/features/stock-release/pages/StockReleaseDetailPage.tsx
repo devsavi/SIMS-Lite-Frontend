@@ -15,6 +15,8 @@ import {
   Package,
   FileText,
   Clock,
+  Tag,
+  FileInput,
 } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
@@ -44,6 +46,7 @@ import {
   canSubmitRelease,
   canApproveRelease,
   canCancelRelease,
+  getPurposeLabel,
 } from "../utils/stock-release-utils";
 import { useAuthStore } from "@/stores/auth.store";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -59,13 +62,16 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
 
   const { data: release, isLoading, error, refetch } = useStockReleaseDetail(id);
 
-  usePageTitle(release ? (release.release_number || `REL-${release.id.substring(0, 8)}`) : null);
+  usePageTitle(
+    release
+      ? release.release_number || `REL-${release.id.substring(0, 8)}`
+      : null
+  );
 
   const submitMutation = useSubmitStockRelease();
   const approveMutation = useApproveStockRelease();
   const cancelMutation = useCancelStockRelease();
 
-  // Workflow Dialog states
   const [submitDialogOpen, setSubmitDialogOpen] = React.useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = React.useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = React.useState(false);
@@ -107,24 +113,20 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
     await cancelMutation.mutateAsync({ id: release.id });
   };
 
-  const createdBy =
-    release.requested_by_user?.full_name ||
-    release.created_by_user?.full_name ||
-    release.requested_by ||
-    release.created_by ||
-    "System User";
+  const createdByName = release.created_by
+    ? `${release.created_by.first_name} ${release.created_by.last_name}`.trim()
+    : "System User";
 
-  const approvedBy =
-    release.approved_by_user?.full_name || release.approved_by || "—";
+  const approvedByName = release.approved_by
+    ? `${release.approved_by.first_name} ${release.approved_by.last_name}`.trim()
+    : "—";
 
   const items = release.items || [];
-  const totalQty =
-    release.total_quantity ??
-    items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const totalQty = release.total_quantity ?? 0;
+  const totalCost = release.total_cost ?? 0;
 
   return (
     <PageContainer className="space-y-6">
-      {/* Header with Breadcrumb Back link */}
       <PageHeader
         title={`Stock Release ${release.release_number || `REL-${release.id.substring(0, 8)}`}`}
         description="Detailed view of stock release request, released products, and audit timeline."
@@ -188,9 +190,9 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2 cols): General Info & Released Items */}
+        {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* General Information Card */}
+          {/* General Info */}
           <Card>
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center justify-between">
@@ -214,6 +216,16 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
 
               <div className="space-y-1">
                 <span className="text-muted-foreground flex items-center gap-1">
+                  <Tag className="h-3.5 w-3.5" />
+                  <span>Purpose</span>
+                </span>
+                <p className="font-medium text-foreground">
+                  {getPurposeLabel(release.purpose)}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-muted-foreground flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>Release Date</span>
                 </span>
@@ -225,9 +237,14 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
               <div className="space-y-1">
                 <span className="text-muted-foreground flex items-center gap-1">
                   <User className="h-3.5 w-3.5" />
-                  <span>Created / Requested By</span>
+                  <span>Created By</span>
                 </span>
-                <p className="font-medium text-foreground">{createdBy}</p>
+                <p className="font-medium text-foreground">{createdByName}</p>
+                {release.created_by?.email && (
+                  <p className="text-[11px] text-muted-foreground">
+                    {release.created_by.email}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -236,20 +253,32 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
                   <span>Approved By</span>
                 </span>
                 <p className="font-medium text-emerald-700 dark:text-emerald-400">
-                  {approvedBy}
+                  {approvedByName}
                 </p>
               </div>
 
+              {release.reference_document && (
+                <div className="space-y-1">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <FileInput className="h-3.5 w-3.5" />
+                    <span>Reference Document</span>
+                  </span>
+                  <p className="font-medium text-foreground font-mono text-xs">
+                    {release.reference_document}
+                  </p>
+                </div>
+              )}
+
               {release.notes && (
                 <div className="sm:col-span-2 space-y-1 pt-2 border-t border-border/40">
-                  <span className="text-muted-foreground font-semibold">Notes / Purpose:</span>
+                  <span className="text-muted-foreground font-semibold">Notes:</span>
                   <p className="text-foreground text-xs leading-relaxed">{release.notes}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Released Items Card */}
+          {/* Released Items */}
           <Card>
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center justify-between">
@@ -257,9 +286,10 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
                   <Package className="h-4 w-4 text-primary" />
                   <span>Released Items</span>
                 </CardTitle>
-                <span className="text-xs font-mono font-semibold text-muted-foreground">
-                  Total Released Qty: {totalQty}
-                </span>
+                <div className="flex items-center gap-4 text-xs font-mono font-semibold text-muted-foreground">
+                  <span>Qty: {totalQty}</span>
+                  <span>Cost: {totalCost.toLocaleString()}</span>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -268,31 +298,38 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
                   <TableRow>
                     <TableHead className="text-xs">Product</TableHead>
                     <TableHead className="text-xs">SKU</TableHead>
-                    <TableHead className="text-xs text-right">Quantity Released</TableHead>
-                    <TableHead className="text-xs">Unit of Measure</TableHead>
+                    <TableHead className="text-xs text-right">Qty Requested</TableHead>
+                    <TableHead className="text-xs text-right">Unit Cost</TableHead>
+                    <TableHead className="text-xs text-right">Line Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-6 text-muted-foreground text-xs">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-6 text-muted-foreground text-xs"
+                      >
                         No items attached to this release.
                       </TableCell>
                     </TableRow>
                   ) : (
                     items.map((item, idx) => (
-                      <TableRow key={item.id || item.product_id || idx}>
+                      <TableRow key={item.id || idx}>
                         <TableCell className="text-xs font-medium text-foreground">
-                          {item.product_name || `Product #${item.product_id}`}
+                          {item.product?.name || "—"}
                         </TableCell>
                         <TableCell className="text-xs font-mono text-muted-foreground">
-                          {item.sku || item.product_sku || "—"}
+                          {item.product?.sku || "—"}
                         </TableCell>
                         <TableCell className="text-xs font-mono font-bold text-right text-foreground">
-                          {item.quantity}
+                          {item.quantity_requested}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {item.unit_of_measure || item.uom_code || "units"}
+                        <TableCell className="text-xs font-mono text-right text-muted-foreground">
+                          {item.unit_cost.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-xs font-mono font-semibold text-right text-foreground">
+                          {item.line_total.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
@@ -303,7 +340,7 @@ export function StockReleaseDetailPage({ id }: StockReleaseDetailPageProps) {
           </Card>
         </div>
 
-        {/* Right Column (1 col): Workflow Timeline */}
+        {/* Right column: timeline */}
         <div className="space-y-6">
           <Card>
             <CardHeader className="pb-3 border-b">

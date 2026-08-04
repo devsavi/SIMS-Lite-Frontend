@@ -2,7 +2,7 @@ import * as React from "react";
 import { Check, Clock, FileEdit, X, User } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { normalizeStatus } from "../../utils/stock-release-utils";
-import type { StockRelease } from "../../types/stock-release-types";
+import type { StockRelease, ReleaseActor } from "../../types/stock-release-types";
 
 export interface ReleaseTimelineProps {
   release: StockRelease;
@@ -19,22 +19,20 @@ interface StepItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+function actorFullName(actor?: ReleaseActor | null): string | null {
+  if (!actor) return null;
+  const name = `${actor.first_name} ${actor.last_name}`.trim();
+  return name || actor.email || null;
+}
+
 export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
   const normStatus = normalizeStatus(release.status);
 
   const createdDate = release.created_at || release.release_date;
-  const createdActor =
-    release.requested_by_user?.full_name ||
-    release.created_by_user?.full_name ||
-    release.requested_by ||
-    release.created_by ||
-    "User";
-
-  const submittedActor =
-    release.requested_by_user?.full_name || release.requested_by || createdActor;
-
-  const approvedActor =
-    release.approved_by_user?.full_name || release.approved_by || "Store Manager";
+  const createdActor = actorFullName(release.created_by) ?? "User";
+  const submittedActor = actorFullName(release.submitted_by) ?? createdActor;
+  const approvedActor = actorFullName(release.approved_by) ?? "Store Manager";
+  const cancelledActor = actorFullName(release.cancelled_by) ?? "User";
 
   const steps: StepItem[] = [
     {
@@ -49,47 +47,47 @@ export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
     {
       id: "submitted",
       title: "Submitted",
-      subtitle: normStatus === "draft" ? "Pending submission" : "Submitted for approval",
+      subtitle: normStatus === "DRAFT" ? "Pending submission" : "Submitted for approval",
       timestamp: release.submitted_at,
-      actor: normStatus !== "draft" ? submittedActor : null,
+      actor: normStatus !== "DRAFT" ? submittedActor : null,
       status:
-        normStatus === "draft"
+        normStatus === "DRAFT"
           ? "pending"
-          : normStatus === "submitted"
+          : normStatus === "SUBMITTED"
           ? "active"
           : "completed",
       icon: Clock,
     },
     {
       id: "final",
-      title: normStatus === "cancelled" ? "Cancelled" : "Approved & Stock Deducted",
+      title: normStatus === "CANCELLED" ? "Cancelled" : "Approved & Stock Deducted",
       subtitle:
-        normStatus === "cancelled"
+        normStatus === "CANCELLED"
           ? release.cancellation_reason
             ? `Reason: ${release.cancellation_reason}`
             : "Release was cancelled"
-          : normStatus === "approved"
+          : normStatus === "APPROVED"
           ? "Stock balance updated"
           : "Awaiting final approval",
       timestamp:
-        normStatus === "cancelled"
+        normStatus === "CANCELLED"
           ? release.cancelled_at
-          : normStatus === "approved"
+          : normStatus === "APPROVED"
           ? release.approved_at
           : null,
       actor:
-        normStatus === "cancelled"
-          ? release.requested_by_user?.full_name || "User"
-          : normStatus === "approved"
+        normStatus === "CANCELLED"
+          ? cancelledActor
+          : normStatus === "APPROVED"
           ? approvedActor
           : null,
       status:
-        normStatus === "cancelled"
+        normStatus === "CANCELLED"
           ? "cancelled"
-          : normStatus === "approved"
+          : normStatus === "APPROVED"
           ? "completed"
           : "pending",
-      icon: normStatus === "cancelled" ? X : Check,
+      icon: normStatus === "CANCELLED" ? X : Check,
     },
   ];
 
@@ -101,10 +99,8 @@ export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
       <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
         {steps.map((step) => {
           const Icon = step.icon;
-
           return (
             <div key={step.id} className="relative flex items-start gap-4">
-              {/* Circle Icon Badge */}
               <div
                 className={cn(
                   "absolute -left-6 top-0.5 flex h-5 w-5 items-center justify-center rounded-none text-white ring-4 ring-background text-[10px] font-bold transition-all",
@@ -117,14 +113,14 @@ export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
                 <Icon className="h-3 w-3" />
               </div>
 
-              {/* Step Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center justify-between gap-1">
                   <p
                     className={cn(
                       "text-xs font-semibold",
                       step.status === "completed" && "text-foreground",
-                      step.status === "active" && "text-amber-600 dark:text-amber-400 font-bold",
+                      step.status === "active" &&
+                        "text-amber-600 dark:text-amber-400 font-bold",
                       step.status === "pending" && "text-muted-foreground",
                       step.status === "cancelled" && "text-rose-600 dark:text-rose-400"
                     )}
@@ -154,7 +150,7 @@ export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
         })}
       </div>
 
-      {/* Additional History log items if provided by backend */}
+      {/* Detailed activity log if provided */}
       {release.history && release.history.length > 0 && (
         <div className="mt-4 pt-4 border-t space-y-2">
           <p className="text-xs font-semibold text-muted-foreground">Detailed Activity Log</p>
@@ -166,7 +162,8 @@ export function ReleaseTimeline({ release, className }: ReleaseTimelineProps) {
               >
                 <span className="font-medium text-foreground">{h.action}</span>
                 <span className="text-muted-foreground">
-                  {h.actor_name || "User"} • {new Date(h.timestamp).toLocaleTimeString()}
+                  {h.actor_name || "User"} •{" "}
+                  {new Date(h.timestamp).toLocaleTimeString()}
                 </span>
               </div>
             ))}

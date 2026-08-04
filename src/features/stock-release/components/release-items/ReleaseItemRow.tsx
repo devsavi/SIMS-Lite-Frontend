@@ -36,44 +36,29 @@ export function ReleaseItemRow({
   canRemove,
 }: ReleaseItemRowProps) {
   const productId = form.watch(`items.${index}.product_id`);
-  const releaseQty = form.watch(`items.${index}.quantity`);
+  const requestedQty = form.watch(`items.${index}.quantity_requested`);
 
-  // Find currently selected product in available inventory
-  const selectedInventoryItem = React.useMemo(() => {
-    return inventoryProducts.find(
-      (item) => item.product?.id === productId || item.id === productId
-    );
-  }, [inventoryProducts, productId]);
-
-  // Update available_quantity and uom when product changes
-  React.useEffect(() => {
-    if (selectedInventoryItem) {
-      const avail = selectedInventoryItem.quantity_on_hand ?? 0;
-      const uom =
-        selectedInventoryItem.product?.uom_code ||
-        selectedInventoryItem.product?.uom_name ||
-        "units";
-      form.setValue(`items.${index}.available_quantity`, avail, {
-        shouldValidate: true,
-      });
-      form.setValue(`items.${index}.unit_of_measure`, uom, {
-        shouldValidate: true,
-      });
-    }
-  }, [selectedInventoryItem, form, index]);
+  // Find currently selected product in inventory
+  const selectedInventoryItem = React.useMemo(
+    () =>
+      inventoryProducts.find(
+        (item) => item.product?.id === productId || item.id === productId
+      ),
+    [inventoryProducts, productId]
+  );
 
   const availableStock = selectedInventoryItem?.quantity_on_hand ?? 0;
   const isOverStock = Boolean(
-    selectedInventoryItem && Number(releaseQty) > availableStock
+    selectedInventoryItem && Number(requestedQty) > availableStock
   );
 
   const errors = form.formState.errors.items?.[index];
 
   return (
     <div className="p-4 rounded-none border border-border/80 bg-card/60 space-y-3 transition-all hover:border-border">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
-        {/* Product selector (cols 1-5) */}
-        <div className="md:col-span-5 space-y-1">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start min-w-0">
+        {/* Product selector (cols 1-6) */}
+        <div className="md:col-span-6 min-w-0 space-y-1">
           <label className="text-xs font-semibold text-foreground flex items-center gap-1">
             <span>Product</span>
             <span className="text-destructive">*</span>
@@ -81,17 +66,17 @@ export function ReleaseItemRow({
 
           <Select
             value={productId || ""}
-            onValueChange={(val) => {
+            onValueChange={(val) =>
               form.setValue(`items.${index}.product_id`, val, {
                 shouldValidate: true,
                 shouldDirty: true,
-              });
-            }}
+              })
+            }
             disabled={isLoadingProducts}
           >
             <SelectTrigger
               aria-label={`Select product for row ${index + 1}`}
-              className={errors?.product_id ? "border-destructive" : ""}
+              className={`w-full min-w-0 ${errors?.product_id ? "border-destructive" : ""}`}
             >
               <SelectValue
                 placeholder={
@@ -99,7 +84,8 @@ export function ReleaseItemRow({
                 }
               />
             </SelectTrigger>
-            <SelectContent className="max-h-60">
+            {/* SelectContent renders in a portal so its width won't affect the form layout */}
+            <SelectContent className="max-h-60 w-[var(--radix-select-trigger-width)]">
               {inventoryProducts.map((item) => {
                 const pId = item.product?.id || item.id;
                 const pName = item.product?.name || "Product";
@@ -107,27 +93,29 @@ export function ReleaseItemRow({
                 const stockQty = item.quantity_on_hand ?? 0;
                 const isSelectedElsewhere =
                   selectedProductIds.includes(pId) && pId !== productId;
+                // textValue is what the trigger shows after selection — plain string, no layout
+                const triggerLabel = pSku ? `${pName} (${pSku})` : pName;
 
                 return (
                   <SelectItem
                     key={item.id}
                     value={pId}
+                    textValue={triggerLabel}
                     disabled={isSelectedElsewhere || stockQty <= 0}
                   >
-                    <div className="flex items-center justify-between w-full gap-4 text-xs">
-                      <span className="font-medium truncate">
-                        {pName} {pSku ? `(${pSku})` : ""}
-                      </span>
+                    {/* Rich row shown inside the dropdown only */}
+                    <span className="flex items-center justify-between gap-3 text-xs w-full pr-1">
+                      <span className="truncate font-medium">{triggerLabel}</span>
                       <span
-                        className={
+                        className={`shrink-0 font-mono text-[11px] ${
                           stockQty > 0
-                            ? "text-emerald-600 dark:text-emerald-400 font-mono text-[11px]"
-                            : "text-rose-500 font-mono text-[11px]"
-                        }
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-500"
+                        }`}
                       >
-                        {stockQty} available
+                        {stockQty} avail
                       </span>
-                    </div>
+                    </span>
                   </SelectItem>
                 );
               })}
@@ -141,8 +129,8 @@ export function ReleaseItemRow({
           )}
         </div>
 
-        {/* Available Stock indicator (cols 6-7) */}
-        <div className="md:col-span-2 space-y-1">
+        {/* Available stock indicator (cols 7-9) */}
+        <div className="md:col-span-3 min-w-0 space-y-1">
           <label className="text-xs font-semibold text-muted-foreground">
             Available Stock
           </label>
@@ -165,10 +153,10 @@ export function ReleaseItemRow({
           </div>
         </div>
 
-        {/* Release Quantity (cols 8-9) */}
-        <div className="md:col-span-2 space-y-1">
+        {/* Request quantity (cols 10-11) */}
+        <div className="md:col-span-2 min-w-0 space-y-1">
           <label className="text-xs font-semibold text-foreground flex items-center gap-1">
-            <span>Release Qty</span>
+            <span>Qty</span>
             <span className="text-destructive">*</span>
           </label>
 
@@ -178,37 +166,25 @@ export function ReleaseItemRow({
             max={availableStock || undefined}
             step="1"
             placeholder="0"
-            aria-label={`Release quantity for row ${index + 1}`}
-            {...form.register(`items.${index}.quantity`, {
+            aria-label={`Quantity requested for row ${index + 1}`}
+            {...form.register(`items.${index}.quantity_requested`, {
               valueAsNumber: true,
             })}
             className={
-              errors?.quantity || isOverStock ? "border-destructive" : ""
+              errors?.quantity_requested || isOverStock
+                ? "border-destructive"
+                : ""
             }
           />
 
-          {errors?.quantity && (
+          {errors?.quantity_requested && (
             <p className="text-[11px] text-destructive font-medium">
-              {errors.quantity.message}
+              {errors.quantity_requested.message}
             </p>
           )}
         </div>
 
-        {/* Unit of Measure (cols 10-11) */}
-        <div className="md:col-span-2 space-y-1">
-          <label className="text-xs font-semibold text-muted-foreground">
-            UOM
-          </label>
-          <Input
-            readOnly
-            aria-label={`Unit of measure for row ${index + 1}`}
-            {...form.register(`items.${index}.unit_of_measure`)}
-            className="bg-muted/40 text-xs"
-            placeholder="UOM"
-          />
-        </div>
-
-        {/* Remove Row Button (col 12) */}
+        {/* Remove button (col 12) */}
         <div className="md:col-span-1 flex items-end justify-end h-9 md:h-auto">
           <Button
             type="button"
@@ -224,11 +200,26 @@ export function ReleaseItemRow({
         </div>
       </div>
 
+      {/* Notes for this line item */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-muted-foreground">
+          Item Notes
+          <span className="font-normal text-muted-foreground/70"> (optional)</span>
+        </label>
+        <Input
+          type="text"
+          placeholder="Notes for this item..."
+          aria-label={`Notes for row ${index + 1}`}
+          {...form.register(`items.${index}.notes`)}
+          className="text-xs"
+        />
+      </div>
+
       {isOverStock && (
         <div className="flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-3 py-1.5 rounded-none font-medium">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>
-            Selected quantity ({releaseQty}) exceeds available stock (
+            Requested quantity ({requestedQty}) exceeds available stock (
             {availableStock}).
           </span>
         </div>

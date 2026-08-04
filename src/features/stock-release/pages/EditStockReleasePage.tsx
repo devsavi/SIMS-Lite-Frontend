@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/common/page-header";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/app/components/ui/button";
 import { PageContainer } from "@/components/common/page-container";
 import { LoadingState } from "@/components/common/loading-state";
 import { ErrorState } from "@/components/common/error-state";
@@ -31,18 +32,13 @@ export function EditStockReleasePage({ id }: EditStockReleasePageProps) {
   ) => {
     if (!id) return;
 
-    // 1. Update draft release
-    const updatedRelease = await updateMutation.mutateAsync({
-      id,
-      payload,
-    });
+    const updatedRelease = await updateMutation.mutateAsync({ id, payload });
 
-    // 2. Submit if requested
     if (autoSubmit && updatedRelease?.id) {
       try {
         await submitMutation.mutateAsync(updatedRelease.id);
       } catch {
-        // Suppress
+        // suppress
       }
     }
 
@@ -70,11 +66,21 @@ export function EditStockReleasePage({ id }: EditStockReleasePageProps) {
   }
 
   return (
-    <PageContainer className="space-y-6">
-      <PageHeader
-        title={`Edit Release ${release.release_number || ""}`}
-        description="Modify release details, dates, and item quantities before submission."
-      />
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Edit Release {release.release_number || ""}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Modify release details, dates, and item quantities before submission.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+          Back
+        </Button>
+      </div>
 
       <StockReleaseForm
         initialData={release}
@@ -82,6 +88,6 @@ export function EditStockReleasePage({ id }: EditStockReleasePageProps) {
         isLoading={updateMutation.isPending || submitMutation.isPending}
         mode="edit"
       />
-    </PageContainer>
+    </div>
   );
 }

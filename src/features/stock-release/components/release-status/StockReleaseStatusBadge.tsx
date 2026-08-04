@@ -19,29 +19,25 @@ const statusStyles: Record<
     icon: React.ComponentType<{ className?: string }>;
   }
 > = {
-  // inactive / grey
-  draft: {
+  DRAFT: {
     bg: "bg-[#F1F1F1] dark:bg-[rgba(255,255,255,0.08)]",
     text: "text-[#6B6B6B] dark:text-[#9CA3AF]",
     border: "border-[#DADADA] dark:border-[rgba(156,163,175,0.35)]",
     icon: FileEdit,
   },
-  // submitted / indigo
-  submitted: {
+  SUBMITTED: {
     bg: "bg-[#E0E3FC] dark:bg-[rgba(129,140,248,0.15)]",
     text: "text-[#4338CA] dark:text-[#818CF8]",
     border: "border-[#C1C7F8] dark:border-[rgba(129,140,248,0.4)]",
     icon: Send,
   },
-  // approved / green
-  approved: {
+  APPROVED: {
     bg: "bg-[#D6F5DE] dark:bg-[rgba(52,211,153,0.15)]",
     text: "text-[#1B8A4C] dark:text-[#34D399]",
     border: "border-[#AEE8C0] dark:border-[rgba(52,211,153,0.4)]",
     icon: CheckCircle2,
   },
-  // cancelled / red
-  cancelled: {
+  CANCELLED: {
     bg: "bg-[#FDE2E2] dark:bg-[rgba(248,113,113,0.15)]",
     text: "text-[#C0362C] dark:text-[#F87171]",
     border: "border-[#F8C1BC] dark:border-[rgba(248,113,113,0.4)]",

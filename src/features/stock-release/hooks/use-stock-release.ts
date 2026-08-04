@@ -35,7 +35,7 @@ export function useStockReleaseDetail(id: string) {
 }
 
 /**
- * Create a new stock release
+ * Create a new stock release draft
  */
 export function useCreateStockRelease() {
   const queryClient = useQueryClient();
@@ -97,6 +97,33 @@ export function useUpdateStockRelease() {
 }
 
 /**
+ * Delete a draft stock release
+ */
+export function useDeleteStockRelease() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => stockReleaseApi.deleteStockRelease(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: stockReleaseKeys.all });
+      toast({
+        title: "Stock Release Deleted",
+        description: "The draft release has been deleted.",
+        variant: "success",
+      });
+    },
+    onError: (error: unknown) => {
+      const err = error as { message?: string };
+      toast({
+        title: "Deletion Failed",
+        description: err.message || "Failed to delete stock release.",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+/**
  * Submit a stock release for approval
  */
 export function useSubmitStockRelease() {
@@ -135,21 +162,13 @@ export function useApproveStockRelease() {
   return useMutation({
     mutationFn: (id: string) => stockReleaseApi.approveStockRelease(id),
     onSuccess: (data) => {
-      // Invalidate stock release queries
       queryClient.invalidateQueries({ queryKey: stockReleaseKeys.all });
       queryClient.invalidateQueries({ queryKey: stockReleaseKeys.detail(data.id) });
-
-      // Invalidate inventory & ledger queries
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-ledger"] });
-
-      // Invalidate dashboard queries (KPIs, widgets, low stock alerts)
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-
-      // Invalidate notifications & reports
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
-
       toast({
         title: "Stock Release Approved",
         description: `Release ${data.release_number || ""} approved! Stock quantities updated.`,

@@ -16,9 +16,10 @@ import {
   useSubmitStockRelease,
   useApproveStockRelease,
   useCancelStockRelease,
+  useDeleteStockRelease,
 } from "../hooks/use-stock-release";
 import { useAuthStore } from "@/stores/auth.store";
-import type { StockReleaseFilterParams, StockRelease } from "../types/stock-release-types";
+import type { StockReleaseFilterParams, StockReleaseSummary } from "../types/stock-release-types";
 
 export function StockReleaseListPage() {
   const router = useRouter();
@@ -26,27 +27,25 @@ export function StockReleaseListPage() {
   const userRole = user?.role;
 
   const role = (userRole as string) || "";
-  // ADMIN/STORE_KEEPER can create stock releases
   const canCreate =
-    user?.is_superuser ||
-    role === "admin" ||
-    role === "store_keeper";
+    user?.is_superuser || role === "admin" || role === "store_keeper";
 
   const [filters, setFilters] = React.useState<StockReleaseFilterParams>({
     page: 1,
     size: 20,
     search: "",
     status: "ALL",
+    purpose: "ALL",
+    period: "ALL",
   });
 
-  // Dialog state for workflow actions
-  const [selectedRelease, setSelectedRelease] = React.useState<StockRelease | null>(null);
+  // Dialog state
+  const [selectedRelease, setSelectedRelease] = React.useState<StockReleaseSummary | null>(null);
   const [submitDialogOpen, setSubmitDialogOpen] = React.useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = React.useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = React.useState(false);
-  const [cancellationReason, setCancellationReason] = React.useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
-  // Data fetching
   const {
     data: releaseResponse,
     isLoading,
@@ -55,19 +54,19 @@ export function StockReleaseListPage() {
     isRefetching,
   } = useStockReleaseList(filters);
 
-  // Workflow mutations
   const submitMutation = useSubmitStockRelease();
   const approveMutation = useApproveStockRelease();
   const cancelMutation = useCancelStockRelease();
+  const deleteMutation = useDeleteStockRelease();
 
   const releases = releaseResponse?.data ?? [];
-  const totalRows = releaseResponse?.total ?? releaseResponse?.pagination?.total ?? releases.length;
+  const totalRows = releaseResponse?.pagination?.total ?? releases.length;
 
-  // KPI aggregates
-  const pendingCount = releases.filter((r) => r.status === "submitted").length;
-  const approvedCount = releases.filter((r) => r.status === "approved").length;
+  // KPI aggregates from current page (full counts come from pagination.total)
+  const pendingCount = releases.filter((r) => r.status === "SUBMITTED").length;
+  const approvedCount = releases.filter((r) => r.status === "APPROVED").length;
   const totalQtyReleased = releases
-    .filter((r) => r.status === "approved")
+    .filter((r) => r.status === "APPROVED")
     .reduce((sum, r) => sum + (r.total_quantity || 0), 0);
 
   const handleFilterChange = (updated: Partial<StockReleaseFilterParams>) => {
@@ -75,32 +74,31 @@ export function StockReleaseListPage() {
   };
 
   const handleResetFilters = () => {
-    setFilters({
-      page: 1,
-      size: 20,
-      search: "",
-      status: "ALL",
-    });
+    setFilters({ page: 1, size: 20, search: "", status: "ALL", purpose: "ALL", period: "ALL" });
   };
 
-  const handleEdit = (release: StockRelease) => {
+  const handleEdit = (release: StockReleaseSummary) => {
     router.push(`/stock-release/${release.id}/edit`);
   };
 
-  const handleOpenSubmit = (release: StockRelease) => {
+  const handleOpenSubmit = (release: StockReleaseSummary) => {
     setSelectedRelease(release);
     setSubmitDialogOpen(true);
   };
 
-  const handleOpenApprove = (release: StockRelease) => {
+  const handleOpenApprove = (release: StockReleaseSummary) => {
     setSelectedRelease(release);
     setApproveDialogOpen(true);
   };
 
-  const handleOpenCancel = (release: StockRelease) => {
+  const handleOpenCancel = (release: StockReleaseSummary) => {
     setSelectedRelease(release);
-    setCancellationReason("");
     setCancelDialogOpen(true);
+  };
+
+  const handleOpenDelete = (release: StockReleaseSummary) => {
+    setSelectedRelease(release);
+    setDeleteDialogOpen(true);
   };
 
   const handleConfirmSubmit = async () => {
@@ -119,10 +117,14 @@ export function StockReleaseListPage() {
 
   const handleConfirmCancel = async () => {
     if (selectedRelease) {
-      await cancelMutation.mutateAsync({
-        id: selectedRelease.id,
-        reason: cancellationReason || undefined,
-      });
+      await cancelMutation.mutateAsync({ id: selectedRelease.id });
+      setSelectedRelease(null);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedRelease) {
+      await deleteMutation.mutateAsync(selectedRelease.id);
       setSelectedRelease(null);
     }
   };
@@ -225,10 +227,9 @@ export function StockReleaseListPage() {
         onSubmit={handleOpenSubmit}
         onApprove={handleOpenApprove}
         onCancel={handleOpenCancel}
+        onDelete={handleOpenDelete}
         onRefresh={() => refetch()}
       />
-
-      {/* Workflow Confirmation Dialogs */}
 
       {/* Submit confirmation */}
       <ConfirmationDialog
@@ -264,6 +265,18 @@ export function StockReleaseListPage() {
         confirmLabel="Cancel Release"
         loading={cancelMutation.isPending}
         onConfirm={handleConfirmCancel}
+      />
+
+      {/* Delete confirmation */}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={`Delete Draft ${selectedRelease?.release_number || ""}`}
+        description="Permanently delete this draft release? This action cannot be undone."
+        variant="danger"
+        confirmLabel="Delete Draft"
+        loading={deleteMutation.isPending}
+        onConfirm={handleConfirmDelete}
       />
     </PageContainer>
   );
