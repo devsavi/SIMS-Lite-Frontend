@@ -44,4 +44,6 @@ export const productKeys = {
   list: (params?: ProductListParams) => [...productKeys.lists(), params] as const,
   details: () => [...productKeys.all, "detail"] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
+  images: () => [...productKeys.all, "image"] as const,
+  image: (id: string) => [...productKeys.images(), id] as const,
 };

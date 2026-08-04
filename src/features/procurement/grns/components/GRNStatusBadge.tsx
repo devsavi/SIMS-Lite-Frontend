@@ -9,7 +9,10 @@ export interface GRNStatusBadgeProps {
   className?: string;
 }
 
-const grnStatusConfig: Record<GRNStatus, { bg: string; text: string; border: string; label: string }> = {
+const grnStatusConfig: Record<
+  GRNStatus,
+  { bg: string; text: string; border: string; label: string }
+> = {
   DRAFT: {
     bg: "bg-[#F1F1F1] dark:bg-[rgba(255,255,255,0.08)]",
     text: "text-[#6B6B6B] dark:text-[#9CA3AF]",
@@ -26,7 +29,13 @@ const grnStatusConfig: Record<GRNStatus, { bg: string; text: string; border: str
     bg: "bg-[#D3F3F1] dark:bg-[rgba(45,212,191,0.15)]",
     text: "text-[#12796F] dark:text-[#2DD4BF]",
     border: "border-[#A7E5E0] dark:border-[rgba(45,212,191,0.4)]",
-    label: "Approved & Stock Updated",
+    label: "Approved",
+  },
+  CANCELLED: {
+    bg: "bg-[#FEE2E2] dark:bg-[rgba(248,113,113,0.15)]",
+    text: "text-[#B91C1C] dark:text-[#F87171]",
+    border: "border-[#FECACA] dark:border-[rgba(248,113,113,0.4)]",
+    label: "Cancelled",
   },
 };
 

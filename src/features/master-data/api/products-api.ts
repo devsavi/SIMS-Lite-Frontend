@@ -7,6 +7,7 @@
  *   POST   /products/                       — create
  *   PUT    /products/{id}                   — update
  *   DELETE /products/{id}                   — delete
+ *   GET    /products/{id}/images            — get product image URL
  *   POST   /products/{id}/image             — upload product image (multipart)
  *   DELETE /products/{id}/image             — remove product image
  *   GET    /products/{id}/barcode           — barcode PNG (blob)
@@ -75,6 +76,19 @@ export const productsApi = {
   // -------------------------------------------------------------------------
   delete: async (id: string): Promise<void> => {
     await del<void>(`${BASE}/${id}`);
+  },
+
+  // -------------------------------------------------------------------------
+  // Image — get URL
+  // -------------------------------------------------------------------------
+  getImage: async (id: string): Promise<string | null> => {
+    try {
+      const res = await get<SuccessResponse<{ url: string }>>(`${BASE}/${id}/image`);
+      return res.data?.url ?? null;
+    } catch {
+      // Returns null if no image exists (404 or empty)
+      return null;
+    }
   },
 
   // -------------------------------------------------------------------------

@@ -32,6 +32,15 @@ export function useProduct(id: string | null) {
   });
 }
 
+export function useProductImage(id: string | null) {
+  return useQuery({
+    queryKey: productKeys.image(id ?? ""),
+    queryFn: () => productsApi.getImage(id!),
+    enabled: !!id,
+    ...QUERY_CACHE_TIMES.MASTER_DATA,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Mutations
 // ---------------------------------------------------------------------------
@@ -91,6 +100,7 @@ export function useUploadProductImage(id: string) {
     onSuccess: (updated) => {
       queryClient.setQueryData(productKeys.detail(id), updated);
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.image(id) });
       toast({ title: "Image uploaded", variant: "success" });
     },
     onError: () => {
@@ -107,6 +117,7 @@ export function useDeleteProductImage(id: string) {
     onSuccess: (updated) => {
       queryClient.setQueryData(productKeys.detail(id), updated);
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.image(id) });
       toast({ title: "Image removed", variant: "success" });
     },
     onError: () => {

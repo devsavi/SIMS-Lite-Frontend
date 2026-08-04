@@ -28,6 +28,7 @@ import {
   useUploadProductImage,
   useDeleteProductImage,
   useDownloadBarcode,
+  useProductImage,
 } from "../../hooks/use-products";
 import { ProductFormDialog } from "../components/ProductFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -112,6 +113,7 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
 
   const { data: product, isLoading, error, refetch } = useProduct(productId);
+  const { data: imageUrl, isLoading: imageLoading } = useProductImage(productId);
   const deleteMutation = useDeleteProduct();
   const uploadImage = useUploadProductImage(productId);
   const deleteImage = useDeleteProductImage(productId);
@@ -375,11 +377,15 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {product.image_path ? (
+            {imageLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Skeleton className="h-48 w-full" />
+              </div>
+            ) : imageUrl ? (
               <div className="flex flex-col gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={product.image_path}
+                  src={imageUrl}
                   alt={product.name}
                   className="max-h-48 w-auto rounded object-contain border border-border"
                 />

@@ -83,7 +83,12 @@ function calcTotals(rows: RowValues[]) {
 }
 
 function todayISO() {
-  return new Date().toISOString().split("T")[0];
+  // Use local date parts to avoid UTC-offset issues (e.g. UTC+5:30 showing yesterday)
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -142,6 +147,15 @@ export function PurchaseOrderForm({
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
+
+  // Ensure order_date always reflects today when creating (not editing).
+  // This handles the case where the page is navigated to without a full remount.
+  React.useEffect(() => {
+    if (!initialData) {
+      setValue("order_date", todayISO());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Plain React state for numeric values — drives instant UI updates ──
   const [rowValues, setRowValues] = React.useState<RowValues[]>(
