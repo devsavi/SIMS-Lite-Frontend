@@ -17,13 +17,16 @@ export function CreateStockReleasePage() {
     payload: CreateStockReleasePayload,
     autoSubmit = false
   ) => {
-    const createdRelease = await createMutation.mutateAsync(payload);
+    const createdRelease = await createMutation.mutateAsync({
+      payload,
+      skipRefetch: autoSubmit, // skip intermediate DRAFT refetch if we're about to submit
+    });
 
     if (autoSubmit && createdRelease?.id) {
       try {
         await submitMutation.mutateAsync(createdRelease.id);
       } catch {
-        // release was already created
+        // release was already created; navigate anyway
       }
     }
 

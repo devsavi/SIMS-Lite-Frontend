@@ -105,6 +105,8 @@ export interface DataTableProps<TData> {
   // ---- Misc ----
   /** Passed to the wrapper <div>. Use for height limits + sticky header. */
   className?: string;
+  /** Passed to the table scroll wrapper <div>. Override to remove fixed height / scroll. */
+  tableClassName?: string;
   /** Empty state props */
   emptyTitle?: string;
   emptyDescription?: string;
@@ -265,6 +267,7 @@ export function DataTable<TData>({
   showColumnToggle = false,
   // Misc
   className,
+  tableClassName,
   emptyTitle = "No results",
   emptyDescription,
   emptyAction,
@@ -363,7 +366,7 @@ export function DataTable<TData>({
       )}
 
       {/* Table */}
-      <div className="relative overflow-auto border border-border rounded-none max-h-[70vh]">
+      <div className={cn("relative border border-border rounded-none", tableClassName ?? "overflow-auto max-h-[70vh]")}>
         <Table aria-label={caption}>
           {caption && (
             <caption className="sr-only">{caption}</caption>

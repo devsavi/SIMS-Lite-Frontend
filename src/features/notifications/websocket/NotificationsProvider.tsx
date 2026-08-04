@@ -21,7 +21,7 @@ import { accessToken } from "@/lib/auth/token";
 import { notificationKeys } from "../hooks/use-notifications";
 import { toast } from "@/app/components/ui/use-toast";
 import { showBrowserNotification } from "../utils/browser-notifications";
-import type { WsEvent } from "../types";
+import type { WsEvent, NotificationPreferences } from "../types";
 
 // ---------------------------------------------------------------------------
 // Context
@@ -64,6 +64,26 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [status, setStatus] = React.useState<WsStatus>("idle");
+
+  /**
+   * Show a browser desktop notification only when:
+   *  - The user has enabled system (desktop) notifications in their preferences
+   *  - Notifications are not currently muted
+   */
+  const maybeShowBrowserNotification = React.useCallback(
+    (opts: Parameters<typeof showBrowserNotification>[0]) => {
+      const prefs = queryClient.getQueryData<NotificationPreferences>(
+        notificationKeys.preferences()
+      );
+      // If we have preferences loaded, respect enable_system and mute_until
+      if (prefs) {
+        if (!prefs.enable_system) return;
+        if (prefs.mute_until && new Date(prefs.mute_until).getTime() > Date.now()) return;
+      }
+      showBrowserNotification(opts);
+    },
+    [queryClient]
+  );
 
   // -------------------------------------------------------------------------
   // Wire token getter once
@@ -108,7 +128,7 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
           description: n.message,
           variant: isUrgent ? "destructive" : "default",
         });
-        showBrowserNotification({
+        maybeShowBrowserNotification({
           id: `ws-${Date.now()}`,
           title: n.title,
           body: n.message,
@@ -198,7 +218,7 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
           description: p.message,
           variant: p.priority === "urgent" ? "destructive" : "default",
         });
-        showBrowserNotification({
+        maybeShowBrowserNotification({
           id: `broadcast-${Date.now()}`,
           title: p.title,
           body: p.message,
@@ -230,7 +250,7 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
       unsubUsers();
       unsubBroadcast();
     };
-  }, [isAuthenticated, queryClient]);
+  }, [isAuthenticated, queryClient, maybeShowBrowserNotification]);
 
   return (
     <NotificationsContext.Provider

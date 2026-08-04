@@ -121,6 +121,7 @@ export function NotificationSettings() {
     if (result === "granted") {
       form.setValue("enable_system", true);
     }
+    return result;
   }
 
   function onSubmit(values: NotificationPreferencesFormValues) {
@@ -228,9 +229,11 @@ export function NotificationSettings() {
                 <FormControl>
                   <Switch
                     checked={field.value}
-                    onCheckedChange={(checked) => {
+                    onCheckedChange={async (checked) => {
                       if (checked && permission !== "granted") {
-                        handleRequestPermission();
+                        const result = await handleRequestPermission();
+                        // Only toggle on if permission was actually granted
+                        field.onChange(result === "granted");
                       } else {
                         field.onChange(checked);
                       }

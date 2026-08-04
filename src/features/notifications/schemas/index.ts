@@ -18,24 +18,34 @@ export const composeNotificationSchema = z
       .string()
       .min(5, "Message must be at least 5 characters")
       .max(1000, "Message must not exceed 1 000 characters"),
-    type: z.enum(["info", "success", "warning", "error"], {
-      required_error: "Please select a notification type",
-    }),
-    category: z.enum(
-      ["inventory", "procurement", "stock_release", "administration", "system", "general"],
-      { required_error: "Please select a category" }
+    type: z.enum(
+      [
+        "SYSTEM",
+        "SUCCESS",
+        "INFO",
+        "WARNING",
+        "ERROR",
+        "PURCHASE_ORDER",
+        "GRN",
+        "STOCK_RELEASE",
+        "INVENTORY",
+        "LOW_STOCK",
+        "OUT_OF_STOCK",
+        "USER",
+        "SECURITY",
+      ],
+      { required_error: "Please select a notification type" }
     ),
-    priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+    priority: z
+      .enum(["LOW", "NORMAL", "HIGH", "CRITICAL"], {
+        required_error: "Please select a priority",
+      })
+      .default("NORMAL"),
     recipient_type: z.enum(["all", "role", "user"], {
       required_error: "Please select who should receive this notification",
     }),
-    recipient_role: z.string().optional(),
+    recipient_role: z.enum(["ADMIN", "OFFICER", "STORE_KEEPER"]).optional(),
     recipient_user_id: z.string().optional(),
-    action_url: z
-      .string()
-      .url("Must be a valid URL")
-      .optional()
-      .or(z.literal("")),
   })
   .superRefine((data, ctx) => {
     if (data.recipient_type === "role" && !data.recipient_role) {
@@ -49,7 +59,7 @@ export const composeNotificationSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["recipient_user_id"],
-        message: "Please select a user",
+        message: "Please enter a user ID",
       });
     }
   });

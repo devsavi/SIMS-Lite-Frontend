@@ -7,17 +7,24 @@
 // Core notification types
 // ---------------------------------------------------------------------------
 
-export type NotificationType = "info" | "success" | "warning" | "error";
+export type NotificationType =
+  | "SYSTEM"
+  | "SUCCESS"
+  | "INFO"
+  | "WARNING"
+  | "ERROR"
+  | "PURCHASE_ORDER"
+  | "GRN"
+  | "STOCK_RELEASE"
+  | "INVENTORY"
+  | "LOW_STOCK"
+  | "OUT_OF_STOCK"
+  | "USER"
+  | "SECURITY";
 
-export type NotificationCategory =
-  | "inventory"
-  | "procurement"
-  | "stock_release"
-  | "administration"
-  | "system"
-  | "general";
+export type NotificationPriority = "LOW" | "NORMAL" | "HIGH" | "CRITICAL";
 
-export type NotificationPriority = "low" | "normal" | "high" | "urgent";
+export type RecipientRole = "ADMIN" | "OFFICER" | "STORE_KEEPER";
 
 export interface SenderRef {
   id: string;
@@ -31,7 +38,6 @@ export interface Notification {
   title: string;
   message: string;
   type: NotificationType;
-  category: NotificationCategory;
   priority: NotificationPriority;
   is_read: boolean;
   sender: SenderRef | null;
@@ -69,7 +75,6 @@ export interface NotificationFilterParams {
   size?: number;
   search?: string;
   type?: NotificationType | "ALL";
-  category?: NotificationCategory | "ALL";
   is_read?: boolean | "ALL";
   from_date?: string;
   to_date?: string;
@@ -79,19 +84,34 @@ export interface NotificationFilterParams {
 // Compose payload (admin)
 // ---------------------------------------------------------------------------
 
+/**
+ * Exactly one of broadcast_all, recipient_role, or recipient_user_id must be
+ * set per request — mixing them will fail backend validation.
+ */
 export type RecipientType = "all" | "role" | "user";
 
-export interface ComposeNotificationPayload {
-  title: string;
-  message: string;
-  type: NotificationType;
-  category: NotificationCategory;
-  priority: NotificationPriority;
-  recipient_type: RecipientType;
-  recipient_role?: string;
-  recipient_user_id?: string;
-  action_url?: string;
-}
+export type ComposeNotificationPayload =
+  | {
+      title: string;
+      message: string;
+      type: NotificationType;
+      priority: NotificationPriority;
+      broadcast_all: true;
+    }
+  | {
+      title: string;
+      message: string;
+      type: NotificationType;
+      priority: NotificationPriority;
+      recipient_role: RecipientRole;
+    }
+  | {
+      title: string;
+      message: string;
+      type: NotificationType;
+      priority: NotificationPriority;
+      recipient_user_id: string;
+    };
 
 // ---------------------------------------------------------------------------
 // User notification preferences

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { stockReleaseApi } from "../api/stock-release-api";
 import { stockReleaseKeys } from "./stock-release-keys";
 import { toast } from "@/app/components/ui/use-toast";
@@ -8,6 +8,11 @@ import type {
   CreateStockReleasePayload,
   UpdateStockReleasePayload,
 } from "../types/stock-release-types";
+
+/** Eagerly refetch all list queries so the table is fresh before navigation */
+async function refetchLists(queryClient: QueryClient) {
+  await queryClient.refetchQueries({ queryKey: stockReleaseKeys.lists() });
+}
 
 export { stockReleaseKeys };
 
@@ -35,16 +40,26 @@ export function useStockReleaseDetail(id: string) {
 }
 
 /**
- * Create a new stock release draft
+ * Create a new stock release draft.
+ * Pass `{ skipRefetch: true }` when you will immediately submit after creation
+ * so the intermediate DRAFT list fetch is skipped.
  */
 export function useCreateStockRelease() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateStockReleasePayload) =>
-      stockReleaseApi.createStockRelease(payload),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: stockReleaseKeys.all });
+    mutationFn: ({
+      payload,
+      skipRefetch = false,
+    }: {
+      payload: CreateStockReleasePayload;
+      skipRefetch?: boolean;
+    }) => stockReleaseApi.createStockRelease(payload),
+    onSuccess: async (data, { skipRefetch }) => {
+      if (!skipRefetch) {
+        // Eagerly refetch so the list is populated before navigation lands
+        await refetchLists(queryClient);
+      }
       toast({
         title: "Stock Release Created",
         description: `Release ${data.release_number || ""} created successfully.`,
@@ -131,8 +146,9 @@ export function useSubmitStockRelease() {
 
   return useMutation({
     mutationFn: (id: string) => stockReleaseApi.submitStockRelease(id),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: stockReleaseKeys.all });
+    onSuccess: async (data) => {
+      // Eagerly refetch so the SUBMITTED status is visible before navigation lands
+      await refetchLists(queryClient);
       queryClient.invalidateQueries({ queryKey: stockReleaseKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });

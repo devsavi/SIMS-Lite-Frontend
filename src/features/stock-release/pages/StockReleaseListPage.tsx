@@ -36,7 +36,7 @@ export function StockReleaseListPage() {
     search: "",
     status: "ALL",
     purpose: "ALL",
-    period: "ALL",
+    period: "day",
   });
 
   // Dialog state
@@ -74,7 +74,7 @@ export function StockReleaseListPage() {
   };
 
   const handleResetFilters = () => {
-    setFilters({ page: 1, size: 20, search: "", status: "ALL", purpose: "ALL", period: "ALL" });
+    setFilters({ page: 1, size: 20, search: "", status: "ALL", purpose: "ALL", period: "day" });
   };
 
   const handleEdit = (release: StockReleaseSummary) => {

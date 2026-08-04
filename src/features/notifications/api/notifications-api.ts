@@ -34,7 +34,6 @@ export const notificationsApi = {
     };
     if (params?.search) query.search = params.search;
     if (params?.type && params.type !== "ALL") query.type = params.type;
-    if (params?.category && params.category !== "ALL") query.category = params.category;
     if (params?.is_read !== undefined && params.is_read !== "ALL")
       query.is_read = params.is_read;
     if (params?.from_date) query.from_date = params.from_date;
@@ -105,8 +104,13 @@ export const notificationsApi = {
   // ---------------------------------------------------------------------------
 
   /**
-   * POST /notifications/compose
-   * Sends a notification to a user, role, or all users.
+   * POST /api/v1/admin/notifications/send
+   * Sends a notification to a user, a role, or all users.
+   *
+   * Only one targeting field is set per request:
+   *   broadcast_all   → all users
+   *   recipient_role  → users in that role
+   *   recipient_user_id → one specific user (UUID)
    */
   async compose(payload: ComposeNotificationPayload): Promise<Notification> {
     const res = await post<SuccessResponse<Notification>>(

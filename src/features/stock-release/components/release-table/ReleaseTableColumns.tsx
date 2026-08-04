@@ -1,6 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
-import { Eye, Edit3, Send, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Eye, Edit2, Send, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { RowActionsMenu, RowActionsMenuItem } from "@/components/common";
 import { StockReleaseStatusBadge } from "../release-status/StockReleaseStatusBadge";
 import {
@@ -155,7 +155,7 @@ export function getReleaseTableColumns({
                 aria-label={`Edit ${release.release_number}`}
                 className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
-                <Edit3 className="h-4 w-4" />
+                <Edit2 className="h-4 w-4" />
               </button>
             )}
 

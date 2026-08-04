@@ -68,6 +68,7 @@ export function ReleaseTable({
       onPageChange={onPageChange}
       onPageSizeChange={onPageSizeChange}
       showColumnToggle
+      tableClassName="overflow-visible"
       emptyTitle="No stock releases found"
       emptyDescription="Create a new stock release request to begin managing inventory releases."
       caption="Stock Release Table"
