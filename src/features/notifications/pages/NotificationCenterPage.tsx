@@ -230,15 +230,24 @@ export function NotificationCenterPage() {
               setFilters((prev) => ({ ...prev, type: v }))
             }
           >
-            <SelectTrigger className="h-9 w-[140px]" aria-label="Filter by type">
+            <SelectTrigger className="h-9 w-[160px]" aria-label="Filter by type">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">All Types</SelectItem>
-              <SelectItem value="info">Info</SelectItem>
-              <SelectItem value="success">Success</SelectItem>
-              <SelectItem value="warning">Warning</SelectItem>
-              <SelectItem value="error">Error</SelectItem>
+              <SelectItem value="INFO">Info</SelectItem>
+              <SelectItem value="SUCCESS">Success</SelectItem>
+              <SelectItem value="WARNING">Warning</SelectItem>
+              <SelectItem value="ERROR">Error</SelectItem>
+              <SelectItem value="PURCHASE_ORDER">Purchase Order</SelectItem>
+              <SelectItem value="GRN">GRN</SelectItem>
+              <SelectItem value="INVENTORY">Inventory</SelectItem>
+              <SelectItem value="STOCK_RELEASE">Stock Release</SelectItem>
+              <SelectItem value="LOW_STOCK">Low Stock</SelectItem>
+              <SelectItem value="OUT_OF_STOCK">Out of Stock</SelectItem>
+              <SelectItem value="USER">User</SelectItem>
+              <SelectItem value="SECURITY">Security</SelectItem>
+              <SelectItem value="SYSTEM">System</SelectItem>
             </SelectContent>
           </Select>
         </div>

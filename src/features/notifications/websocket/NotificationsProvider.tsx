@@ -5,23 +5,39 @@
  *
  * Wraps the application tree and:
  *  1. Connects the WsClient when the user is authenticated.
- *  2. Disconnects on logout or component unmount.
- *  3. Dispatches incoming WS events to:
- *     - TanStack Query cache invalidations
- *     - Toast notifications for important events
- *     - Browser (desktop) notifications when the tab is backgrounded
- *  4. Provides connection status via context.
+ *  2. Disconnects on logout / component unmount.
+ *  3. Handles all server→client WS events:
+ *       system.connected         — logs connection info
+ *       notification.unread_count — syncs badge count in cache
+ *       notification.new          — prepends to lists, increments badge
+ *       notification.broadcast    — same as notification.new + toast
+ *       notification.read         — flips is_read in cache locally
+ *       notification.all_read     — marks all as read in cache locally
+ *       notification.deleted      — removes from cache locally
+ *  4. Shows toasts + browser notifications for important events.
+ *  5. Provides connection status via context.
  */
 
 import * as React from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { getWsClient, configureWsClient, type WsStatus } from "@/lib/websocket/ws-client";
 import { useAuthStore } from "@/stores/auth.store";
-import { accessToken } from "@/lib/auth/token";
+import { accessToken, refreshToken } from "@/lib/auth/token";
+import { authApi } from "@/features/auth/api/auth-api";
 import { notificationKeys } from "../hooks/use-notifications";
 import { toast } from "@/app/components/ui/use-toast";
 import { showBrowserNotification } from "../utils/browser-notifications";
-import type { WsEvent, NotificationPreferences } from "../types";
+import type {
+  Notification,
+  NotificationSummary,
+  PaginatedNotifications,
+  UnreadCountResponse,
+  WsConnectedPayload,
+  WsUnreadCountPayload,
+  WsNotificationReadPayload,
+  WsNotificationDeletedPayload,
+  NotificationPreferences,
+} from "../types";
 
 // ---------------------------------------------------------------------------
 // Context
@@ -42,17 +58,6 @@ export function useNotificationsContext(): NotificationsContextValue {
 }
 
 // ---------------------------------------------------------------------------
-// Query keys for other features (for cache invalidation)
-// ---------------------------------------------------------------------------
-
-const INVENTORY_KEY = ["inventory"];
-const DASHBOARD_KEY = ["dashboard"];
-const PURCHASE_ORDERS_KEY = ["purchase-orders"];
-const GRNS_KEY = ["grns"];
-const STOCK_RELEASE_KEY = ["stock-release"];
-const USERS_KEY = ["users"];
-
-// ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
@@ -65,17 +70,11 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [status, setStatus] = React.useState<WsStatus>("idle");
 
-  /**
-   * Show a browser desktop notification only when:
-   *  - The user has enabled system (desktop) notifications in their preferences
-   *  - Notifications are not currently muted
-   */
   const maybeShowBrowserNotification = React.useCallback(
     (opts: Parameters<typeof showBrowserNotification>[0]) => {
       const prefs = queryClient.getQueryData<NotificationPreferences>(
         notificationKeys.preferences()
       );
-      // If we have preferences loaded, respect enable_system and mute_until
       if (prefs) {
         if (!prefs.enable_system) return;
         if (prefs.mute_until && new Date(prefs.mute_until).getTime() > Date.now()) return;
@@ -103,152 +102,360 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
       return;
     }
 
-    // Subscribe to status changes
     const unsubStatus = ws.onStatus(setStatus);
-
-    // Connect (no-op if already connected)
     ws.connect();
 
     // -----------------------------------------------------------------------
-    // Event handlers
+    // Helpers
     // -----------------------------------------------------------------------
 
-    function invalidate(keys: readonly unknown[]) {
-      queryClient.invalidateQueries({ queryKey: keys });
+    /** Convert a full Notification to a NotificationSummary */
+    function toSummary(n: Notification): NotificationSummary {
+      return {
+        id: n.id,
+        title: n.title,
+        message: n.message,
+        type: n.type,
+        priority: n.priority,
+        is_read: n.is_read,
+        created_at: n.created_at,
+      };
     }
 
-    // Generic notification event — refresh badge + list
-    const unsubNotification = ws.on<WsEvent["payload"]>("notification", (payload) => {
-      invalidate(notificationKeys.all);
-      const n = payload as { title?: string; message?: string; priority?: string };
-      if (n.title) {
-        const isUrgent = n.priority === "high" || n.priority === "urgent";
-        toast({
-          title: n.title,
-          description: n.message,
-          variant: isUrgent ? "destructive" : "default",
-        });
-        maybeShowBrowserNotification({
-          id: `ws-${Date.now()}`,
-          title: n.title,
-          body: n.message,
-        });
+    /** Prepend a new notification to all infinite-query pages (page 1 only) */
+    function prependToInfiniteList(notification: Notification) {
+      queryClient.setQueriesData<InfiniteData<PaginatedNotifications>>(
+        { queryKey: notificationKeys.lists() },
+        (old) => {
+          if (!old) return old;
+          const firstPage = old.pages[0];
+          if (!firstPage) return old;
+          // Avoid duplicates
+          const alreadyExists = firstPage.data.some((n) => n.id === notification.id);
+          if (alreadyExists) return old;
+          return {
+            ...old,
+            pages: [
+              {
+                ...firstPage,
+                data: [notification, ...firstPage.data],
+                pagination: {
+                  ...firstPage.pagination,
+                  total: firstPage.pagination.total + 1,
+                },
+              },
+              ...old.pages.slice(1),
+            ],
+          };
+        }
+      );
+    }
+
+    /** Prepend a notification summary to the recent list in cache */
+    function prependToRecentList(notification: Notification) {
+      queryClient.setQueriesData<{ notifications: NotificationSummary[]; unread_count: number }>(
+        { queryKey: notificationKeys.recent() },
+        (old) => {
+          if (!old) return old;
+          const summary = toSummary(notification);
+          // Avoid duplicates
+          if (old.notifications.some((n) => n.id === notification.id)) return old;
+          return {
+            // Do not touch unread_count here — it is owned by the
+            // notification.unread_count WS event (or the unread-count cache key).
+            // Bumping it here AND in the count cache = double inflation.
+            unread_count: old.unread_count,
+            notifications: [summary, ...old.notifications].slice(0, 10),
+          };
+        }
+      );
+    }
+
+    // -----------------------------------------------------------------------
+    // system.connected — server confirms connection + sends initial unread count
+    // -----------------------------------------------------------------------
+    const unsubConnected = ws.on<WsConnectedPayload>("system.connected", () => {
+      // Connection confirmed — the server will follow immediately with
+      // notification.unread_count, so nothing extra needed here.
+    });
+
+    // -----------------------------------------------------------------------
+    // system.auth_error — token was rejected (code 4001); refresh and reconnect
+    // -----------------------------------------------------------------------
+    const unsubAuthError = ws.on<number>("system.auth_error", async () => {
+      const rt = refreshToken.get();
+      if (!rt) return; // No refresh token — stay disconnected
+      try {
+        const tokenRes = await authApi.refreshToken({ refresh_token: rt });
+        accessToken.set(tokenRes.access_token, tokenRes.expires_in);
+        refreshToken.set(tokenRes.refresh_token);
+        // Reconnect — getToken() will now return the fresh access token
+        ws.connect();
+      } catch {
+        // Refresh failed — clear session
+        useAuthStore.getState().clearSession();
+        if (typeof window !== "undefined") {
+          window.location.replace("/login");
+        }
       }
     });
 
-    // --- Inventory ---
-    const unsubLowStock = ws.on("low_stock_alert", (payload) => {
-      invalidate(INVENTORY_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-      const p = payload as { product_name?: string; current_quantity?: number };
-      toast({
-        title: "Low Stock Alert",
-        description: p.product_name
-          ? `${p.product_name} — only ${p.current_quantity} units remaining.`
-          : "A product is running low on stock.",
-        variant: "destructive",
-      });
-    });
+    // -----------------------------------------------------------------------
+    // notification.unread_count — sync badge from server
+    // -----------------------------------------------------------------------
+    const unsubUnreadCount = ws.on<WsUnreadCountPayload>(
+      "notification.unread_count",
+      (payload) => {
+        queryClient.setQueryData<UnreadCountResponse>(
+          notificationKeys.unreadCount(),
+          payload
+        );
+      }
+    );
 
-    const unsubStockAdjustment = ws.on("stock_adjustment_completed", () => {
-      invalidate(INVENTORY_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
+    // Helper: refetch the count from REST — used whenever a WS event changes state
+    function refetchUnreadCount() {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() });
+    }
 
-    // --- Stock Release ---
-    const unsubStockRelease = ws.on("stock_release_approved", () => {
-      invalidate(STOCK_RELEASE_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
+    // -----------------------------------------------------------------------
+    // notification.new — a new notification for this user
+    // -----------------------------------------------------------------------
+    const unsubNew = ws.on<{ notification: NotificationSummary }>(
+      "notification.new",
+      ({ notification }) => {
+        const fullNotif: Notification = {
+          id: notification.id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          priority: notification.priority,
+          is_read: notification.is_read,
+          created_at: notification.created_at,
+          recipient_type: "USER",
+          recipient_role: null,
+          recipient_user_id: null,
+          sender_id: null,
+          read_at: null,
+          data: null,
+          updated_at: notification.created_at,
+        };
 
-    ws.on("stock_release_rejected", () => {
-      invalidate(STOCK_RELEASE_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
+        prependToInfiniteList(fullNotif);
+        prependToRecentList(fullNotif);
+        refetchUnreadCount();
 
-    // --- Purchase Orders ---
-    const unsubPO = ws.on("purchase_order_submitted", () => {
-      invalidate(PURCHASE_ORDERS_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
-    ws.on("purchase_order_approved", () => {
-      invalidate(PURCHASE_ORDERS_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
-    ws.on("purchase_order_rejected", () => {
-      invalidate(PURCHASE_ORDERS_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
+        const isUrgent =
+          notification.priority === "HIGH" || notification.priority === "CRITICAL";
 
-    // --- GRNs ---
-    const unsubGRN = ws.on("grn_submitted", () => {
-      invalidate(GRNS_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
-    ws.on("grn_approved", () => {
-      invalidate(GRNS_KEY);
-      invalidate(DASHBOARD_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
-
-    // --- Users ---
-    const unsubUsers = ws.on("user_created", () => {
-      invalidate(USERS_KEY);
-      invalidate(notificationKeys.unreadCount());
-    });
-    ws.on("role_changed", () => {
-      invalidate(USERS_KEY);
-    });
-
-    // --- System broadcasts ---
-    const unsubBroadcast = ws.on("broadcast", (payload) => {
-      invalidate(notificationKeys.unreadCount());
-      const p = payload as { title?: string; message?: string; priority?: string };
-      if (p.title) {
         toast({
-          title: p.title,
-          description: p.message,
-          variant: p.priority === "urgent" ? "destructive" : "default",
+          title: notification.title,
+          description: notification.message,
+          variant: isUrgent ? "destructive" : "default",
         });
+
         maybeShowBrowserNotification({
-          id: `broadcast-${Date.now()}`,
-          title: p.title,
-          body: p.message,
+          id: notification.id,
+          title: notification.title,
+          body: notification.message,
+        });
+      }
+    );
+
+    // -----------------------------------------------------------------------
+    // notification.broadcast — broadcast to all users
+    // -----------------------------------------------------------------------
+    const unsubBroadcast = ws.on<{ notification: NotificationSummary }>(
+      "notification.broadcast",
+      ({ notification }) => {
+        const fullNotif: Notification = {
+          id: notification.id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          priority: notification.priority,
+          is_read: notification.is_read,
+          created_at: notification.created_at,
+          recipient_type: "BROADCAST",
+          recipient_role: null,
+          recipient_user_id: null,
+          sender_id: null,
+          read_at: null,
+          data: null,
+          updated_at: notification.created_at,
+        };
+
+        prependToInfiniteList(fullNotif);
+        prependToRecentList(fullNotif);
+        refetchUnreadCount();
+
+        const isUrgent =
+          notification.priority === "HIGH" || notification.priority === "CRITICAL";
+
+        toast({
+          title: notification.title,
+          description: notification.message,
+          variant: isUrgent ? "destructive" : "default",
+        });
+
+        maybeShowBrowserNotification({
+          id: notification.id,
+          title: notification.title,
+          body: notification.message,
           forceShowWhenFocused: true,
         });
       }
+    );
+
+    // -----------------------------------------------------------------------
+    // notification.read — a notification was marked read (could be from another tab)
+    // -----------------------------------------------------------------------
+    const unsubRead = ws.on<WsNotificationReadPayload>(
+      "notification.read",
+      ({ notification_id }) => {
+        // Flip is_read locally without a network round-trip
+        queryClient.setQueriesData<InfiniteData<PaginatedNotifications>>(
+          { queryKey: notificationKeys.lists() },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                data: page.data.map((n) =>
+                  n.id === notification_id
+                    ? { ...n, is_read: true, read_at: new Date().toISOString() }
+                    : n
+                ),
+              })),
+            };
+          }
+        );
+
+        queryClient.setQueriesData<{ notifications: NotificationSummary[]; unread_count: number }>(
+          { queryKey: notificationKeys.recent() },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              notifications: old.notifications.map((n) =>
+                n.id === notification_id ? { ...n, is_read: true } : n
+              ),
+            };
+          }
+        );
+
+        // The server follows notification.read with notification.unread_count,
+        // but we also hit the REST endpoint directly to guarantee accuracy.
+        refetchUnreadCount();
+      }
+    );
+
+    // -----------------------------------------------------------------------
+    // notification.all_read — bulk mark all read
+    // -----------------------------------------------------------------------
+    const unsubAllRead = ws.on("notification.all_read", () => {
+      queryClient.setQueryData<UnreadCountResponse>(
+        notificationKeys.unreadCount(),
+        (old) => (old ? { ...old, unread_count: 0, critical_count: 0, high_count: 0 } : old)
+      );
+
+      queryClient.setQueriesData<InfiniteData<PaginatedNotifications>>(
+        { queryKey: notificationKeys.lists() },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.map((n) => ({
+                ...n,
+                is_read: true,
+                read_at: new Date().toISOString(),
+              })),
+            })),
+          };
+        }
+      );
+
+      queryClient.setQueriesData<{ notifications: NotificationSummary[]; unread_count: number }>(
+        { queryKey: notificationKeys.recent() },
+        (old) => {
+          if (!old) return old;
+          return {
+            unread_count: 0,
+            notifications: old.notifications.map((n) => ({ ...n, is_read: true })),
+          };
+        }
+      );
+
+      refetchUnreadCount();
     });
 
-    ws.on("maintenance", (payload) => {
-      const p = payload as { title?: string; message?: string };
-      toast({
-        title: p.title ?? "Maintenance Notice",
-        description: p.message,
-        variant: "destructive",
-      });
-    });
+    // -----------------------------------------------------------------------
+    // notification.deleted — a notification was deleted
+    // -----------------------------------------------------------------------
+    const unsubDeleted = ws.on<WsNotificationDeletedPayload>(
+      "notification.deleted",
+      ({ notification_id }) => {
+        queryClient.setQueriesData<InfiniteData<PaginatedNotifications>>(
+          { queryKey: notificationKeys.lists() },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                data: page.data.filter((n) => n.id !== notification_id),
+                pagination: {
+                  ...page.pagination,
+                  total: Math.max(0, page.pagination.total - 1),
+                },
+              })),
+            };
+          }
+        );
+
+        queryClient.setQueriesData<{ notifications: NotificationSummary[]; unread_count: number }>(
+          { queryKey: notificationKeys.recent() },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              notifications: old.notifications.filter((n) => n.id !== notification_id),
+            };
+          }
+        );
+      }
+    );
+
+    // -----------------------------------------------------------------------
+    // Page visibility — request fresh count when tab regains focus
+    // -----------------------------------------------------------------------
+    function handleVisibilityChange() {
+      if (
+        document.visibilityState === "visible" &&
+        ws.isConnected
+      ) {
+        ws.emit("notification.unread_count");
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // -----------------------------------------------------------------------
     // Cleanup
     // -----------------------------------------------------------------------
     return () => {
       unsubStatus();
-      unsubNotification();
-      unsubLowStock();
-      unsubStockAdjustment();
-      unsubStockRelease();
-      unsubPO();
-      unsubGRN();
-      unsubUsers();
+      unsubConnected();
+      unsubAuthError();
+      unsubUnreadCount();
+      unsubNew();
       unsubBroadcast();
+      unsubRead();
+      unsubAllRead();
+      unsubDeleted();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isAuthenticated, queryClient, maybeShowBrowserNotification]);
 

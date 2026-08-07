@@ -10,40 +10,108 @@ import {
   Check,
   Undo2,
   Trash2,
+  ClipboardList,
+  Package,
+  Archive,
+  ArrowUpFromLine,
+  User,
+  Lock,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { formatRelative } from "@/utils/format";
 import { Button } from "@/app/components/ui/button";
-import type { Notification, NotificationType } from "../../types";
+import type {
+  Notification,
+  NotificationSummary,
+  NotificationType,
+  NotificationPriority,
+} from "../../types";
 
 // ---------------------------------------------------------------------------
-// Config
+// Type config — icon + colour for each notification type
 // ---------------------------------------------------------------------------
 
 const TYPE_CONFIG: Record<
   NotificationType,
   { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }
 > = {
-  info: {
+  INFO: {
     icon: Info,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
   },
-  success: {
+  SUCCESS: {
     icon: CheckCircle2,
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-50 dark:bg-emerald-950/30",
   },
-  warning: {
+  WARNING: {
     icon: AlertTriangle,
     color: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-50 dark:bg-amber-950/30",
   },
-  error: {
+  ERROR: {
     icon: XCircle,
     color: "text-destructive",
     bg: "bg-destructive/5",
   },
+  PURCHASE_ORDER: {
+    icon: ClipboardList,
+    color: "text-indigo-600 dark:text-indigo-400",
+    bg: "bg-indigo-50 dark:bg-indigo-950/30",
+  },
+  GRN: {
+    icon: Package,
+    color: "text-teal-600 dark:text-teal-400",
+    bg: "bg-teal-50 dark:bg-teal-950/30",
+  },
+  INVENTORY: {
+    icon: Archive,
+    color: "text-slate-600 dark:text-slate-400",
+    bg: "bg-slate-50 dark:bg-slate-950/30",
+  },
+  STOCK_RELEASE: {
+    icon: ArrowUpFromLine,
+    color: "text-purple-600 dark:text-purple-400",
+    bg: "bg-purple-50 dark:bg-purple-950/30",
+  },
+  LOW_STOCK: {
+    icon: AlertTriangle,
+    color: "text-orange-600 dark:text-orange-400",
+    bg: "bg-orange-50 dark:bg-orange-950/30",
+  },
+  OUT_OF_STOCK: {
+    icon: XCircle,
+    color: "text-destructive",
+    bg: "bg-destructive/5",
+  },
+  USER: {
+    icon: User,
+    color: "text-sky-600 dark:text-sky-400",
+    bg: "bg-sky-50 dark:bg-sky-950/30",
+  },
+  SECURITY: {
+    icon: Lock,
+    color: "text-destructive",
+    bg: "bg-destructive/5",
+  },
+  SYSTEM: {
+    icon: Settings2,
+    color: "text-muted-foreground",
+    bg: "bg-muted/40",
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Priority indicator
+// ---------------------------------------------------------------------------
+
+const PRIORITY_COLOR: Record<NotificationPriority, string> = {
+  CRITICAL: "bg-destructive",
+  HIGH: "bg-orange-500",
+  NORMAL: "bg-primary",
+  LOW: "bg-muted-foreground/40",
 };
 
 // ---------------------------------------------------------------------------
@@ -51,7 +119,8 @@ const TYPE_CONFIG: Record<
 // ---------------------------------------------------------------------------
 
 export interface NotificationCardProps {
-  notification: Notification;
+  /** Accepts both the full Notification and the lightweight NotificationSummary */
+  notification: Notification | NotificationSummary;
   onMarkAsRead?: (id: string) => void;
   onMarkAsUnread?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -73,8 +142,9 @@ export function NotificationCard({
   compact = false,
   isLoading = false,
 }: NotificationCardProps) {
-  const cfg = TYPE_CONFIG[notification.type] ?? TYPE_CONFIG.info;
+  const cfg = TYPE_CONFIG[notification.type] ?? TYPE_CONFIG.INFO;
   const Icon = cfg.icon ?? Bell;
+  const priorityColor = PRIORITY_COLOR[notification.priority] ?? PRIORITY_COLOR.NORMAL;
 
   const handleReadToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -100,13 +170,14 @@ export function NotificationCard({
         !notification.is_read && "bg-primary/5 hover:bg-primary/8"
       )}
     >
-      {/* Unread indicator strip */}
-      {!notification.is_read && (
-        <span
-          className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary"
-          aria-hidden="true"
-        />
-      )}
+      {/* Priority + unread indicator strip */}
+      <span
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-0.5",
+          notification.is_read ? "bg-transparent" : priorityColor
+        )}
+        aria-hidden="true"
+      />
 
       {/* Type icon */}
       <div
@@ -132,8 +203,11 @@ export function NotificationCard({
           </p>
           {!notification.is_read && (
             <span
-              className="mt-1.5 h-2 w-2 shrink-0 rounded-none bg-primary"
-              aria-label="Unread"
+              className={cn(
+                "mt-1.5 h-2 w-2 shrink-0 rounded-none",
+                priorityColor
+              )}
+              aria-label={`${notification.priority.toLowerCase()} priority, unread`}
             />
           )}
         </div>
@@ -149,15 +223,19 @@ export function NotificationCard({
           >
             {formatRelative(notification.created_at)}
           </time>
-          {notification.sender && (
-            <>
-              <span className="text-muted-foreground/40" aria-hidden="true">
-                ·
-              </span>
-              <span className="text-xs text-muted-foreground/70">
-                {notification.sender.full_name}
-              </span>
-            </>
+          {/* Priority label for CRITICAL and HIGH */}
+          {(notification.priority === "CRITICAL" ||
+            notification.priority === "HIGH") && (
+            <span
+              className={cn(
+                "text-[10px] font-semibold uppercase tracking-wide",
+                notification.priority === "CRITICAL"
+                  ? "text-destructive"
+                  : "text-orange-500"
+              )}
+            >
+              {notification.priority}
+            </span>
           )}
         </div>
       </div>

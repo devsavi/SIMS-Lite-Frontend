@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useInfiniteNotifications, useMarkAsRead, useMarkAsUnread, useDeleteNotification } from "../../hooks/use-notifications";
+import {
+  useInfiniteNotifications,
+  useMarkAsRead,
+  useMarkAsUnread,
+  useDeleteNotification,
+} from "../../hooks/use-notifications";
 import { NotificationCard } from "../notification-card/NotificationCard";
 import { Button } from "@/app/components/ui/button";
 import { Loader2 } from "lucide-react";

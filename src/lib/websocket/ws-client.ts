@@ -20,7 +20,10 @@ export type WsEventHandler<T = unknown> = (payload: T) => void;
 export type WsStatusHandler = (status: WsStatus) => void;
 
 export interface WsMessage {
-  type: string;
+  /** Outgoing client→server messages use "event". */
+  event?: string;
+  /** Legacy field kept for internal use (heartbeat pong etc.). */
+  type?: string;
   payload?: unknown;
 }
 
@@ -125,6 +128,14 @@ export class WsClient {
     }
   }
 
+  /**
+   * Send a client→server event using the server's expected envelope format.
+   * { "event": "<name>", "payload": {...} }
+   */
+  emit(eventName: string, payload?: unknown): void {
+    this.send({ event: eventName, payload });
+  }
+
   // -------------------------------------------------------------------------
   // Subscriptions
   // -------------------------------------------------------------------------
@@ -177,18 +188,25 @@ export class WsClient {
   };
 
   private _handleMessage = (event: MessageEvent): void => {
-    let msg: WsMessage;
+    let msg: Record<string, unknown>;
     try {
-      msg = JSON.parse(event.data as string) as WsMessage;
+      msg = JSON.parse(event.data as string) as Record<string, unknown>;
     } catch {
       return; // Ignore non-JSON frames
     }
 
+    // The server uses "event" as the discriminator field.
+    // Support both "event" (server spec) and "type" (legacy/pong).
+    const eventName = (msg.event ?? msg.type) as string | undefined;
+    if (!eventName) return;
+
     // Pong response — no further dispatch needed
-    if (msg.type === "pong") return;
+    if (eventName === "pong" || eventName === "system.pong") return;
+
+    const payload = msg.payload;
 
     // Dispatch to specific-type handlers
-    this.eventHandlers.get(msg.type)?.forEach((h) => h(msg.payload));
+    this.eventHandlers.get(eventName)?.forEach((h) => h(payload));
 
     // Dispatch to catch-all handlers
     this.eventHandlers.get("*")?.forEach((h) => h(msg));
@@ -201,9 +219,16 @@ export class WsClient {
       return;
     }
     this._setStatus("disconnected");
-    // Do not reconnect on auth failures (4001/4003/4401)
+    // Auth failures — do not reconnect automatically
+    // Codes 4001 / 4003 / 4401 are server-set auth rejections
     if (event.code === 4001 || event.code === 4003 || event.code === 4401) {
       this._setStatus("error");
+      // Dispatch a special event so consumers (e.g. NotificationsProvider)
+      // can attempt a token refresh and call connect() again.
+      this.eventHandlers.get("system.auth_error")?.forEach((h) => h(event.code));
+      this.eventHandlers.get("*")?.forEach((h) =>
+        h({ event: "system.auth_error", payload: { code: event.code } })
+      );
       return;
     }
     this._scheduleReconnect();
@@ -227,7 +252,7 @@ export class WsClient {
   private _startHeartbeat(): void {
     this._clearHeartbeat();
     this.heartbeatTimer = setInterval(() => {
-      this.send({ type: "ping" });
+      this.send({ event: "system.ping" });
     }, this.opts.heartbeatInterval);
   }
 

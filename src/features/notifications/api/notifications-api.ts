@@ -1,6 +1,6 @@
 /**
  * Notifications feature — REST API calls.
- * All paths relative to NEXT_PUBLIC_API_URL.
+ * All responses are wrapped in { "status": "success", "data": ... }.
  */
 
 import { get, post, patch, put, del } from "@/lib/api/client";
@@ -9,7 +9,10 @@ import type {
   Notification,
   NotificationFilterParams,
   PaginatedNotifications,
+  PaginatedApiResponse,
   UnreadCountResponse,
+  RecentNotificationsResponse,
+  CriticalAlertsResponse,
   ComposeNotificationPayload,
   NotificationPreferences,
 } from "../types";
@@ -18,13 +21,9 @@ const BASE = "/notifications";
 
 export const notificationsApi = {
   // ---------------------------------------------------------------------------
-  // List — paginated with optional filters
+  // List — GET /notifications  (paginated, filterable)
   // ---------------------------------------------------------------------------
 
-  /**
-   * GET /notifications
-   * Returns paginated notifications for the current user.
-   */
   async getNotifications(
     params?: NotificationFilterParams
   ): Promise<PaginatedNotifications> {
@@ -39,48 +38,70 @@ export const notificationsApi = {
     if (params?.from_date) query.from_date = params.from_date;
     if (params?.to_date) query.to_date = params.to_date;
 
-    return get<PaginatedNotifications>(BASE, { params: query });
+    // Server returns { status, data: [...], pagination: {...} }
+    // "pagination" is a sibling of "data", not nested inside it.
+    const res = await get<PaginatedApiResponse<Notification>>(BASE, { params: query });
+    return { data: res.data, pagination: res.pagination };
   },
 
   // ---------------------------------------------------------------------------
-  // Unread count
+  // Dashboard — unread count badge
+  // GET /notifications/dashboard/unread-count
   // ---------------------------------------------------------------------------
 
-  /**
-   * GET /notifications/unread-count
-   * Returns the current unread notification count.
-   */
-  async getUnreadCount(): Promise<number> {
+  async getUnreadCount(): Promise<UnreadCountResponse> {
     const res = await get<SuccessResponse<UnreadCountResponse>>(
       `${BASE}/dashboard/unread-count`
     );
-    return res.data.unread_count;
+    return res.data;
+  },
+
+  // ---------------------------------------------------------------------------
+  // Dashboard — recent notifications (header popup)
+  // GET /notifications/dashboard/recent?limit=10
+  // ---------------------------------------------------------------------------
+
+  async getRecentNotifications(limit = 10): Promise<RecentNotificationsResponse> {
+    const res = await get<SuccessResponse<RecentNotificationsResponse>>(
+      `${BASE}/dashboard/recent`,
+      { params: { limit } }
+    );
+    return res.data;
+  },
+
+  // ---------------------------------------------------------------------------
+  // Dashboard — critical alerts
+  // GET /notifications/dashboard/critical-alerts
+  // ---------------------------------------------------------------------------
+
+  async getCriticalAlerts(): Promise<CriticalAlertsResponse> {
+    const res = await get<SuccessResponse<CriticalAlertsResponse>>(
+      `${BASE}/dashboard/critical-alerts`
+    );
+    return res.data;
+  },
+
+  // ---------------------------------------------------------------------------
+  // Single notification
+  // GET /notifications/{id}
+  // ---------------------------------------------------------------------------
+
+  async getNotification(id: string): Promise<Notification> {
+    const res = await get<SuccessResponse<Notification>>(`${BASE}/${id}`);
+    return res.data;
   },
 
   // ---------------------------------------------------------------------------
   // Mark as read / unread
   // ---------------------------------------------------------------------------
 
-  /**
-   * PATCH /notifications/:id/read
-   */
+  /** PATCH /notifications/{id}/read */
   async markAsRead(id: string): Promise<Notification> {
     const res = await patch<SuccessResponse<Notification>>(`${BASE}/${id}/read`);
     return res.data;
   },
 
-  /**
-   * PATCH /notifications/:id/unread
-   */
-  async markAsUnread(id: string): Promise<Notification> {
-    const res = await patch<SuccessResponse<Notification>>(`${BASE}/${id}/unread`);
-    return res.data;
-  },
-
-  /**
-   * PATCH /notifications/read-all
-   * Marks all notifications for the current user as read.
-   */
+  /** PATCH /notifications/read-all */
   async markAllAsRead(): Promise<{ updated_count: number }> {
     const res = await patch<SuccessResponse<{ updated_count: number }>>(
       `${BASE}/read-all`
@@ -90,28 +111,18 @@ export const notificationsApi = {
 
   // ---------------------------------------------------------------------------
   // Delete
+  // DELETE /notifications/{id}
   // ---------------------------------------------------------------------------
 
-  /**
-   * DELETE /notifications/:id
-   */
   async deleteNotification(id: string): Promise<void> {
     await del(`${BASE}/${id}`);
   },
 
   // ---------------------------------------------------------------------------
   // Compose (admin only)
+  // POST /admin/notifications/send
   // ---------------------------------------------------------------------------
 
-  /**
-   * POST /api/v1/admin/notifications/send
-   * Sends a notification to a user, a role, or all users.
-   *
-   * Only one targeting field is set per request:
-   *   broadcast_all   → all users
-   *   recipient_role  → users in that role
-   *   recipient_user_id → one specific user (UUID)
-   */
   async compose(payload: ComposeNotificationPayload): Promise<Notification> {
     const res = await post<SuccessResponse<Notification>>(
       `admin/notifications/send`,
@@ -124,9 +135,7 @@ export const notificationsApi = {
   // Preferences
   // ---------------------------------------------------------------------------
 
-  /**
-   * GET /notifications/preferences/me
-   */
+  /** GET /notifications/preferences/me */
   async getPreferences(): Promise<NotificationPreferences> {
     const res = await get<SuccessResponse<NotificationPreferences>>(
       `${BASE}/preferences/me`
@@ -134,9 +143,7 @@ export const notificationsApi = {
     return res.data;
   },
 
-  /**
-   * PUT /notifications/preferences/me
-   */
+  /** PUT /notifications/preferences/me */
   async updatePreferences(
     prefs: Partial<NotificationPreferences>
   ): Promise<NotificationPreferences> {

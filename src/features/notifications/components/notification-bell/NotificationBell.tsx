@@ -10,7 +10,7 @@ import {
 } from "@/app/components/ui/popover";
 import { cn } from "@/utils/cn";
 import { NotificationPanel } from "../notification-panel/NotificationPanel";
-import { useUnreadCount } from "../../hooks/use-notifications";
+import { useUnreadCountFull } from "../../hooks/use-notifications";
 import { useWsNotifications } from "../../websocket/use-ws-notifications";
 
 // ---------------------------------------------------------------------------
@@ -34,15 +34,22 @@ function ConnectionDot({ isConnected }: { isConnected: boolean }) {
 // Badge
 // ---------------------------------------------------------------------------
 
-function UnreadBadge({ count }: { count: number }) {
+function UnreadBadge({
+  count,
+  hasCritical,
+}: {
+  count: number;
+  hasCritical: boolean;
+}) {
   if (count <= 0) return null;
   return (
     <span
-      aria-label={`${count} unread notification${count !== 1 ? "s" : ""}`}
+      aria-label={`${count} unread notification${count !== 1 ? "s" : ""}${hasCritical ? ", includes critical" : ""}`}
       className={cn(
         "absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center",
-        "rounded-none bg-destructive px-1 text-[9px] font-bold leading-none text-white",
-        "animate-in zoom-in-50 duration-200"
+        "rounded-none px-1 text-[9px] font-bold leading-none text-white",
+        "animate-in zoom-in-50 duration-200",
+        hasCritical ? "bg-destructive" : "bg-destructive"
       )}
     >
       {count > 99 ? "99+" : count}
@@ -56,8 +63,11 @@ function UnreadBadge({ count }: { count: number }) {
 
 export function NotificationBell() {
   const [open, setOpen] = React.useState(false);
-  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: countData } = useUnreadCountFull();
   const { isConnected } = useWsNotifications();
+
+  const unreadCount = countData?.unread_count ?? 0;
+  const criticalCount = countData?.critical_count ?? 0;
 
   // Announce new notifications to screen readers
   const prevCount = React.useRef(unreadCount);
@@ -92,7 +102,7 @@ export function NotificationBell() {
             variant="ghost"
             size="icon"
             className="relative h-8 w-8"
-            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread${criticalCount > 0 ? `, ${criticalCount} critical` : ""})` : ""}`}
             aria-haspopup="dialog"
             aria-expanded={open}
           >
@@ -102,7 +112,7 @@ export function NotificationBell() {
                 open && "scale-110"
               )}
             />
-            <UnreadBadge count={unreadCount} />
+            <UnreadBadge count={unreadCount} hasCritical={criticalCount > 0} />
             <ConnectionDot isConnected={isConnected} />
             {/* Screen-reader-only status */}
             <span className="sr-only">

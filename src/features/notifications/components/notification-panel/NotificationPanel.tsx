@@ -9,7 +9,7 @@ import { ScrollArea } from "@/app/components/ui/scroll-area";
 import { Separator } from "@/app/components/ui/separator";
 import { NotificationCard } from "../notification-card/NotificationCard";
 import { EmptyState } from "@/components/common/empty-state";
-import { useNotificationList, useMarkAsRead, useMarkAllAsRead } from "../../hooks/use-notifications";
+import { useRecentNotifications, useMarkAsRead, useMarkAllAsRead } from "../../hooks/use-notifications";
 
 // ---------------------------------------------------------------------------
 // Skeleton
@@ -46,15 +46,12 @@ interface NotificationPanelProps {
 // ---------------------------------------------------------------------------
 
 export function NotificationPanel({ onClose }: NotificationPanelProps) {
-  const { data, isLoading, isError, refetch } = useNotificationList({
-    page: 1,
-    size: 10,
-  });
+  const { data, isLoading, isError, refetch } = useRecentNotifications(10);
 
   const { mutate: markAsRead } = useMarkAsRead();
   const { mutate: markAllAsRead, isPending: isMarkingAll } = useMarkAllAsRead();
 
-  const notifications = data?.data ?? [];
+  const notifications = data?.notifications ?? [];
   const unreadCount = data?.unread_count ?? 0;
 
   return (

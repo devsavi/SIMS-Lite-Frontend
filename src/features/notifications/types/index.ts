@@ -1,6 +1,6 @@
 /**
  * Notifications feature — TypeScript types.
- * Aligned with the backend Notification API.
+ * Aligned with the backend Notification API spec.
  */
 
 // ---------------------------------------------------------------------------
@@ -8,48 +8,74 @@
 // ---------------------------------------------------------------------------
 
 export type NotificationType =
-  | "SYSTEM"
-  | "SUCCESS"
   | "INFO"
   | "WARNING"
   | "ERROR"
+  | "SUCCESS"
   | "PURCHASE_ORDER"
   | "GRN"
-  | "STOCK_RELEASE"
   | "INVENTORY"
+  | "STOCK_RELEASE"
   | "LOW_STOCK"
   | "OUT_OF_STOCK"
   | "USER"
-  | "SECURITY";
+  | "SECURITY"
+  | "SYSTEM";
 
 export type NotificationPriority = "LOW" | "NORMAL" | "HIGH" | "CRITICAL";
 
+export type RecipientType = "USER" | "ROLE" | "BROADCAST";
+
 export type RecipientRole = "ADMIN" | "OFFICER" | "STORE_KEEPER";
 
-export interface SenderRef {
-  id: string;
-  full_name: string;
-  email: string;
-}
-
-/** Full server-side notification object */
+/** Full server-side notification object (NotificationRead) */
 export interface Notification {
   id: string;
   title: string;
   message: string;
   type: NotificationType;
   priority: NotificationPriority;
+  recipient_type: RecipientType;
+  recipient_role: string | null;
+  recipient_user_id: string | null;
+  sender_id: string | null;
   is_read: boolean;
-  sender: SenderRef | null;
-  recipient_id: string;
-  action_url: string | null;
-  created_at: string;
   read_at: string | null;
+  data: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Lightweight summary used in dashboard/recent and dashboard/critical-alerts */
+export interface NotificationSummary {
+  id: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  priority: NotificationPriority;
+  is_read: boolean;
+  created_at: string;
 }
 
 // ---------------------------------------------------------------------------
 // API response wrappers
 // ---------------------------------------------------------------------------
+
+/**
+ * The paginated list endpoint returns:
+ * { "status": "success", "data": [...], "pagination": { ... } }
+ * Note: "pagination" is a sibling of "data", not nested inside it.
+ */
+export interface PaginatedApiResponse<T> {
+  status: "success";
+  data: T[];
+  pagination: {
+    page: number;
+    size: number;
+    total: number;
+    pages: number;
+  };
+}
 
 export interface PaginatedNotifications {
   data: Notification[];
@@ -59,11 +85,22 @@ export interface PaginatedNotifications {
     total: number;
     pages: number;
   };
-  unread_count: number;
 }
 
 export interface UnreadCountResponse {
   unread_count: number;
+  critical_count: number;
+  high_count: number;
+}
+
+export interface RecentNotificationsResponse {
+  notifications: NotificationSummary[];
+  unread_count: number;
+}
+
+export interface CriticalAlertsResponse {
+  alerts: NotificationSummary[];
+  total: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,12 +120,6 @@ export interface NotificationFilterParams {
 // ---------------------------------------------------------------------------
 // Compose payload (admin)
 // ---------------------------------------------------------------------------
-
-/**
- * Exactly one of broadcast_all, recipient_role, or recipient_user_id must be
- * set per request — mixing them will fail backend validation.
- */
-export type RecipientType = "all" | "role" | "user";
 
 export type ComposeNotificationPayload =
   | {
@@ -127,110 +158,59 @@ export interface NotificationPreferences {
 }
 
 // ---------------------------------------------------------------------------
-// WebSocket event types (discriminated union)
+// WebSocket — server → client events
+// Event shape: { "event": "<name>", "payload": {...}, "room": null, "sender": null }
 // ---------------------------------------------------------------------------
 
+export interface WsEnvelope<T = unknown> {
+  event: string;
+  payload: T;
+  room: string | null;
+  sender: string | null;
+}
+
+// Payloads for each server→client event
+export interface WsConnectedPayload {
+  connection_id: string;
+  user_id: string;
+  role: string;
+  channels: string[];
+}
+
+export interface WsUnreadCountPayload {
+  unread_count: number;
+  critical_count: number;
+  high_count: number;
+}
+
+export interface WsNotificationReadPayload {
+  notification_id: string;
+}
+
+export interface WsNotificationDeletedPayload {
+  notification_id: string;
+}
+
+export type WsServerEvent =
+  | WsEnvelope<WsConnectedPayload>        // system.connected
+  | WsEnvelope<WsUnreadCountPayload>      // notification.unread_count
+  | WsEnvelope<{ notification: NotificationSummary }> // notification.new
+  | WsEnvelope<{ notification: NotificationSummary }> // notification.broadcast
+  | WsEnvelope<WsNotificationReadPayload> // notification.read
+  | WsEnvelope<{ count: number }>         // notification.all_read
+  | WsEnvelope<WsNotificationDeletedPayload>; // notification.deleted
+
+// Convenience type alias for WS event names
 export type WsEventType =
-  // Inventory
-  | "low_stock_alert"
-  | "stock_adjustment_completed"
-  | "stock_release_approved"
-  | "stock_release_rejected"
-  // Procurement
-  | "purchase_order_submitted"
-  | "purchase_order_approved"
-  | "purchase_order_rejected"
-  | "grn_submitted"
-  | "grn_approved"
-  // Administration
-  | "user_created"
-  | "role_changed"
-  | "settings_updated"
-  // System
-  | "broadcast"
-  | "maintenance"
-  // Generic
-  | "notification";
+  | "system.connected"
+  | "system.pong"
+  | "system.error"
+  | "notification.new"
+  | "notification.broadcast"
+  | "notification.read"
+  | "notification.all_read"
+  | "notification.deleted"
+  | "notification.unread_count";
 
-export interface WsBaseEvent {
-  type: WsEventType;
-  timestamp: string;
-}
-
-export interface WsNotificationEvent extends WsBaseEvent {
-  type: "notification";
-  payload: Notification;
-}
-
-export interface WsLowStockEvent extends WsBaseEvent {
-  type: "low_stock_alert";
-  payload: {
-    product_id: string;
-    product_name: string;
-    current_quantity: number;
-    reorder_level: number;
-  };
-}
-
-export interface WsPurchaseOrderEvent extends WsBaseEvent {
-  type:
-    | "purchase_order_submitted"
-    | "purchase_order_approved"
-    | "purchase_order_rejected";
-  payload: {
-    purchase_order_id: string;
-    po_number: string;
-    status: string;
-  };
-}
-
-export interface WsGrnEvent extends WsBaseEvent {
-  type: "grn_submitted" | "grn_approved";
-  payload: {
-    grn_id: string;
-    grn_number: string;
-  };
-}
-
-export interface WsStockReleaseEvent extends WsBaseEvent {
-  type: "stock_release_approved" | "stock_release_rejected";
-  payload: {
-    stock_release_id: string;
-    release_number: string;
-  };
-}
-
-export interface WsBroadcastEvent extends WsBaseEvent {
-  type: "broadcast" | "maintenance";
-  payload: {
-    title: string;
-    message: string;
-    priority: NotificationPriority;
-  };
-}
-
-export interface WsUserEvent extends WsBaseEvent {
-  type: "user_created" | "role_changed";
-  payload: {
-    user_id: string;
-    user_name: string;
-  };
-}
-
-export interface WsStockAdjustmentEvent extends WsBaseEvent {
-  type: "stock_adjustment_completed";
-  payload: {
-    adjustment_id: string;
-    product_name: string;
-  };
-}
-
-export type WsEvent =
-  | WsNotificationEvent
-  | WsLowStockEvent
-  | WsPurchaseOrderEvent
-  | WsGrnEvent
-  | WsStockReleaseEvent
-  | WsBroadcastEvent
-  | WsUserEvent
-  | WsStockAdjustmentEvent;
+// Category alias for backwards compatibility
+export type NotificationCategory = NotificationType;
