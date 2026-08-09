@@ -106,8 +106,12 @@ export function useUploadProductImage(id: string) {
       queryClient.invalidateQueries({ queryKey: productKeys.image(id) });
       toast({ title: "Image uploaded", variant: "success" });
     },
-    onError: () => {
-      toast({ title: "Failed to upload image", variant: "destructive" });
+    onError: (error: unknown) => {
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? (error as { message: string }).message
+          : "Failed to upload image";
+      toast({ title: message, variant: "destructive" });
     },
   });
 }

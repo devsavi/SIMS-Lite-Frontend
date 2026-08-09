@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Edit2, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, RefreshCw } from "lucide-react";
+import { type VisibilityState } from "@tanstack/react-table";
+import { useAuthStore } from "@/stores/auth.store";
+import { canAccess } from "@/lib/auth/permissions";
 import { useUoms, useDeleteUom, useRestoreUom } from "../../hooks/use-uoms";
 import { UomFormDialog } from "../components/UomFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -25,6 +28,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { UnitOfMeasure } from "../../types";
 
 export function UomsPage() {
+  const { role } = useAuthStore();
+  const isAdmin = role === "admin";
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);
   const [search, setSearch] = React.useState("");
@@ -35,7 +40,10 @@ export function UomsPage() {
   const [editingUom, setEditingUom] = React.useState<UnitOfMeasure | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<UnitOfMeasure | null>(null);
 
-  const { data, isLoading, error, refetch } = useUoms({
+  // ---- Column visibility: Status hidden by default ----
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ is_active: false });
+
+  const { data, isLoading, error, refetch, isRefetching } = useUoms({
     page,
     page_size: pageSize,
     search: debouncedSearch || undefined,
@@ -83,45 +91,53 @@ export function UomsPage() {
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <PermissionGuard permission="products.edit">
-            <button
-              type="button"
-              onClick={() => { setEditingUom(row.original); setDialogOpen(true); }}
-              title="Edit"
-              aria-label={`Edit ${row.original.name}`}
-              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-          </PermissionGuard>
-          <RowActionsMenu label={`More actions for ${row.original.name}`}>
-            {!row.original.is_active && (
-              <PermissionGuard permission="products.edit">
-                <RowActionsMenuItem
-                  icon={<RotateCcw className="h-3.5 w-3.5" />}
-                  onClick={() => restoreMutation.mutate(row.original.id)}
-                  disabled={restoreMutation.isPending}
-                >
-                  Restore
-                </RowActionsMenuItem>
-              </PermissionGuard>
+      enableHiding: false,
+      cell: ({ row }) => {
+        const canEdit = isAdmin;
+        const canDelete = isAdmin;
+
+        const hasRestore = !row.original.is_active && canEdit;
+        const hasDelete = row.original.is_active && canDelete;
+        const hasMenuOptions = hasRestore || hasDelete;
+
+        return (
+          <div className="flex items-center justify-end gap-1">
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => { setEditingUom(row.original); setDialogOpen(true); }}
+                title="Edit"
+                aria-label={`Edit ${row.original.name}`}
+                className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
             )}
-            <PermissionGuard permission="products.delete">
-              {row.original.is_active && (
-                <RowActionsMenuItem
-                  icon={<Trash2 className="h-3.5 w-3.5" />}
-                  onClick={() => setDeleteTarget(row.original)}
-                  destructive
-                >
-                  Delete
-                </RowActionsMenuItem>
-              )}
-            </PermissionGuard>
-          </RowActionsMenu>
-        </div>
-      ),
+            {hasMenuOptions && (
+              <RowActionsMenu label={`More actions for ${row.original.name}`}>
+                {hasRestore && (
+                  <RowActionsMenuItem
+                    icon={<RotateCcw className="h-3.5 w-3.5" />}
+                    onClick={() => restoreMutation.mutate(row.original.id)}
+                    disabled={restoreMutation.isPending}
+                  >
+                    Restore
+                  </RowActionsMenuItem>
+                )}
+                {hasDelete && (
+                  <RowActionsMenuItem
+                    icon={<Trash2 className="h-3.5 w-3.5" />}
+                    onClick={() => setDeleteTarget(row.original)}
+                    destructive
+                  >
+                    Delete
+                  </RowActionsMenuItem>
+                )}
+              </RowActionsMenu>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -131,12 +147,12 @@ export function UomsPage() {
         title="Units of Measure"
         description="Manage units used for product quantities."
         actions={
-          <PermissionGuard permission="products.create">
+          isAdmin ? (
             <Button onClick={() => { setEditingUom(null); setDialogOpen(true); }}>
               <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
               New Unit
             </Button>
-          </PermissionGuard>
+          ) : null
         }
       />
 
@@ -154,6 +170,17 @@ export function UomsPage() {
           <Button variant="outline" size="sm" onClick={() => setShowInactive((v) => !v)}>
             {showInactive ? "Hide Inactive" : "Show Inactive"}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            title="Refresh units of measure"
+            aria-label="Refresh units of measure"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
+            Refresh
+          </Button>
         </ToolbarRight>
       </Toolbar>
 
@@ -169,6 +196,13 @@ export function UomsPage() {
         pageSize={pageSize}
         onPageChange={setPage}
         onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={(updater) =>
+          setColumnVisibility((prev) =>
+            typeof updater === "function" ? updater(prev) : updater
+          )
+        }
+        showColumnToggle
       />
 
       <UomFormDialog

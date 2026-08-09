@@ -146,13 +146,6 @@ export function ProductForm({
             placeholder="Brief one-line summary"
             autoComplete="off"
           />
-          <TextareaField
-            control={form.control}
-            name="description"
-            label="Description"
-            placeholder="Optional detailed product description"
-            rows={3}
-          />
         </section>
 
         {/* --- Classification --- */}
@@ -288,24 +281,14 @@ export function ProductForm({
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Pricing
           </h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <NumberField
-              control={form.control}
-              name="cost_price"
-              label="Cost Price"
-              placeholder="0.00"
-              min={0}
-              step={0.01}
-            />
-            <NumberField
-              control={form.control}
-              name="selling_price"
-              label="Selling Price"
-              placeholder="0.00"
-              min={0}
-              step={0.01}
-            />
-          </div>
+          <NumberField
+            control={form.control}
+            name="cost_price"
+            label="Cost Price"
+            placeholder="0.00"
+            min={0}
+            step={0.01}
+          />
         </section>
 
         {/* --- Inventory --- */}
@@ -333,29 +316,31 @@ export function ProductForm({
           </div>
         </section>
 
-        {/* Active toggle */}
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
-              <div>
-                <FormLabel className="text-sm font-medium">Active</FormLabel>
-                <FormDescription className="text-xs">
-                  Inactive products will not appear in inventory and purchase order forms.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  aria-label="Product active status"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Active toggle — only shown when editing an existing product */}
+        {editingId && (
+          <FormField
+            control={form.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
+                <div>
+                  <FormLabel className="text-sm font-medium">Active</FormLabel>
+                  <FormDescription className="text-xs">
+                    Inactive products will not appear in inventory and purchase order forms.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    aria-label="Product active status"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>

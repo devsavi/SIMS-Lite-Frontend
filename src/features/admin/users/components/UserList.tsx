@@ -25,7 +25,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
 import { StatusBadge } from "@/components/common/status-badge";
+
+function getInitials(name: string | undefined | null): string {
+  if (!name) return "?";
+  return (
+    name
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0]?.toUpperCase() ?? "")
+      .join("") || "?"
+  );
+}
 
 const STATUS_VARIANT_MAP: Record<UserStatus, "active" | "inactive" | "pending"> = {
   ACTIVE: "active",
@@ -181,6 +193,7 @@ export function UserList({
         <table className="w-full text-left text-sm text-foreground">
           <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
             <tr>
+              <th scope="col" className="w-12 px-4 py-3">Profile</th>
               <th scope="col" className="px-4 py-3">Name & Email</th>
               <th scope="col" className="px-4 py-3">Role</th>
               <th scope="col" className="px-4 py-3">Status</th>
@@ -194,6 +207,9 @@ export function UserList({
               Array.from({ length: 5 }).map((_, idx) => (
                 <tr key={idx} className="animate-pulse">
                   <td className="px-4 py-3">
+                    <div className="h-8 w-8 rounded-full bg-muted"></div>
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="h-4 w-36 rounded-none bg-muted"></div>
                     <div className="mt-1 h-3 w-48 rounded-none bg-muted/60"></div>
                   </td>
@@ -206,13 +222,23 @@ export function UserList({
               ))
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   No users found matching the selected criteria.
                 </td>
               </tr>
             ) : (
               users.map((user) => (
                 <tr key={user.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-3">
+                    <Avatar className="h-8 w-8 rounded-full border border-border">
+                      {user.avatarUrl ? (
+                        <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      ) : null}
+                      <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-foreground">{user.name}</div>
                     <div className="text-xs text-muted-foreground">{user.email}</div>

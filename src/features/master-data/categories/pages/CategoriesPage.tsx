@@ -5,7 +5,10 @@
  */
 
 import * as React from "react";
-import { Plus, Edit2, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, RefreshCw } from "lucide-react";
+import { type VisibilityState } from "@tanstack/react-table";
+import { useAuthStore } from "@/stores/auth.store";
+import { canAccess } from "@/lib/auth/permissions";
 import { useCategories, useDeleteCategory, useRestoreCategory } from "../../hooks/use-categories";
 import { CategoryFormDialog } from "../components/CategoryFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -29,6 +32,9 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { Category } from "../../types";
 
 export function CategoriesPage() {
+  // ---- Auth / Role ----
+  const { role } = useAuthStore();
+
   // ---- State ----
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);
@@ -40,8 +46,11 @@ export function CategoriesPage() {
   const [editingCategory, setEditingCategory] = React.useState<Category | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Category | null>(null);
 
+  // ---- Column visibility: Parent and Status hidden by default ----
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ parent: false, is_active: false });
+
   // ---- Query ----
-  const { data, isLoading, error, refetch } = useCategories({
+  const { data, isLoading, error, refetch, isRefetching } = useCategories({
     page,
     page_size: pageSize,
     search: debouncedSearch || undefined,
@@ -95,45 +104,53 @@ export function CategoriesPage() {
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <PermissionGuard permission="categories.edit">
-            <button
-              type="button"
-              onClick={() => { setEditingCategory(row.original); setDialogOpen(true); }}
-              title="Edit"
-              aria-label={`Edit ${row.original.name}`}
-              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-          </PermissionGuard>
-          <RowActionsMenu label={`More actions for ${row.original.name}`}>
-            {!row.original.is_active && (
-              <PermissionGuard permission="categories.edit">
-                <RowActionsMenuItem
-                  icon={<RotateCcw className="h-3.5 w-3.5" />}
-                  onClick={() => restoreMutation.mutate(row.original.id)}
-                  disabled={restoreMutation.isPending}
-                >
-                  Restore
-                </RowActionsMenuItem>
-              </PermissionGuard>
-            )}
-            <PermissionGuard permission="categories.delete">
-              {row.original.is_active && (
-                <RowActionsMenuItem
-                  icon={<Trash2 className="h-3.5 w-3.5" />}
-                  onClick={() => setDeleteTarget(row.original)}
-                  destructive
-                >
-                  Delete
-                </RowActionsMenuItem>
-              )}
+      enableHiding: false,
+      cell: ({ row }) => {
+        const canEdit = canAccess(role, "categories.edit");
+        const canDelete = canAccess(role, "categories.delete");
+
+        const hasRestore = !row.original.is_active && canEdit;
+        const hasDelete = row.original.is_active && canDelete;
+        const hasMenuOptions = hasRestore || hasDelete;
+
+        return (
+          <div className="flex items-center justify-end gap-1">
+            <PermissionGuard permission="categories.edit">
+              <button
+                type="button"
+                onClick={() => { setEditingCategory(row.original); setDialogOpen(true); }}
+                title="Edit"
+                aria-label={`Edit ${row.original.name}`}
+                className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
             </PermissionGuard>
-          </RowActionsMenu>
-        </div>
-      ),
+            {hasMenuOptions && (
+              <RowActionsMenu label={`More actions for ${row.original.name}`}>
+                {hasRestore && (
+                  <RowActionsMenuItem
+                    icon={<RotateCcw className="h-3.5 w-3.5" />}
+                    onClick={() => restoreMutation.mutate(row.original.id)}
+                    disabled={restoreMutation.isPending}
+                  >
+                    Restore
+                  </RowActionsMenuItem>
+                )}
+                {hasDelete && (
+                  <RowActionsMenuItem
+                    icon={<Trash2 className="h-3.5 w-3.5" />}
+                    onClick={() => setDeleteTarget(row.original)}
+                    destructive
+                  >
+                    Delete
+                  </RowActionsMenuItem>
+                )}
+              </RowActionsMenu>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -172,6 +189,17 @@ export function CategoriesPage() {
           >
             {showInactive ? "Hide Inactive" : "Show Inactive"}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            title="Refresh categories"
+            aria-label="Refresh categories"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
+            Refresh
+          </Button>
         </ToolbarRight>
       </Toolbar>
 
@@ -187,6 +215,13 @@ export function CategoriesPage() {
         pageSize={pageSize}
         onPageChange={setPage}
         onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={(updater) =>
+          setColumnVisibility((prev) =>
+            typeof updater === "function" ? updater(prev) : updater
+          )
+        }
+        showColumnToggle
       />
 
       {/* Create / Edit dialog */}

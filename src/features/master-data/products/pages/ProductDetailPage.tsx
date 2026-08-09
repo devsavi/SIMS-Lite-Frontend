@@ -46,6 +46,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { formatDate, formatCurrency } from "@/utils/format";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { toast } from "@/app/components/ui/use-toast";
 
 interface ProductDetailPageProps {
   productId: string;
@@ -147,6 +148,17 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Guard: reject files over 5 MB before hitting the API
+    const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+    if (file.size > MAX_SIZE_BYTES) {
+      toast({
+        title: "Image too large",
+        description: "Please choose an image under 5 MB.",
+        variant: "destructive",
+      });
+      e.target.value = "";
+      return;
+    }
     await uploadImage.mutateAsync(file);
     e.target.value = "";
   }
@@ -254,13 +266,7 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
                 value={product.short_description}
               />
             )}
-            {product.description && (
-              <DetailRow
-                icon={<Package className="h-4 w-4" />}
-                label="Description"
-                value={product.description}
-              />
-            )}
+
           </CardContent>
         </Card>
 
@@ -331,11 +337,6 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
               icon={<DollarSign className="h-4 w-4" />}
               label="Cost Price"
               value={<span className="font-medium tabular-nums">{formatCurrency(product.cost_price)}</span>}
-            />
-            <DetailRow
-              icon={<DollarSign className="h-4 w-4" />}
-              label="Selling Price"
-              value={<span className="font-medium tabular-nums">{formatCurrency(product.selling_price)}</span>}
             />
           </CardContent>
         </Card>

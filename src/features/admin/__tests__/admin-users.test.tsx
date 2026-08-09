@@ -247,7 +247,7 @@ describe("UserList component", () => {
     render(<UserList {...defaultProps} />);
     expect(screen.getByText("Jane Doe")).toBeInTheDocument();
     expect(screen.getByText("jane@test.com")).toBeInTheDocument();
-    expect(screen.getByText("ACTIVE")).toBeInTheDocument();
+    expect(screen.getByText(/active/i)).toBeInTheDocument();
   });
 
   it("shows loading skeleton rows when isLoading is true", () => {
@@ -307,7 +307,8 @@ describe("UserFormDialog component", () => {
         onSubmitCreate={mockOnSubmitCreate}
         onSubmitUpdate={mockOnSubmitUpdate}
         isSubmitting={false}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
     expect(screen.getByText("Create New User")).toBeInTheDocument();
     expect(screen.getByText("Create User")).toBeInTheDocument();
@@ -322,7 +323,8 @@ describe("UserFormDialog component", () => {
         onSubmitCreate={mockOnSubmitCreate}
         onSubmitUpdate={mockOnSubmitUpdate}
         isSubmitting={false}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
     expect(screen.getByText("Edit User Account")).toBeInTheDocument();
     expect(screen.getByText("Save Changes")).toBeInTheDocument();
@@ -337,7 +339,8 @@ describe("UserFormDialog component", () => {
         onSubmitCreate={mockOnSubmitCreate}
         onSubmitUpdate={mockOnSubmitUpdate}
         isSubmitting={false}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
 
     const submitBtn = screen.getByText("Create User");
@@ -414,7 +417,8 @@ describe("UserRoleModal component", () => {
         onClose={vi.fn()}
         onAssignRole={vi.fn()}
         isSubmitting={false}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
     expect(screen.getByText(`Assign Role — ${mockUser.name}`)).toBeInTheDocument();
     expect(screen.getByText("Update Role")).toBeInTheDocument();
@@ -428,7 +432,8 @@ describe("UserRoleModal component", () => {
         onClose={vi.fn()}
         onAssignRole={vi.fn()}
         isSubmitting={false}
-      />
+      />,
+      { wrapper: createWrapper() }
     );
     expect(screen.queryByText("Update Role")).not.toBeInTheDocument();
   });

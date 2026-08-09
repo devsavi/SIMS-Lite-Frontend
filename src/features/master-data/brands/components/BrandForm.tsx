@@ -29,6 +29,8 @@ interface BrandFormProps {
 }
 
 export function BrandForm({ defaultValues, editingId, onSubmit, onCancel, error, isPending }: BrandFormProps) {
+  const isEditing = !!editingId;
+
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(brandSchema),
     defaultValues: {
@@ -57,22 +59,24 @@ export function BrandForm({ defaultValues, editingId, onSubmit, onCancel, error,
         <TextField control={form.control} name="website_url" label="Website" placeholder="https://example.com" type="url" />
         <TextField control={form.control} name="logo_url" label="Logo URL" placeholder="https://example.com/logo.png" type="url" />
 
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
-              <div>
-                <FormLabel className="text-sm font-medium">Active</FormLabel>
-                <FormDescription className="text-xs">Inactive brands will not appear in product forms.</FormDescription>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} aria-label="Brand active status" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {isEditing && (
+          <FormField
+            control={form.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
+                <div>
+                  <FormLabel className="text-sm font-medium">Active</FormLabel>
+                  <FormDescription className="text-xs">Inactive brands will not appear in product forms.</FormDescription>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} aria-label="Brand active status" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>Cancel</Button>

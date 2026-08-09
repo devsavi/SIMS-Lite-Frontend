@@ -7,6 +7,7 @@
  */
 
 import * as React from "react";
+import { useAuthStore } from "@/stores/auth.store";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
@@ -16,8 +17,9 @@ import {
   Upload,
   FileSpreadsheet,
   Barcode,
+  RefreshCw,
 } from "lucide-react";
-import { type SortingState } from "@tanstack/react-table";
+import { type SortingState, type VisibilityState } from "@tanstack/react-table";
 import {
   useProducts,
   useDeleteProduct,
@@ -86,10 +88,17 @@ export function ProductsPage() {
   // ---- Sorting ----
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // ---- Auth / Role ----
+  const { role } = useAuthStore();
+  const isAdmin = role === "admin";
+
   // ---- Dialog state ----
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Product | null>(null);
+
+  // ---- Column visibility: SKU and Status hidden by default ----
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ sku: false, is_active: false });
 
   // ---- Import file ref ----
   const importInputRef = React.useRef<HTMLInputElement>(null);
@@ -108,7 +117,7 @@ export function ProductsPage() {
     : "name";
 
   // ---- Queries ----
-  const { data, isLoading, error, refetch } = useProducts({
+  const { data, isLoading, error, refetch, isRefetching } = useProducts({
     page,
     size: pageSize,
     search: debouncedSearch || undefined,
@@ -236,12 +245,12 @@ export function ProductsPage() {
       size: 80,
     },
     {
-      id: "selling_price",
-      accessorKey: "selling_price",
-      header: "Price",
+      id: "cost_price",
+      accessorKey: "cost_price",
+      header: "Cost",
       cell: ({ row }) => (
         <span className="text-sm tabular-nums">
-          {formatCurrency(row.original.selling_price)}
+          {formatCurrency(row.original.cost_price)}
         </span>
       ),
       size: 100,
@@ -336,29 +345,31 @@ export function ProductsPage() {
               Template
             </Button>
 
-            {/* Bulk import */}
-            <PermissionGuard permission="products.create">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleImportClick}
-                disabled={bulkImport.isPending}
-                title="Bulk import products from Excel"
-              >
-                <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
-                Import
-              </Button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept=".xlsx,.xls"
-                className="hidden"
-                onChange={handleImportFileChange}
-                aria-label="Select Excel file for bulk import"
-              />
-            </PermissionGuard>
+            {/* Bulk import — admin only */}
+            {isAdmin && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleImportClick}
+                  disabled={bulkImport.isPending}
+                  title="Bulk import products from Excel"
+                >
+                  <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Import
+                </Button>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  className="hidden"
+                  onChange={handleImportFileChange}
+                  aria-label="Select Excel file for bulk import"
+                />
+              </>
+            )}
 
-            {/* New product */}
+            {/* New product — all roles with products.create permission */}
             <PermissionGuard permission="products.create">
               <Button
                 onClick={() => { setEditingProduct(null); setDialogOpen(true); }}
@@ -438,6 +449,17 @@ export function ProductsPage() {
           >
             {showInactive ? "Hide Inactive" : "Show Inactive"}
           </Button>
+          <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              title="Refresh products"
+              aria-label="Refresh products"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Refresh
+            </Button>
         </ToolbarRight>
       </Toolbar>
 
@@ -468,6 +490,12 @@ export function ProductsPage() {
         onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
         sorting={sorting}
         onSortingChange={setSorting}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={(updater) =>
+          setColumnVisibility((prev) =>
+            typeof updater === "function" ? updater(prev) : updater
+          )
+        }
         caption="Products list"
         emptyTitle="No products found"
         emptyDescription={

@@ -218,10 +218,16 @@ const OFFICER_PERMISSIONS: Permission[] = [
 
 const STORE_KEEPER_PERMISSIONS: Permission[] = [
   "dashboard.view",
-  // Master Data — read only
+  // Master Data — read & write (no delete)
   "products.view",
+  "products.create",
+  "products.edit",
   "categories.view",
+  "categories.create",
+  "categories.edit",
   "brands.view",
+  "brands.create",
+  "brands.edit",
   "suppliers.view",
   // Procurement — read only (no grn.create/edit/submit/cancel)
   "purchase_orders.view",

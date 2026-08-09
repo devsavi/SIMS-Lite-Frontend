@@ -34,7 +34,13 @@ export function ProductFormDialog({
   const error = createMutation.error || updateMutation.error;
 
   async function handleSubmit(values: ProductFormValues) {
-    const payload = emptyToNull(values) as ProductFormValues;
+    const payload = {
+      ...emptyToNull(values),
+      // Description and selling price are hidden from the UI;
+      // always send null so the backend receives an explicit value.
+      description: null,
+      selling_price: null,
+    } as ProductFormValues;
     if (isEditing) {
       await updateMutation.mutateAsync(payload);
     } else {
@@ -52,10 +58,10 @@ export function ProductFormDialog({
         brand_id: product.brand?.id ?? null,
         uom_id: product.uom?.id ?? null,
         supplier_id: product.supplier?.id ?? null,
-        cost_price: product.cost_price,
-        selling_price: product.selling_price,
-        reorder_level: product.reorder_level,
-        reorder_quantity: product.reorder_quantity,
+        cost_price: product.cost_price ?? 0,
+        selling_price: product.selling_price ?? 0,
+        reorder_level: product.reorder_level ?? 0,
+        reorder_quantity: product.reorder_quantity ?? 0,
         is_active: product.is_active,
       }
     : undefined!;

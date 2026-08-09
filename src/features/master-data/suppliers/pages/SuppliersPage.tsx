@@ -7,6 +7,8 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Edit2, Trash2, RotateCcw, Eye, Mail, Phone } from "lucide-react";
+import { useAuthStore } from "@/stores/auth.store";
+import { canAccess } from "@/lib/auth/permissions";
 import { useSuppliers, useDeleteSupplier, useRestoreSupplier } from "../../hooks/use-suppliers";
 import { SupplierFormDialog } from "../components/SupplierFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -30,6 +32,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { Supplier } from "../../types";
 
 export function SuppliersPage() {
+  const { role } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -147,56 +150,63 @@ export function SuppliersPage() {
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <PermissionGuard permission="suppliers.view">
-            <button
-              type="button"
-              onClick={() => router.push(`/suppliers/${row.original.id}`)}
-              title="View details"
-              aria-label={`View ${row.original.company_name}`}
-              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Eye className="h-4 w-4" />
-            </button>
-          </PermissionGuard>
-          <PermissionGuard permission="suppliers.edit">
-            <button
-              type="button"
-              onClick={() => { setEditingSupplier(row.original); setDialogOpen(true); }}
-              title="Edit"
-              aria-label={`Edit ${row.original.company_name}`}
-              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-          </PermissionGuard>
-          <RowActionsMenu label={`More actions for ${row.original.company_name}`}>
-            {!row.original.is_active && (
-              <PermissionGuard permission="suppliers.edit">
-                <RowActionsMenuItem
-                  icon={<RotateCcw className="h-3.5 w-3.5" />}
-                  onClick={() => restoreMutation.mutate(row.original.id)}
-                  disabled={restoreMutation.isPending}
-                >
-                  Restore
-                </RowActionsMenuItem>
-              </PermissionGuard>
-            )}
-            <PermissionGuard permission="suppliers.delete">
-              {row.original.is_active && (
-                <RowActionsMenuItem
-                  icon={<Trash2 className="h-3.5 w-3.5" />}
-                  onClick={() => setDeleteTarget(row.original)}
-                  destructive
-                >
-                  Delete
-                </RowActionsMenuItem>
-              )}
+      cell: ({ row }) => {
+        const canEdit = canAccess(role, "suppliers.edit");
+        const canDelete = canAccess(role, "suppliers.delete");
+
+        const hasRestore = !row.original.is_active && canEdit;
+        const hasDelete = row.original.is_active && canDelete;
+        const hasMenuOptions = hasRestore || hasDelete;
+
+        return (
+          <div className="flex items-center justify-end gap-1">
+            <PermissionGuard permission="suppliers.view">
+              <button
+                type="button"
+                onClick={() => router.push(`/suppliers/${row.original.id}`)}
+                title="View details"
+                aria-label={`View ${row.original.company_name}`}
+                className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Eye className="h-4 w-4" />
+              </button>
             </PermissionGuard>
-          </RowActionsMenu>
-        </div>
-      ),
+            <PermissionGuard permission="suppliers.edit">
+              <button
+                type="button"
+                onClick={() => { setEditingSupplier(row.original); setDialogOpen(true); }}
+                title="Edit"
+                aria-label={`Edit ${row.original.company_name}`}
+                className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+            </PermissionGuard>
+            {hasMenuOptions && (
+              <RowActionsMenu label={`More actions for ${row.original.company_name}`}>
+                {hasRestore && (
+                  <RowActionsMenuItem
+                    icon={<RotateCcw className="h-3.5 w-3.5" />}
+                    onClick={() => restoreMutation.mutate(row.original.id)}
+                    disabled={restoreMutation.isPending}
+                  >
+                    Restore
+                  </RowActionsMenuItem>
+                )}
+                {hasDelete && (
+                  <RowActionsMenuItem
+                    icon={<Trash2 className="h-3.5 w-3.5" />}
+                    onClick={() => setDeleteTarget(row.original)}
+                    destructive
+                  >
+                    Delete
+                  </RowActionsMenuItem>
+                )}
+              </RowActionsMenu>
+            )}
+          </div>
+        );
+      },
     },
   ];
 

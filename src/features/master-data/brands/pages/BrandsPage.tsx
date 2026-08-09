@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Edit2, Trash2, RotateCcw, ExternalLink } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, ExternalLink, RefreshCw } from "lucide-react";
+import { type VisibilityState } from "@tanstack/react-table";
+import { useAuthStore } from "@/stores/auth.store";
+import { canAccess } from "@/lib/auth/permissions";
 import { useBrands, useDeleteBrand, useRestoreBrand } from "../../hooks/use-brands";
 import { BrandFormDialog } from "../components/BrandFormDialog";
 import { Button } from "@/app/components/ui/button";
@@ -25,6 +28,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import type { Brand } from "../../types";
 
 export function BrandsPage() {
+  const { role } = useAuthStore();
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(20);
   const [search, setSearch] = React.useState("");
@@ -35,7 +39,10 @@ export function BrandsPage() {
   const [editingBrand, setEditingBrand] = React.useState<Brand | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Brand | null>(null);
 
-  const { data, isLoading, error, refetch } = useBrands({
+  // ---- Column visibility: Status hidden by default ----
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ is_active: false });
+
+  const { data, isLoading, error, refetch, isRefetching } = useBrands({
     page,
     page_size: pageSize,
     search: debouncedSearch || undefined,
@@ -116,45 +123,53 @@ export function BrandsPage() {
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <PermissionGuard permission="brands.edit">
-            <button
-              type="button"
-              onClick={() => { setEditingBrand(row.original); setDialogOpen(true); }}
-              title="Edit"
-              aria-label={`Edit ${row.original.name}`}
-              className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-          </PermissionGuard>
-          <RowActionsMenu label={`More actions for ${row.original.name}`}>
-            {!row.original.is_active && (
-              <PermissionGuard permission="brands.edit">
-                <RowActionsMenuItem
-                  icon={<RotateCcw className="h-3.5 w-3.5" />}
-                  onClick={() => restoreMutation.mutate(row.original.id)}
-                  disabled={restoreMutation.isPending}
-                >
-                  Restore
-                </RowActionsMenuItem>
-              </PermissionGuard>
-            )}
-            <PermissionGuard permission="brands.delete">
-              {row.original.is_active && (
-                <RowActionsMenuItem
-                  icon={<Trash2 className="h-3.5 w-3.5" />}
-                  onClick={() => setDeleteTarget(row.original)}
-                  destructive
-                >
-                  Delete
-                </RowActionsMenuItem>
-              )}
+      enableHiding: false,
+      cell: ({ row }) => {
+        const canEdit = canAccess(role, "brands.edit");
+        const canDelete = canAccess(role, "brands.delete");
+
+        const hasRestore = !row.original.is_active && canEdit;
+        const hasDelete = row.original.is_active && canDelete;
+        const hasMenuOptions = hasRestore || hasDelete;
+
+        return (
+          <div className="flex items-center justify-end gap-1">
+            <PermissionGuard permission="brands.edit">
+              <button
+                type="button"
+                onClick={() => { setEditingBrand(row.original); setDialogOpen(true); }}
+                title="Edit"
+                aria-label={`Edit ${row.original.name}`}
+                className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
             </PermissionGuard>
-          </RowActionsMenu>
-        </div>
-      ),
+            {hasMenuOptions && (
+              <RowActionsMenu label={`More actions for ${row.original.name}`}>
+                {hasRestore && (
+                  <RowActionsMenuItem
+                    icon={<RotateCcw className="h-3.5 w-3.5" />}
+                    onClick={() => restoreMutation.mutate(row.original.id)}
+                    disabled={restoreMutation.isPending}
+                  >
+                    Restore
+                  </RowActionsMenuItem>
+                )}
+                {hasDelete && (
+                  <RowActionsMenuItem
+                    icon={<Trash2 className="h-3.5 w-3.5" />}
+                    onClick={() => setDeleteTarget(row.original)}
+                    destructive
+                  >
+                    Delete
+                  </RowActionsMenuItem>
+                )}
+              </RowActionsMenu>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -187,6 +202,17 @@ export function BrandsPage() {
           <Button variant="outline" size="sm" onClick={() => setShowInactive((v) => !v)}>
             {showInactive ? "Hide Inactive" : "Show Inactive"}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            title="Refresh brands"
+            aria-label="Refresh brands"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
+            Refresh
+          </Button>
         </ToolbarRight>
       </Toolbar>
 
@@ -202,6 +228,13 @@ export function BrandsPage() {
         pageSize={pageSize}
         onPageChange={setPage}
         onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={(updater) =>
+          setColumnVisibility((prev) =>
+            typeof updater === "function" ? updater(prev) : updater
+          )
+        }
+        showColumnToggle
       />
 
       <BrandFormDialog

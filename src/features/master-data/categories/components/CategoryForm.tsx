@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { categorySchema, type CategoryFormValues } from "../../schemas";
-import { useCategories } from "../../hooks/use-categories";
 import { Button } from "@/app/components/ui/button";
 import { Switch } from "@/app/components/ui/switch";
 import {
@@ -22,15 +21,7 @@ import {
   FormDescription,
 } from "@/app/components/ui/form";
 import { TextField, TextareaField } from "@/components/common/form-fields";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
 import { isApiError } from "@/lib/api/client";
-import type { Category } from "../../types";
 
 interface CategoryFormProps {
   defaultValues?: Partial<CategoryFormValues>;
@@ -49,16 +40,6 @@ export function CategoryForm({
   error,
   isPending,
 }: CategoryFormProps) {
-  // Load parent category options (flat list, exclude self if editing)
-  const { data: categoriesData } = useCategories({ page: 1, page_size: 100, is_active: true });
-
-  const parentOptions = React.useMemo(() => {
-    const cats = categoriesData?.data ?? [];
-    return cats
-      .filter((c: Category) => c.id !== editingId)
-      .map((c: Category) => ({ label: c.name, value: c.id }));
-  }, [categoriesData, editingId]);
-
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -73,7 +54,8 @@ export function CategoryForm({
   const apiError = error && isApiError(error) ? error : null;
 
   async function handleSubmit(values: CategoryFormValues) {
-    await onSubmit(values);
+    // parent_id is always null — field is not exposed in the form
+    await onSubmit({ ...values, parent_id: null });
   }
 
   return (
@@ -103,59 +85,31 @@ export function CategoryForm({
           rows={3}
         />
 
-        {/* Parent category — custom handling for nullable value */}
-        <FormField
-          control={form.control}
-          name="parent_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Parent Category</FormLabel>
-              <Select
-                onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
-                value={field.value ?? "__none__"}
-              >
+        {/* Active toggle — only shown when editing */}
+        {editingId && (
+          <FormField
+            control={form.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
+                <div>
+                  <FormLabel className="text-sm font-medium">Active</FormLabel>
+                  <FormDescription className="text-xs">
+                    Inactive categories will not appear in product forms.
+                  </FormDescription>
+                </div>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="None (top-level)" />
-                  </SelectTrigger>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    aria-label="Category active status"
+                  />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="__none__">None (top-level)</SelectItem>
-                  {parentOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Active toggle */}
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
-              <div>
-                <FormLabel className="text-sm font-medium">Active</FormLabel>
-                <FormDescription className="text-xs">
-                  Inactive categories will not appear in product forms.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  aria-label="Category active status"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>

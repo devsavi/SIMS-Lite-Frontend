@@ -2,7 +2,7 @@
  * Master Data — Categories API
  */
 
-import { get, post, put, patch, del } from "@/lib/api/client";
+import { get, post, put, del } from "@/lib/api/client";
 import type {
   Category,
   CreateCategoryRequest,
@@ -37,9 +37,22 @@ export const categoriesApi = {
     }
 
     const res = await get<RawPaginatedResponse>(BASE, { params: apiParams });
+
+    // Build a lookup map so we can resolve parent_id → { id, name, slug }
+    // without an extra network call. The flat list contains both parent and
+    // child categories, so this covers all cases for a single page.
+    const lookup = new Map(
+      (res.data ?? []).map((c) => [c.id, { id: c.id, name: c.name, slug: c.slug }])
+    );
+
+    const enriched = (res.data ?? []).map((c) => ({
+      ...c,
+      parent: c.parent_id ? (lookup.get(c.parent_id) ?? null) : null,
+    }));
+
     return {
       status: res.status,
-      data: res.data || [],
+      data: enriched,
       pagination: {
         total: res.pagination?.total ?? 0,
         page: res.pagination?.page ?? 1,
@@ -60,7 +73,7 @@ export const categoriesApi = {
   },
 
   update: async (id: string, data: UpdateCategoryRequest): Promise<Category> => {
-    const res = await patch<SuccessResponse<Category>>(`${BASE}/${id}`, data);
+    const res = await put<SuccessResponse<Category>>(`${BASE}/${id}`, data);
     return res.data;
   },
 
