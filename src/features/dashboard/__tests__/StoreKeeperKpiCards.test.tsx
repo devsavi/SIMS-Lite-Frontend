@@ -8,24 +8,30 @@ import { render, screen } from "@testing-library/react";
 import { StoreKeeperKpiCards } from "../components/kpi-cards/StoreKeeperKpiCards";
 
 const mockStats = {
-  total_inventory_items: 5320,
+  total_products: 150,
+  total_suppliers: 25,
+  pending_grns: 3,
+  pending_stock_releases: 7,
   low_stock_count: 12,
-  today_stock_releases: 4,
 };
 
 describe("StoreKeeperKpiCards", () => {
-  it("renders all 3 KPI cards", () => {
+  it("renders all 5 KPI cards", () => {
     render(<StoreKeeperKpiCards stats={mockStats} />);
-    expect(screen.getByText("Current Inventory")).toBeInTheDocument();
-    expect(screen.getByText("Low Stock Products")).toBeInTheDocument();
-    expect(screen.getByText("Today's Releases")).toBeInTheDocument();
+    expect(screen.getByText("Total Products")).toBeInTheDocument();
+    expect(screen.getByText("Total Suppliers")).toBeInTheDocument();
+    expect(screen.getByText("Pending GRNs")).toBeInTheDocument();
+    expect(screen.getByText("Pending Releases")).toBeInTheDocument();
+    expect(screen.getByText("Low Stock Items")).toBeInTheDocument();
   });
 
   it("displays formatted numbers", () => {
     render(<StoreKeeperKpiCards stats={mockStats} />);
-    expect(screen.getByText("5,320")).toBeInTheDocument();
+    expect(screen.getByText("150")).toBeInTheDocument();
+    expect(screen.getByText("25")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
-    expect(screen.getByText("4")).toBeInTheDocument();
   });
 
   it("renders skeleton when loading", () => {

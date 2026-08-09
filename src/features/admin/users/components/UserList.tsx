@@ -101,7 +101,7 @@ interface UserListProps {
   onAssignRole: (user: UserItem) => void;
   onResetPassword: (user: UserItem) => void;
   onToggleStatus: (user: UserItem) => void;
-  onDeleteUser: (userId: string) => void;
+  onDeleteUser: (user: UserItem) => void;
 }
 
 export function UserList({
@@ -319,7 +319,7 @@ export function UserList({
                               type="button"
                               onClick={() => {
                                 setOpenDropdownId(null);
-                                onDeleteUser(user.id);
+                                onDeleteUser(user);
                               }}
                               className="flex w-full items-center gap-2 rounded-none px-2 py-1.5 text-destructive hover:bg-destructive/10"
                             >

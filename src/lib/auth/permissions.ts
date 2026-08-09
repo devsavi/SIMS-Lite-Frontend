@@ -114,7 +114,6 @@ export type Permission =
 //   master_data:read, master_data:write, master_data:delete
 //
 // OFFICER permissions (backend):
-//   users:read,
 //   master_data:read, master_data:write,
 //   procurement:read, procurement:write,
 //   reports:read, reports:export,
@@ -186,8 +185,6 @@ const ADMIN_PERMISSIONS: Permission[] = [
 
 const OFFICER_PERMISSIONS: Permission[] = [
   "dashboard.view",
-  // Users — read only
-  "users.view",
   // Master Data — read & write (no delete)
   "products.view",
   "products.create",

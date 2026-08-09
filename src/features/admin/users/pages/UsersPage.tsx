@@ -9,6 +9,7 @@ import { UserDetailsModal } from "../components/UserDetailsModal";
 import { UserRoleModal } from "../components/UserRoleModal";
 import { ResetPasswordModal } from "../components/ResetPasswordModal";
 import { UserStatusToggle } from "../components/UserStatusToggle";
+import { DeleteUserModal } from "../components/DeleteUserModal";
 import {
   useUsersList,
   useCreateUser,
@@ -89,6 +90,8 @@ export function UsersPage() {
 
   const [toggleUser, setToggleUser] = React.useState<UserItem | null>(null);
 
+  const [deleteUser, setDeleteUser] = React.useState<UserItem | null>(null);
+
   // Mutations
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser();
@@ -121,10 +124,12 @@ export function UsersPage() {
     await toggleStatusMutation.mutateAsync({ id: userId, status });
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      await deleteUserMutation.mutateAsync(userId);
-    }
+  const handleDeleteUser = (user: UserItem) => {
+    setDeleteUser(user);
+  };
+
+  const handleConfirmDelete = async (userId: string) => {
+    await deleteUserMutation.mutateAsync(userId);
   };
 
 
@@ -212,6 +217,14 @@ export function UsersPage() {
           onClose={() => setToggleUser(null)}
           onConfirm={handleToggleStatus}
           isSubmitting={toggleStatusMutation.isPending}
+        />
+
+        <DeleteUserModal
+          user={deleteUser}
+          isOpen={!!deleteUser}
+          onClose={() => setDeleteUser(null)}
+          onConfirm={handleConfirmDelete}
+          isSubmitting={deleteUserMutation.isPending}
         />
       </div>
     </PermissionGuard>

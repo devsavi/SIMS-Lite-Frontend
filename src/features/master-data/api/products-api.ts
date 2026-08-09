@@ -79,12 +79,26 @@ export const productsApi = {
   },
 
   // -------------------------------------------------------------------------
-  // Image — get URL
+  // Image — fetch bytes and return a blob object URL
   // -------------------------------------------------------------------------
   getImage: async (id: string): Promise<string | null> => {
     try {
-      const res = await get<SuccessResponse<{ url: string }>>(`${BASE}/${id}/image`);
-      return res.data?.url ?? null;
+      const res = await apiClient.get<Blob>(`${BASE}/${id}/image`, {
+        responseType: "blob",
+        headers: {
+          Accept: "image/*, application/octet-stream, */*",
+        },
+      });
+      if (!res.data) return null;
+      let blob: Blob;
+      if (res.data instanceof Blob) {
+        blob = res.data;
+      } else {
+        const contentType = (res.headers && res.headers["content-type"]) || "image/jpeg";
+        blob = new Blob([res.data], { type: contentType });
+      }
+      if (blob.size === 0) return null;
+      return URL.createObjectURL(blob);
     } catch {
       // Returns null if no image exists (404 or empty)
       return null;

@@ -121,6 +121,14 @@ export function ProductDetailPage({ productId }: ProductDetailPageProps) {
 
   const imageInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Revoke blob URL when the component unmounts or the URL changes,
+  // preventing memory leaks from accumulated object URLs.
+  React.useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    };
+  }, [imageUrl]);
+
   usePageTitle(product?.name);
 
   if (isLoading) return <ProductDetailSkeleton />;

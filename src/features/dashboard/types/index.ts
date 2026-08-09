@@ -25,7 +25,7 @@ export interface DashboardStats {
   // Products / Inventory
   total_products: number;
   total_suppliers: number;
-  total_inventory_items: number;
+  total_active_users: number;
   inventory_value: number;
   low_stock_count: number;
 
@@ -141,17 +141,17 @@ export interface DashboardNotifications {
 // Pending approvals
 // ---------------------------------------------------------------------------
 
-export type ApprovalType = "purchase_order" | "stock_release";
+export type ApprovalType = "purchase_order" | "stock_release" | "grn";
 export type ApprovalStatus = "pending" | "approved" | "rejected" | "cancelled";
 
 export interface PendingApproval {
   id: string;
   type: ApprovalType;
-  reference: string;     // PO number or SR number
+  reference: string;     // PO number, SR number, or GRN number
   description: string;
   requested_by: string;
   requested_at: string;
-  amount?: number;
+  amount?: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -252,14 +252,17 @@ export interface AdminDashboardData {
 
 export interface OfficerDashboardData {
   stats: Pick<DashboardStats,
+    | "total_products"
+    | "total_suppliers"
     | "pending_purchase_orders"
     | "pending_grns"
-    | "inventory_value"
     | "low_stock_count"
   >;
   charts: Pick<DashboardCharts,
     | "monthly_purchase_orders"
     | "monthly_stock_releases"
+    | "top_released_products"
+    | "low_stock_distribution"
   >;
   assigned_purchase_orders: RecentPurchaseOrder[];
   pending_grns: RecentGRN[];
@@ -268,9 +271,16 @@ export interface OfficerDashboardData {
 
 export interface StoreKeeperDashboardData {
   stats: Pick<DashboardStats,
-    | "total_inventory_items"
+    | "total_products"
+    | "total_suppliers"
+    | "pending_grns"
+    | "pending_stock_releases"
     | "low_stock_count"
-    | "today_stock_releases"
+  >;
+  charts: Pick<DashboardCharts,
+    | "monthly_stock_releases"
+    | "top_released_products"
+    | "low_stock_distribution"
   >;
   inventory_alerts: InventoryAlert[];
   pending_stock_releases: PendingStockRelease[];

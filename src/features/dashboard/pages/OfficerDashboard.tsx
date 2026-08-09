@@ -11,7 +11,8 @@ import { PageContainer } from "@/components/common/page-container";
 import {
   useDashboardStats,
   useDashboardCharts,
-  useDashboardNotifications,
+  usePendingApprovals,
+  useLowStockItems,
   useRecentPurchaseOrders,
   useRecentGRNs,
   dashboardKeys,
@@ -19,11 +20,14 @@ import {
 import { OfficerKpiCards } from "../components/kpi-cards/OfficerKpiCards";
 import {
   MonthlyPurchaseOrdersChart,
-  GrnTrendChart,
+  MonthlyStockReleasesChart,
+  TopReleasedProductsChart,
+  LowStockDistributionChart,
 } from "../components/charts/DashboardCharts";
+import { PendingApprovalsWidget } from "../components/widgets/PendingApprovalsWidget";
+import { LowStockWidget } from "../components/widgets/LowStockWidget";
 import { RecentPurchaseOrdersWidget } from "../components/widgets/RecentPurchaseOrdersWidget";
 import { RecentGRNsWidget } from "../components/widgets/RecentGRNsWidget";
-import { NotificationsWidget } from "../components/widgets/NotificationsWidget";
 import { OfficerQuickActions } from "../components/widgets/QuickActions";
 import { DashboardFilters } from "../components/filters/DashboardFilters";
 import type { DashboardQueryParams } from "../types";
@@ -34,6 +38,7 @@ export function OfficerDashboard() {
   const [period, setPeriod] = React.useState<Period>("today");
   const [fromDate, setFromDate] = React.useState<string>("");
   const [toDate, setToDate] = React.useState<string>("");
+  const [chartYear, setChartYear] = React.useState<number>(new Date().getFullYear());
   const queryClient = useQueryClient();
 
   const getIsoDate = (dateStr: string, timeSuffix: string) => {
@@ -54,8 +59,9 @@ export function OfficerDashboard() {
   };
 
   const statsQuery = useDashboardStats(params);
-  const chartsQuery = useDashboardCharts(params);
-  const notificationsQuery = useDashboardNotifications(params);
+  const chartsQuery = useDashboardCharts({ year: chartYear });
+  const approvalsQuery = usePendingApprovals(params);
+  const lowStockQuery = useLowStockItems();
   const purchaseOrdersQuery = useRecentPurchaseOrders(8, params);
   const grnsQuery = useRecentGRNs(5, params);
 
@@ -100,19 +106,60 @@ export function OfficerDashboard() {
       {/* Quick Actions */}
       <OfficerQuickActions />
 
-      {/* Charts */}
+      {/* Charts — Row 1 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <MonthlyPurchaseOrdersChart
           data={chartsQuery.data?.monthly_purchase_orders}
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
-        <GrnTrendChart
+        <MonthlyStockReleasesChart
           data={chartsQuery.data?.monthly_stock_releases}
           loading={chartsQuery.isLoading}
           error={chartsQuery.error}
           onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
+        />
+      </div>
+
+      {/* Charts — Row 2 */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TopReleasedProductsChart
+          data={chartsQuery.data?.top_released_products}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
+        />
+        <LowStockDistributionChart
+          data={chartsQuery.data?.low_stock_distribution}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
+        />
+      </div>
+
+      {/* Pending Approvals + Low Stock Alerts */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <PendingApprovalsWidget
+          approvals={approvalsQuery.data}
+          loading={approvalsQuery.isLoading}
+          error={approvalsQuery.error}
+          onRetry={() => approvalsQuery.refetch()}
+          allowedTypes={["purchase_order", "grn"]}
+        />
+        <LowStockWidget
+          items={lowStockQuery.data}
+          loading={lowStockQuery.isLoading}
+          error={lowStockQuery.error}
+          onRetry={() => lowStockQuery.refetch()}
         />
       </div>
 
@@ -131,18 +178,6 @@ export function OfficerDashboard() {
           error={grnsQuery.error}
           onRetry={() => grnsQuery.refetch()}
           title="Pending GRNs"
-        />
-      </div>
-
-      {/* Notifications */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <NotificationsWidget
-          notifications={notificationsQuery.data?.items}
-          unreadCount={notificationsQuery.data?.unread_count}
-          total={notificationsQuery.data?.pagination?.total}
-          loading={notificationsQuery.isLoading}
-          error={notificationsQuery.error}
-          onRetry={() => notificationsQuery.refetch()}
         />
       </div>
     </PageContainer>

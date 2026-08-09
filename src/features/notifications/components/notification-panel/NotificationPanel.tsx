@@ -5,7 +5,6 @@ import Link from "next/link";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { Button } from "@/app/components/ui/button";
-import { ScrollArea } from "@/app/components/ui/scroll-area";
 import { Separator } from "@/app/components/ui/separator";
 import { NotificationCard } from "../notification-card/NotificationCard";
 import { EmptyState } from "@/components/common/empty-state";
@@ -56,7 +55,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
 
   return (
     <div
-      className="flex flex-col overflow-hidden w-full"
+      className="flex flex-col w-full"
       style={{ maxHeight: "min(520px, calc(100dvh - 80px))" }}
       role="dialog"
       aria-label="Notifications panel"
@@ -97,8 +96,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
         </div>
       </div>
 
-      {/* Notification list */}
-      <ScrollArea className="flex-1">
+      {/* Notification list — plain overflow-y-auto so it scrolls reliably in flex layouts */}
+      <div className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
           <NotificationSkeleton />
         ) : isError ? (
@@ -134,7 +133,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
             ))}
           </ul>
         )}
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       <Separator />

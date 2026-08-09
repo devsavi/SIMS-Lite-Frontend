@@ -4,7 +4,7 @@ import * as React from "react";
 import {
   Package,
   Truck,
-  Archive,
+  Users,
   DollarSign,
   ShoppingCart,
   ClipboardList,
@@ -30,6 +30,17 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
       aria-label="Key performance indicators"
     >
       <StatCard
+        label="Inventory Value"
+        value={loading ? "—" : formatCurrency(stats?.inventory_value)}
+        icon={<DollarSign className="h-5 w-5" aria-hidden="true" />}
+        trend={
+          stats?.trends?.inventory_value
+            ? { value: stats.trends.inventory_value.value, label: "vs last month" }
+            : undefined
+        }
+        loading={loading}
+      />
+      <StatCard
         label="Total Products"
         value={loading ? "—" : formatNumber(stats?.total_products)}
         icon={<Package className="h-5 w-5" aria-hidden="true" />}
@@ -52,20 +63,9 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
         loading={loading}
       />
       <StatCard
-        label="Inventory Items"
-        value={loading ? "—" : formatNumber(stats?.total_inventory_items)}
-        icon={<Archive className="h-5 w-5" aria-hidden="true" />}
-        loading={loading}
-      />
-      <StatCard
-        label="Inventory Value"
-        value={loading ? "—" : formatCurrency(stats?.inventory_value)}
-        icon={<DollarSign className="h-5 w-5" aria-hidden="true" />}
-        trend={
-          stats?.trends?.inventory_value
-            ? { value: stats.trends.inventory_value.value, label: "vs last month" }
-            : undefined
-        }
+        label="Active Users"
+        value={loading ? "—" : formatNumber(stats?.total_active_users)}
+        icon={<Users className="h-5 w-5" aria-hidden="true" />}
         loading={loading}
       />
       <StatCard

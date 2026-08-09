@@ -8,18 +8,20 @@ import { render, screen } from "@testing-library/react";
 import { OfficerKpiCards } from "../components/kpi-cards/OfficerKpiCards";
 
 const mockStats = {
+  total_products: 150,
+  total_suppliers: 25,
   pending_purchase_orders: 8,
   pending_grns: 3,
-  inventory_value: 245680.50,
   low_stock_count: 12,
 };
 
 describe("OfficerKpiCards", () => {
-  it("renders all 4 KPI cards", () => {
+  it("renders all 5 KPI cards", () => {
     render(<OfficerKpiCards stats={mockStats} />);
+    expect(screen.getByText("Total Products")).toBeInTheDocument();
+    expect(screen.getByText("Total Suppliers")).toBeInTheDocument();
     expect(screen.getByText("Pending POs")).toBeInTheDocument();
     expect(screen.getByText("Pending GRNs")).toBeInTheDocument();
-    expect(screen.getByText("Inventory Value")).toBeInTheDocument();
     expect(screen.getByText("Low Stock Items")).toBeInTheDocument();
   });
 

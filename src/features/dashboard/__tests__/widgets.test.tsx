@@ -105,6 +105,15 @@ const pendingApprovals: PendingApproval[] = [
     requested_at: new Date(Date.now() - 3600_000).toISOString(),
     amount: 1250.00,
   },
+  {
+    id: "pa2",
+    type: "grn",
+    reference: "GRN-20260808-00001-SAVI",
+    description: "Goods received note from Test Supplier",
+    requested_by: "Savindu Weththasinghe",
+    requested_at: new Date(Date.now() - 7200_000).toISOString(),
+    amount: null,
+  },
 ];
 
 const purchaseOrders: RecentPurchaseOrder[] = [
@@ -232,13 +241,27 @@ describe("PendingApprovalsWidget", () => {
   it("renders pending approvals", () => {
     render(<PendingApprovalsWidget approvals={pendingApprovals} />);
     expect(screen.getByText("PO-010")).toBeInTheDocument();
+    expect(screen.getByText("GRN-20260808-00001-SAVI")).toBeInTheDocument();
     // "By Carol White" is rendered as "By " + "Carol White" in adjacent text nodes
     expect(screen.getByText(/carol white/i)).toBeInTheDocument();
+    expect(screen.getByText(/savindu weththasinghe/i)).toBeInTheDocument();
+  });
+
+  it("filters approvals when allowedTypes is provided", () => {
+    render(
+      <PendingApprovalsWidget
+        approvals={pendingApprovals}
+        allowedTypes={["purchase_order"]}
+      />
+    );
+    expect(screen.getByText("PO-010")).toBeInTheDocument();
+    expect(screen.queryByText("GRN-20260808-00001-SAVI")).not.toBeInTheDocument();
   });
 
   it("renders Review button for each item", () => {
     render(<PendingApprovalsWidget approvals={pendingApprovals} />);
     expect(screen.getByRole("link", { name: /review po-010/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /review grn-20260808-00001-savi/i })).toBeInTheDocument();
   });
 
   it("shows empty state when no approvals", () => {

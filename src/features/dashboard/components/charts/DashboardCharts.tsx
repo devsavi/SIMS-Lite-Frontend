@@ -247,9 +247,9 @@ export function MonthlyStockReleasesChart({
 }
 
 // ---------------------------------------------------------------------------
-// PyramidChart — vertical pyramid, rank 1 (largest) at the bottom
-// Bars are bottom-aligned; each rank is progressively narrower and shorter.
-// Label and rank number are rendered inside each bar.
+// PyramidChart — 5-tier vertical pyramid chart
+// All 5 sections are trapezoids with matching side angles forming a continuous pyramid shape.
+// Rank 1 (largest) is at the bottom, Rank 5 (smallest) at the top.
 // ---------------------------------------------------------------------------
 
 const PYRAMID_COLORS = [
@@ -260,11 +260,15 @@ const PYRAMID_COLORS = [
   "var(--color-chart-5)",
 ];
 
-// Width % for each rank position (index 0 = rank 1 = widest/bottom)
-const PYRAMID_WIDTHS = [100, 82, 65, 48, 32];
-
-// Height px for each rank position (index 0 = rank 1 = tallest/bottom)
-const PYRAMID_HEIGHTS = [64, 54, 46, 38, 32];
+// Trapezoid clip-paths for each rank position (index 0 = Rank 1 bottom -> index 4 = Rank 5 top)
+// Each level's top and bottom widths line up along the continuous sloping pyramid edge.
+const PYRAMID_CLIP_PATHS = [
+  "polygon(9.2% 0%, 90.8% 0%, 98.0% 100%, 2.0% 100%)",   // Rank 1 (bottom)
+  "polygon(16.9% 0%, 83.1% 0%, 90.3% 100%, 9.7% 100%)",   // Rank 2
+  "polygon(24.6% 0%, 75.4% 0%, 82.6% 100%, 17.4% 100%)",  // Rank 3
+  "polygon(32.3% 0%, 67.7% 0%, 74.9% 100%, 25.1% 100%)",  // Rank 4
+  "polygon(40.0% 0%, 60.0% 0%, 67.2% 100%, 32.8% 100%)",  // Rank 5 (top)
+];
 
 interface PyramidRow {
   label: string;
@@ -279,66 +283,56 @@ interface PyramidChartProps {
 function PyramidChart({ rows, valueFormatter }: PyramidChartProps) {
   const fmt = valueFormatter ?? String;
 
-  // Always render exactly 5 slots. Empty slots get a dotted placeholder.
-  // Slot 0 = rank 1 (bottom/widest), slot 4 = rank 5 (top/narrowest).
+  // Always render exactly 5 slots.
+  // Slot 0 = rank 1 (bottom), slot 4 = rank 5 (top).
   const slots = Array.from({ length: 5 }, (_, i) => rows[i] ?? null);
-
-  // Which reversed-index is the topmost filled bar (gets the taper clip-path)
-  const topmostFilledReversedIdx = [...slots].reverse().findIndex((s) => s !== null);
 
   return (
     <div
-      className="flex w-full flex-col items-center justify-end gap-0.5"
+      className="flex w-full flex-col items-center justify-center gap-1 py-2"
       style={{ minHeight: 260 }}
       role="img"
       aria-label="Pyramid chart"
     >
-      {/* Render top-to-bottom: slot 4 (rank 5, narrowest) → slot 0 (rank 1, widest) */}
+      {/* Render top-to-bottom: slot 4 (rank 5, top) → slot 0 (rank 1, bottom) */}
       {[...slots].reverse().map((row, reversedIdx) => {
-        const rankIdx = 4 - reversedIdx; // 0 = rank 1 = bottom/widest
-        const width = PYRAMID_WIDTHS[rankIdx];
-        const height = PYRAMID_HEIGHTS[rankIdx];
+        const rankIdx = 4 - reversedIdx; // 0 = rank 1 = bottom
         const rank = rankIdx + 1;
+        const clipPath = PYRAMID_CLIP_PATHS[rankIdx];
 
         if (row === null) {
-          // Empty slot — dotted outline placeholder matching chart grid line style
+          // Empty slot — subtle muted trapezoid maintaining pyramid geometry
           return (
             <div
               key={rankIdx}
-              className="flex items-center justify-center"
+              className="flex h-11 w-full items-center justify-center overflow-hidden"
               style={{
-                width: `${width}%`,
-                height,
-                border: "1.5px dashed var(--color-border)",
+                backgroundColor: "var(--color-muted)",
+                opacity: 0.3,
+                clipPath,
               }}
             >
-              <span className="select-none text-[10px] text-muted-foreground/40">
-                {rank}
+              <span className="select-none text-[11px] font-medium text-muted-foreground">
+                #{rank}
               </span>
             </div>
           );
         }
 
         const color = PYRAMID_COLORS[rankIdx % PYRAMID_COLORS.length];
-        // Taper the top-left/top-right corners of the topmost filled bar
-        const isTopmostFilled = reversedIdx === topmostFilledReversedIdx;
 
         return (
           <div
             key={rankIdx}
-            className="flex items-center justify-center overflow-hidden px-2"
+            className="flex h-11 w-full items-center justify-center overflow-hidden px-4 transition-opacity hover:opacity-90"
             style={{
-              width: `${width}%`,
-              height,
               backgroundColor: color,
-              clipPath: isTopmostFilled
-                ? "polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%)"
-                : "none",
+              clipPath,
             }}
             title={`#${rank} ${row.label} — ${fmt(row.value)}`}
           >
             <span className="truncate text-center text-xs font-semibold text-white drop-shadow-sm">
-              {rank}&nbsp;·&nbsp;{row.label}&nbsp;({fmt(row.value)})
+              #{rank}&nbsp;·&nbsp;{row.label}&nbsp;({fmt(row.value)})
             </span>
           </div>
         );

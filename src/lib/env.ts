@@ -22,13 +22,13 @@ export const env = {
   apiUrl: getEnv(
     process.env.NEXT_PUBLIC_API_URL,
     "NEXT_PUBLIC_API_URL",
-    "http://localhost:8000/api/v1"
+    "http://localhost:8001/api/v1"
   ),
   appName: process.env.NEXT_PUBLIC_APP_NAME || "SIMS Lite",
   wsUrl: getEnv(
     process.env.NEXT_PUBLIC_WS_URL,
     "NEXT_PUBLIC_WS_URL",
-    "ws://localhost:8000/api/v1/ws"
+    "ws://localhost:8001/api/v1/ws"
   ),
 } as const;
 

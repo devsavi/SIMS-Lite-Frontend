@@ -37,7 +37,10 @@ export function useProductImage(id: string | null) {
     queryKey: productKeys.image(id ?? ""),
     queryFn: () => productsApi.getImage(id!),
     enabled: !!id,
-    ...QUERY_CACHE_TIMES.MASTER_DATA,
+    // Blob URLs are tab-local and can't be shared across sessions/profiles,
+    // so we keep them fresh and clean up when evicted from cache.
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5, // revoke after 5 min of inactivity
   });
 }
 

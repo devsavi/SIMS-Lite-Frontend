@@ -11,7 +11,7 @@ import type { DashboardStats } from "../types";
 const mockStats: DashboardStats = {
   total_products: 1284,
   total_suppliers: 47,
-  total_inventory_items: 5320,
+  total_active_users: 15,
   inventory_value: 245680.50,
   low_stock_count: 12,
   pending_purchase_orders: 8,
@@ -25,7 +25,7 @@ describe("AdminKpiCards", () => {
     render(<AdminKpiCards stats={mockStats} />);
     expect(screen.getByText("Total Products")).toBeInTheDocument();
     expect(screen.getByText("Total Suppliers")).toBeInTheDocument();
-    expect(screen.getByText("Inventory Items")).toBeInTheDocument();
+    expect(screen.getByText("Active Users")).toBeInTheDocument();
     expect(screen.getByText("Inventory Value")).toBeInTheDocument();
     expect(screen.getByText("Pending POs")).toBeInTheDocument();
     expect(screen.getByText("Pending GRNs")).toBeInTheDocument();

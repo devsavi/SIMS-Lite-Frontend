@@ -10,17 +10,19 @@ import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
 import {
   useDashboardStats,
-  useDashboardNotifications,
-  useInventoryAlerts,
-  usePendingStockReleases,
-  useRecentAdjustments,
+  useDashboardCharts,
+  usePendingApprovals,
+  useRecentGRNs,
   dashboardKeys,
 } from "../hooks/use-dashboard";
 import { StoreKeeperKpiCards } from "../components/kpi-cards/StoreKeeperKpiCards";
-import { InventoryAlertsWidget } from "../components/widgets/InventoryAlertsWidget";
-import { PendingStockReleasesWidget } from "../components/widgets/PendingStockReleasesWidget";
-import { RecentAdjustmentsWidget } from "../components/widgets/RecentAdjustmentsWidget";
-import { NotificationsWidget } from "../components/widgets/NotificationsWidget";
+import {
+  MonthlyStockReleasesChart,
+  TopReleasedProductsChart,
+  LowStockDistributionChart,
+} from "../components/charts/DashboardCharts";
+import { PendingApprovalsWidget } from "../components/widgets/PendingApprovalsWidget";
+import { RecentGRNsWidget } from "../components/widgets/RecentGRNsWidget";
 import { StoreKeeperQuickActions } from "../components/widgets/QuickActions";
 import { DashboardFilters } from "../components/filters/DashboardFilters";
 import type { DashboardQueryParams } from "../types";
@@ -31,6 +33,7 @@ export function StoreKeeperDashboard() {
   const [period, setPeriod] = React.useState<Period>("today");
   const [fromDate, setFromDate] = React.useState<string>("");
   const [toDate, setToDate] = React.useState<string>("");
+  const [chartYear, setChartYear] = React.useState<number>(new Date().getFullYear());
   const queryClient = useQueryClient();
 
   const getIsoDate = (dateStr: string, timeSuffix: string) => {
@@ -51,12 +54,11 @@ export function StoreKeeperDashboard() {
   };
 
   const statsQuery = useDashboardStats(params);
-  const notificationsQuery = useDashboardNotifications(5);
-  const alertsQuery = useInventoryAlerts();
-  const stockReleasesQuery = usePendingStockReleases();
-  const adjustmentsQuery = useRecentAdjustments(6);
+  const chartsQuery = useDashboardCharts({ year: chartYear });
+  const approvalsQuery = usePendingApprovals(params);
+  const grnsQuery = useRecentGRNs(5, params);
 
-  const isRefreshing = statsQuery.isFetching || alertsQuery.isFetching;
+  const isRefreshing = statsQuery.isFetching || chartsQuery.isFetching || approvalsQuery.isFetching;
 
   function handleRefresh() {
     queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
@@ -96,36 +98,48 @@ export function StoreKeeperDashboard() {
       {/* Quick Actions */}
       <StoreKeeperQuickActions />
 
-      {/* Alerts + Releases */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <InventoryAlertsWidget
-          alerts={alertsQuery.data}
-          loading={alertsQuery.isLoading}
-          error={alertsQuery.error}
-          onRetry={() => alertsQuery.refetch()}
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        <MonthlyStockReleasesChart
+          data={chartsQuery.data?.monthly_stock_releases}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
-        <PendingStockReleasesWidget
-          releases={stockReleasesQuery.data}
-          loading={stockReleasesQuery.isLoading}
-          error={stockReleasesQuery.error}
-          onRetry={() => stockReleasesQuery.refetch()}
+        <TopReleasedProductsChart
+          data={chartsQuery.data?.top_released_products}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
+        />
+        <LowStockDistributionChart
+          data={chartsQuery.data?.low_stock_distribution}
+          loading={chartsQuery.isLoading}
+          error={chartsQuery.error}
+          onRetry={() => chartsQuery.refetch()}
+          year={chartYear}
+          onYearChange={setChartYear}
         />
       </div>
 
-      {/* Adjustments + Notifications */}
+      {/* Pending Approvals + Recent GRNs */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RecentAdjustmentsWidget
-          adjustments={adjustmentsQuery.data}
-          loading={adjustmentsQuery.isLoading}
-          error={adjustmentsQuery.error}
-          onRetry={() => adjustmentsQuery.refetch()}
+        <PendingApprovalsWidget
+          approvals={approvalsQuery.data}
+          loading={approvalsQuery.isLoading}
+          error={approvalsQuery.error}
+          onRetry={() => approvalsQuery.refetch()}
+          allowedTypes={["grn", "stock_release"]}
         />
-        <NotificationsWidget
-          notifications={notificationsQuery.data?.items}
-          unreadCount={notificationsQuery.data?.unread_count}
-          loading={notificationsQuery.isLoading}
-          error={notificationsQuery.error}
-          onRetry={() => notificationsQuery.refetch()}
+        <RecentGRNsWidget
+          grns={grnsQuery.data}
+          loading={grnsQuery.isLoading}
+          error={grnsQuery.error}
+          onRetry={() => grnsQuery.refetch()}
         />
       </div>
     </PageContainer>
