@@ -28,7 +28,13 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
   const error = createMutation.error || updateMutation.error;
 
   async function handleSubmit(values: SupplierFormValues) {
-    const payload = emptyToNull(values) as SupplierFormValues;
+    const cleaned = {
+      ...values,
+      // Treat the "+94" prefix-only placeholder as empty (same behaviour as a blank field)
+      phone: values.phone === "+94" ? "" : values.phone,
+      company_phone: values.company_phone === "+94" ? "" : values.company_phone,
+    };
+    const payload = emptyToNull(cleaned) as SupplierFormValues;
     if (isEditing) {
       await updateMutation.mutateAsync(payload);
     } else {
@@ -43,6 +49,7 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
         contact_person: supplier.contact_person ?? "",
         email: supplier.email ?? "",
         phone: supplier.phone ?? "",
+        company_phone: supplier.company_phone ?? "",
         address: supplier.address ?? "",
         city: supplier.city ?? "",
         country: supplier.country ?? "",

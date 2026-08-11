@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { canAccess } from "@/lib/auth/permissions";
 import { useUoms, useDeleteUom, useRestoreUom } from "../../hooks/use-uoms";
 import { UomFormDialog } from "../components/UomFormDialog";
+import { PermissionGuard as AdminPermissionGuard } from "@/features/admin/shared/components/PermissionGuard";
 import { Button } from "@/app/components/ui/button";
 import {
   PageContainer,
@@ -142,84 +143,86 @@ export function UomsPage() {
   ];
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Units of Measure"
-        description="Manage units used for product quantities."
-        actions={
-          isAdmin ? (
-            <Button onClick={() => { setEditingUom(null); setDialogOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-              New Unit
+    <AdminPermissionGuard requiredPermission="uoms.view">
+      <PageContainer>
+        <PageHeader
+          title="Units of Measure"
+          description="Manage units used for product quantities."
+          actions={
+            isAdmin ? (
+              <Button onClick={() => { setEditingUom(null); setDialogOpen(true); }}>
+                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                New Unit
+              </Button>
+            ) : null
+          }
+        />
+
+        <Toolbar>
+          <ToolbarLeft>
+            <SearchInput
+              placeholder="Search units…"
+              value={search}
+              onChange={setSearch}
+              aria-label="Search units of measure"
+              className="w-64"
+            />
+          </ToolbarLeft>
+          <ToolbarRight>
+            <Button variant="outline" size="sm" onClick={() => setShowInactive((v) => !v)}>
+              {showInactive ? "Hide Inactive" : "Show Inactive"}
             </Button>
-          ) : null
-        }
-      />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              title="Refresh units of measure"
+              aria-label="Refresh units of measure"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Refresh
+            </Button>
+          </ToolbarRight>
+        </Toolbar>
 
-      <Toolbar>
-        <ToolbarLeft>
-          <SearchInput
-            placeholder="Search units…"
-            value={search}
-            onChange={setSearch}
-            aria-label="Search units of measure"
-            className="w-64"
-          />
-        </ToolbarLeft>
-        <ToolbarRight>
-          <Button variant="outline" size="sm" onClick={() => setShowInactive((v) => !v)}>
-            {showInactive ? "Hide Inactive" : "Show Inactive"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            title="Refresh units of measure"
-            aria-label="Refresh units of measure"
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
-            Refresh
-          </Button>
-        </ToolbarRight>
-      </Toolbar>
+        <DataTable
+          columns={columns}
+          data={data?.data ?? []}
+          loading={isLoading}
+          error={error}
+          onRetry={refetch}
+          serverSide
+          totalRows={data?.pagination?.total ?? 0}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={(updater) =>
+            setColumnVisibility((prev) =>
+              typeof updater === "function" ? updater(prev) : updater
+            )
+          }
+          showColumnToggle
+        />
 
-      <DataTable
-        columns={columns}
-        data={data?.data ?? []}
-        loading={isLoading}
-        error={error}
-        onRetry={refetch}
-        serverSide
-        totalRows={data?.pagination?.total ?? 0}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
-        columnVisibility={columnVisibility}
-        onColumnVisibilityChange={(updater) =>
-          setColumnVisibility((prev) =>
-            typeof updater === "function" ? updater(prev) : updater
-          )
-        }
-        showColumnToggle
-      />
+        <UomFormDialog
+          open={dialogOpen}
+          onOpenChange={(v) => { setDialogOpen(v); if (!v) setEditingUom(null); }}
+          uom={editingUom}
+        />
 
-      <UomFormDialog
-        open={dialogOpen}
-        onOpenChange={(v) => { setDialogOpen(v); if (!v) setEditingUom(null); }}
-        uom={editingUom}
-      />
-
-      <DeleteDialog
-        open={!!deleteTarget}
-        onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}
-        itemName={deleteTarget?.name}
-        loading={deleteMutation.isPending}
-        onConfirm={async () => {
-          if (deleteTarget) await deleteMutation.mutateAsync(deleteTarget.id);
-        }}
-      />
-    </PageContainer>
+        <DeleteDialog
+          open={!!deleteTarget}
+          onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}
+          itemName={deleteTarget?.name}
+          loading={deleteMutation.isPending}
+          onConfirm={async () => {
+            if (deleteTarget) await deleteMutation.mutateAsync(deleteTarget.id);
+          }}
+        />
+      </PageContainer>
+    </AdminPermissionGuard>
   );
 }

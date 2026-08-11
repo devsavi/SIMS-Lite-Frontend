@@ -60,6 +60,8 @@ export type Permission =
   | "categories.create"
   | "categories.edit"
   | "categories.delete"
+  // Units of Measure
+  | "uoms.view"
   // Brands (master_data:read/write/delete)
   | "brands.view"
   | "brands.create"
@@ -147,6 +149,7 @@ const ADMIN_PERMISSIONS: Permission[] = [
   "categories.create",
   "categories.edit",
   "categories.delete",
+  "uoms.view",
   "brands.view",
   "brands.create",
   "brands.edit",
@@ -229,6 +232,8 @@ const STORE_KEEPER_PERMISSIONS: Permission[] = [
   "brands.create",
   "brands.edit",
   "suppliers.view",
+  "suppliers.create",
+  "suppliers.edit",
   // Procurement — read only (no grn.create/edit/submit/cancel)
   "purchase_orders.view",
   "grn.view",

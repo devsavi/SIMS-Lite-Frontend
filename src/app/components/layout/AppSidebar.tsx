@@ -91,7 +91,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Units of Measure",
     href: "/uoms",
     icon: Hash,
-    permissions: ["products.view"],
+    permissions: ["uoms.view"],
   },
   {
     label: "Suppliers",

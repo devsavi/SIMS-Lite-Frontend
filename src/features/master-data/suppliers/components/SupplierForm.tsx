@@ -29,6 +29,8 @@ interface SupplierFormProps {
 }
 
 export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, error, isPending }: SupplierFormProps) {
+  const isEditing = !!editingId;
+
   const form = useForm<SupplierFormValues>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
@@ -42,6 +44,7 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
       is_active: true,
       ...defaultValues,
       phone: defaultValues?.phone || "+94",
+      company_phone: defaultValues?.company_phone || "+94",
     },
   });
 
@@ -57,14 +60,24 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
         )}
 
         {/* Company */}
-        <TextField
-          control={form.control}
-          name="company_name"
-          label="Company Name"
-          placeholder="e.g. Acme Supplies Ltd."
-          required
-          autoComplete="organization"
-        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <TextField
+            control={form.control}
+            name="company_name"
+            label="Company Name"
+            placeholder="e.g. Acme Supplies Ltd."
+            required
+            autoComplete="organization"
+          />
+          <TextField
+            control={form.control}
+            name="company_phone"
+            label="Company Phone"
+            placeholder="+1 555 000 0000"
+            type="tel"
+            autoComplete="tel"
+          />
+        </div>
 
         {/* Contact */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -78,7 +91,7 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
           <TextField
             control={form.control}
             name="phone"
-            label="Phone"
+            label="Contact Phone"
             placeholder="+1 555 000 0000"
             type="tel"
             autoComplete="tel"
@@ -115,22 +128,24 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
           rows={3}
         />
 
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
-              <div>
-                <FormLabel className="text-sm font-medium">Active</FormLabel>
-                <FormDescription className="text-xs">Inactive suppliers cannot be used in new purchase orders.</FormDescription>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} aria-label="Supplier active status" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {isEditing && (
+          <FormField
+            control={form.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-none border border-border p-3">
+                <div>
+                  <FormLabel className="text-sm font-medium">Active</FormLabel>
+                  <FormDescription className="text-xs">Inactive suppliers cannot be used in new purchase orders.</FormDescription>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} aria-label="Supplier active status" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>Cancel</Button>

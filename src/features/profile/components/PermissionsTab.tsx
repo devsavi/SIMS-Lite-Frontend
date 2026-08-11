@@ -53,6 +53,7 @@ const ALL_PERMISSION_GROUPS: PermissionGroup[] = [
       { key: "categories.edit", label: "Create & Edit Categories" },
       { key: "brands.view", label: "View Brands" },
       { key: "brands.edit", label: "Create & Edit Brands" },
+      { key: "uoms.view", label: "View Units of Measure" },
     ],
   },
   {

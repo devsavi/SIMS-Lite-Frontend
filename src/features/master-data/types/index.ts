@@ -122,6 +122,7 @@ export interface Supplier extends AuditFields {
   contact_person: string | null;
   email: string | null;
   phone: string | null;
+  company_phone: string | null;
   address: string | null;
   city: string | null;
   country: string | null;
@@ -135,6 +136,7 @@ export interface CreateSupplierRequest {
   contact_person?: string | null;
   email?: string | null;
   phone?: string | null;
+  company_phone?: string | null;
   address?: string | null;
   city?: string | null;
   country?: string | null;

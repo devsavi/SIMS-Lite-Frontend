@@ -6,7 +6,8 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Edit2, Trash2, RotateCcw, Eye, Mail, Phone } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, Eye, Mail, Phone, RefreshCw } from "lucide-react";
+import { type VisibilityState } from "@tanstack/react-table";
 import { useAuthStore } from "@/stores/auth.store";
 import { canAccess } from "@/lib/auth/permissions";
 import { useSuppliers, useDeleteSupplier, useRestoreSupplier } from "../../hooks/use-suppliers";
@@ -47,6 +48,9 @@ export function SuppliersPage() {
   const [editingSupplier, setEditingSupplier] = React.useState<Supplier | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<Supplier | null>(null);
 
+  // ---- Column visibility: Status hidden by default ----
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ is_active: false });
+
   // Automatically open dialog if query param create=true
   React.useEffect(() => {
     if (searchParams.get("create") === "true") {
@@ -56,7 +60,7 @@ export function SuppliersPage() {
   }, [searchParams]);
 
   // ---- Query ----
-  const { data, isLoading, error, refetch } = useSuppliers({
+  const { data, isLoading, error, refetch, isRefetching } = useSuppliers({
     page,
     page_size: pageSize,
     search: debouncedSearch || undefined,
@@ -72,9 +76,26 @@ export function SuppliersPage() {
     {
       accessorKey: "company_name",
       header: "Company",
-      cell: ({ row }) => (
-        <span className="font-medium text-foreground">{row.original.company_name}</span>
-      ),
+      cell: ({ row }) => {
+        const { company_name, company_phone } = row.original;
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium text-foreground">{company_name}</span>
+            {company_phone && (
+              <a
+                href={`tel:${company_phone}`}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                title={`Call ${company_phone}`}
+                aria-label={`Call ${company_phone}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Phone className="h-3 w-3" aria-hidden="true" />
+                <span>{company_phone}</span>
+              </a>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "contact_person",
@@ -108,11 +129,11 @@ export function SuppliersPage() {
               <a
                 href={`tel:${phone}`}
                 className="flex items-center gap-1 text-sm hover:text-primary"
-                aria-label={`Call ${phone}`}
+                aria-label={`Contact phone ${phone}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Phone className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-                {phone}
+                <span className="truncate max-w-[180px]">{phone}</span>
               </a>
             )}
           </div>
@@ -150,6 +171,7 @@ export function SuppliersPage() {
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
+      enableHiding: false,
       cell: ({ row }) => {
         const canEdit = canAccess(role, "suppliers.edit");
         const canDelete = canAccess(role, "suppliers.delete");
@@ -245,6 +267,17 @@ export function SuppliersPage() {
           >
             {showInactive ? "Hide Inactive" : "Show Inactive"}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            title="Refresh suppliers"
+            aria-label="Refresh suppliers"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} aria-hidden="true" />
+            Refresh
+          </Button>
         </ToolbarRight>
       </Toolbar>
 
@@ -263,6 +296,13 @@ export function SuppliersPage() {
         caption="Suppliers list"
         emptyTitle="No suppliers found"
         emptyDescription="Add your first supplier to get started."
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={(updater) =>
+          setColumnVisibility((prev) =>
+            typeof updater === "function" ? updater(prev) : updater
+          )
+        }
+        showColumnToggle
       />
 
       {/* Create / Edit dialog */}

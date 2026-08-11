@@ -79,6 +79,7 @@ export const supplierSchema = z.object({
     .nullable(),
   email: emailSchema.optional().or(z.literal("")).nullable(),
   phone: phoneSchema.optional().nullable(),
+  company_phone: phoneSchema.optional().nullable(),
   address: z
     .string()
     .max(500, "Address must not exceed 500 characters")

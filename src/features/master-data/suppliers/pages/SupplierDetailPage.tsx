@@ -187,6 +187,12 @@ export function SupplierDetailPage({ supplierId }: SupplierDetailPageProps) {
               value={supplier.company_name}
             />
             <DetailRow
+              icon={<Phone className="h-4 w-4" />}
+              label="Company Phone"
+              value={supplier.company_phone}
+              href={supplier.company_phone ? `tel:${supplier.company_phone}` : undefined}
+            />
+            <DetailRow
               icon={<User className="h-4 w-4" />}
               label="Contact Person"
               value={supplier.contact_person}
@@ -199,7 +205,7 @@ export function SupplierDetailPage({ supplierId }: SupplierDetailPageProps) {
             />
             <DetailRow
               icon={<Phone className="h-4 w-4" />}
-              label="Phone"
+              label="Contact Phone"
               value={supplier.phone}
               href={supplier.phone ? `tel:${supplier.phone}` : undefined}
             />

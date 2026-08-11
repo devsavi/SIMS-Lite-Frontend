@@ -139,6 +139,7 @@ describe("supplierSchema", () => {
       contact_person: "John Smith",
       email: "john@globalsupplies.com",
       phone: "+1 555 123 4567",
+      company_phone: "+1 555 987 6543",
       address: "123 Main St",
       city: "New York",
       country: "United States",
