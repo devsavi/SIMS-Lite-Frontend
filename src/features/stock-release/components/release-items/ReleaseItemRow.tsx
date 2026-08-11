@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Trash2, AlertCircle, CheckCircle } from "lucide-react";
+import { Trash2, AlertCircle, CheckCircle, MessageSquarePlus, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import {
@@ -37,6 +37,15 @@ export function ReleaseItemRow({
 }: ReleaseItemRowProps) {
   const productId = form.watch(`items.${index}.product_id`);
   const requestedQty = form.watch(`items.${index}.quantity_requested`);
+  const existingNote = form.getValues(`items.${index}.notes`);
+
+  // Show notes only when user opts in (auto-expand if already has a saved note)
+  const [showNotes, setShowNotes] = React.useState(() => Boolean(existingNote));
+
+  const handleRemoveNote = () => {
+    form.setValue(`items.${index}.notes`, "", { shouldDirty: true });
+    setShowNotes(false);
+  };
 
   // Find currently selected product in inventory
   const selectedInventoryItem = React.useMemo(
@@ -200,20 +209,44 @@ export function ReleaseItemRow({
         </div>
       </div>
 
-      {/* Notes for this line item */}
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-muted-foreground">
-          Item Notes
-          <span className="font-normal text-muted-foreground/70"> (optional)</span>
-        </label>
-        <Input
-          type="text"
-          placeholder="Notes for this item..."
-          aria-label={`Notes for row ${index + 1}`}
-          {...form.register(`items.${index}.notes`)}
-          className="text-xs"
-        />
-      </div>
+      {/* Per-item notes — hidden by default, toggled by user */}
+      {showNotes ? (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-muted-foreground">
+              Item Note
+              <span className="font-normal text-muted-foreground/70"> (optional)</span>
+            </label>
+            <button
+              type="button"
+              onClick={handleRemoveNote}
+              className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+              aria-label={`Remove note for item ${index + 1}`}
+            >
+              <X className="h-3 w-3" />
+              Remove
+            </button>
+          </div>
+          <Input
+            type="text"
+            placeholder="Add a note for this item..."
+            aria-label={`Notes for row ${index + 1}`}
+            {...form.register(`items.${index}.notes`)}
+            className="text-xs"
+            autoFocus
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowNotes(true)}
+          className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors py-0.5"
+          aria-label={`Add note for item ${index + 1}`}
+        >
+          <MessageSquarePlus className="h-3.5 w-3.5" />
+          Add note
+        </button>
+      )}
 
       {isOverStock && (
         <div className="flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-3 py-1.5 rounded-none font-medium">

@@ -29,6 +29,8 @@ export interface StockReleaseFormProps {
   onSubmit: (payload: CreateStockReleasePayload, autoSubmit?: boolean) => Promise<void>;
   isLoading?: boolean;
   mode?: "create" | "edit";
+  /** When true the release date is locked to today and cannot be changed. */
+  isDateLocked?: boolean;
 }
 
 export function StockReleaseForm({
@@ -36,7 +38,9 @@ export function StockReleaseForm({
   onSubmit,
   isLoading = false,
   mode = "create",
+  isDateLocked = false,
 }: StockReleaseFormProps) {
+  const todayIso = new Date().toISOString().split("T")[0];
   // Fetch store inventory for product selection
   const { data: inventoryResponse, isLoading: isLoadingInventory } = useInventoryList({
     page: 1,
@@ -47,9 +51,11 @@ export function StockReleaseForm({
 
   const defaultValues: StockReleaseFormValues = {
     purpose: (initialData?.purpose ?? "INTERNAL_USE") as StockReleasePurpose,
-    release_date: initialData?.release_date
-      ? new Date(initialData.release_date).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
+    release_date: isDateLocked
+      ? todayIso
+      : initialData?.release_date
+        ? new Date(initialData.release_date).toISOString().split("T")[0]
+        : todayIso,
     notes: initialData?.notes ?? "",
     reference_document: initialData?.reference_document ?? "",
     items: initialData?.items?.length
@@ -73,6 +79,16 @@ export function StockReleaseForm({
   });
 
   const items = form.watch("items");
+
+  // Keep locked date always in sync with today (e.g. form open past midnight)
+  React.useEffect(() => {
+    if (isDateLocked) {
+      form.setValue("release_date", new Date().toISOString().split("T")[0], {
+        shouldValidate: false,
+        shouldDirty: false,
+      });
+    }
+  }, [isDateLocked, form]);
 
   // Track selected products to prevent duplicate selection
   const selectedProductIds = items.map((i) => i.product_id).filter(Boolean);
@@ -103,7 +119,7 @@ export function StockReleaseForm({
   return (
     <form
       onSubmit={form.handleSubmit((values) => handleFormSubmit(values, false))}
-      className="space-y-6 w-full max-w-5xl mx-auto"
+      className="space-y-6 w-full"
     >
       {/* General Info Card */}
       <Card>
@@ -159,16 +175,30 @@ export function StockReleaseForm({
                 <span>Release Date</span>
                 <span className="text-destructive">*</span>
               </label>
-              <Input
-                type="date"
-                aria-label="Release Date"
-                {...form.register("release_date")}
-                className={form.formState.errors.release_date ? "border-destructive" : ""}
-              />
-              {form.formState.errors.release_date && (
-                <p className="text-xs text-destructive font-medium">
-                  {form.formState.errors.release_date.message}
-                </p>
+              {isDateLocked ? (
+                <div
+                  aria-label="Release Date (locked to today)"
+                  className="h-9 flex items-center px-3 rounded-none border bg-muted/40 text-xs text-muted-foreground select-none"
+                >
+                  {todayIso}
+                  <span className="ml-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">
+                    (today)
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    type="date"
+                    aria-label="Release Date"
+                    {...form.register("release_date")}
+                    className={form.formState.errors.release_date ? "border-destructive" : ""}
+                  />
+                  {form.formState.errors.release_date && (
+                    <p className="text-xs text-destructive font-medium">
+                      {form.formState.errors.release_date.message}
+                    </p>
+                  )}
+                </>
               )}
             </div>
 

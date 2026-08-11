@@ -91,7 +91,7 @@ export function StockAdjustmentForm({
   return (
     <form
       onSubmit={form.handleSubmit((values) => handleFormSubmit(values, false))}
-      className="space-y-6 max-w-5xl mx-auto"
+      className="space-y-6 w-full"
     >
       {/* Header card */}
       <Card>

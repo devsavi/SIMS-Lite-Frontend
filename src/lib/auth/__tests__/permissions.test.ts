@@ -15,6 +15,7 @@ describe("canAccess()", () => {
   it("store_keeper can only access their own permissions", () => {
     expect(canAccess("store_keeper", "inventory.view")).toBe(true);
     expect(canAccess("store_keeper", "stock_release.view")).toBe(true);
+    expect(canAccess("store_keeper", "purchase_orders.view")).toBe(false);
     expect(canAccess("store_keeper", "users.view")).toBe(false);
     expect(canAccess("store_keeper", "users.create")).toBe(false);
     expect(canAccess("store_keeper", "products.delete")).toBe(false);
@@ -24,6 +25,7 @@ describe("canAccess()", () => {
   it("officer has appropriate permissions", () => {
     expect(canAccess("officer", "purchase_orders.create")).toBe(true);
     expect(canAccess("officer", "suppliers.view")).toBe(true);
+    expect(canAccess("officer", "stock_release.view")).toBe(false);
     expect(canAccess("officer", "users.view")).toBe(false);
     expect(canAccess("officer", "users.delete")).toBe(false);
     expect(canAccess("officer", "settings.edit")).toBe(false);

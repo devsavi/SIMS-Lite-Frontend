@@ -210,8 +210,7 @@ const OFFICER_PERMISSIONS: Permission[] = [
   "grn.edit",
   // Inventory — read only
   "inventory.view",
-  // Stock Release — view only (cannot create or approve)
-  "stock_release.view",
+  // Stock Release — no access (hidden for Officer, same as Users / UoMs)
   // Reports — read & export
   "reports.view",
   "reports.export",
@@ -234,8 +233,7 @@ const STORE_KEEPER_PERMISSIONS: Permission[] = [
   "suppliers.view",
   "suppliers.create",
   "suppliers.edit",
-  // Procurement — read only (no grn.create/edit/submit/cancel)
-  "purchase_orders.view",
+  // Procurement — GRN read only; Purchase Orders hidden (same as Users / UoMs)
   "grn.view",
   // Inventory — full access including approve (inventory:write + inventory:approve)
   "inventory.view",

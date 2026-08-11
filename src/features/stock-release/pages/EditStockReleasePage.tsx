@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { PageHeader } from "@/components/common/page-header";
 import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { LoadingState } from "@/components/common/loading-state";
 import { ErrorState } from "@/components/common/error-state";
 import { StockReleaseForm } from "../components/release-form/StockReleaseForm";
@@ -13,6 +13,7 @@ import {
   useUpdateStockRelease,
   useSubmitStockRelease,
 } from "../hooks/use-stock-release";
+import { useAuthStore } from "@/stores/auth.store";
 import type { CreateStockReleasePayload } from "../types/stock-release-types";
 
 export interface EditStockReleasePageProps {
@@ -21,6 +22,8 @@ export interface EditStockReleasePageProps {
 
 export function EditStockReleasePage({ id }: EditStockReleasePageProps) {
   const router = useRouter();
+  const { role } = useAuthStore();
+  const isDateLocked = role !== "admin";
   const { data: release, isLoading, error, refetch } = useStockReleaseDetail(id);
 
   const updateMutation = useUpdateStockRelease();
@@ -66,28 +69,28 @@ export function EditStockReleasePage({ id }: EditStockReleasePageProps) {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Edit Release {release.release_number || ""}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Modify release details, dates, and item quantities before submission.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-          Back
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title={`Edit Release ${release.release_number || ""}`}
+        description="Modify release details, dates, and item quantities before submission."
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Stock Release", href: "/stock-release" },
+              { label: release.release_number || id, href: `/stock-release/${id}` },
+              { label: "Edit" },
+            ]}
+          />
+        }
+      />
 
       <StockReleaseForm
         initialData={release}
         onSubmit={handleFormSubmit}
         isLoading={updateMutation.isPending || submitMutation.isPending}
         mode="edit"
+        isDateLocked={isDateLocked}
       />
-    </div>
+    </PageContainer>
   );
 }

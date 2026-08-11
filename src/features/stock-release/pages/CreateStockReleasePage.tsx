@@ -2,14 +2,18 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { PageHeader } from "@/components/common/page-header";
+import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { StockReleaseForm } from "../components/release-form/StockReleaseForm";
 import { useCreateStockRelease, useSubmitStockRelease } from "../hooks/use-stock-release";
+import { useAuthStore } from "@/stores/auth.store";
 import type { CreateStockReleasePayload } from "../types/stock-release-types";
 
 export function CreateStockReleasePage() {
   const router = useRouter();
+  const { role } = useAuthStore();
+  const isDateLocked = role !== "admin";
   const createMutation = useCreateStockRelease();
   const submitMutation = useSubmitStockRelease();
 
@@ -34,25 +38,26 @@ export function CreateStockReleasePage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">New Stock Release</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Create a new stock release request for store inventory items.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-          Back
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="New Stock Release"
+        description="Create a new stock release request for store inventory items."
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Stock Release", href: "/stock-release" },
+              { label: "New" },
+            ]}
+          />
+        }
+      />
 
       <StockReleaseForm
         onSubmit={handleFormSubmit}
         isLoading={createMutation.isPending || submitMutation.isPending}
         mode="create"
+        isDateLocked={isDateLocked}
       />
-    </div>
+    </PageContainer>
   );
 }
