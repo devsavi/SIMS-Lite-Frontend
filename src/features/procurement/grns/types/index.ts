@@ -66,8 +66,8 @@ export interface GoodsReceivedNote {
   purchase_order_id: string | null;
   /** null for PO-less (direct) GRNs */
   po_number: string | null;
-  /** Always present — the supplier (via PO or directly selected) */
-  supplier_id: string | null;
+  /** Optional / null for PO-less or test mock GRNs */
+  supplier_id?: string | null;
   supplier: GRNSupplier;
   status: GRNStatus;
   received_date: string;

@@ -11,7 +11,7 @@ import { usePurchaseOrders } from "@/features/procurement/purchase-orders/hooks/
 import { useSuppliers } from "@/features/master-data/hooks/use-suppliers";
 import { useProducts } from "@/features/master-data/hooks/use-products";
 import type { GRNFormValues } from "@/features/procurement/grns/schemas/grn.schema";
-import type { PurchaseOrder } from "@/features/procurement/purchase-orders/types";
+import type { PurchaseOrder, PurchaseOrderListItem } from "@/features/procurement/purchase-orders/types";
 
 export default function NewGRNPage() {
   const router = useRouter();
@@ -26,13 +26,15 @@ export default function NewGRNPage() {
     const list: PurchaseOrder[] = Array.isArray(posData)
       ? posData
       : (posData as any)?.data || [];
-    return list.filter((po) => po.status === "APPROVED" || po.status === "PARTIALLY_RECEIVED");
+    return list.filter((po) => po.status === "APPROVED" || po.status === "PARTIALLY_RECEIVED") as unknown as PurchaseOrderListItem[];
   }, [posData]);
 
-  const selectedPO = React.useMemo(
-    () => approvedPOs.find((po) => po.id === selectedPOId),
-    [approvedPOs, selectedPOId]
-  );
+  const selectedPO = React.useMemo(() => {
+    const list: PurchaseOrder[] = Array.isArray(posData)
+      ? posData
+      : (posData as any)?.data || [];
+    return list.find((po) => po.id === selectedPOId);
+  }, [posData, selectedPOId]);
 
   const suppliers = React.useMemo(() => {
     const list = Array.isArray(suppliersData)

@@ -23,7 +23,7 @@ export const dashboardKeys = {
     [...dashboardKeys.all, "stats", params] as const,
   charts: (params?: ChartQueryParams) =>
     [...dashboardKeys.all, "charts", params] as const,
-  activities: (params?: DashboardQueryParams) =>
+  activities: (params?: DashboardQueryParams | number) =>
     [...dashboardKeys.all, "activities", params] as const,
   notifications: (params?: DashboardQueryParams) =>
     [...dashboardKeys.all, "notifications", params] as const,

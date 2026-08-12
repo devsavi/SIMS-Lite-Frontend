@@ -35,15 +35,21 @@ export interface Notification {
   message: string;
   type: NotificationType;
   priority: NotificationPriority;
-  recipient_type: RecipientType;
-  recipient_role: string | null;
-  recipient_user_id: string | null;
-  sender_id: string | null;
+  recipient_type?: RecipientType;
+  recipient_role?: string | null;
+  recipient_user_id?: string | null;
+  sender_id?: string | null;
   is_read: boolean;
-  read_at: string | null;
-  data: Record<string, unknown> | null;
+  read_at?: string | null;
+  data?: Record<string, unknown> | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+
+  // Optional legacy / test-fixture fields
+  category?: string;
+  sender?: { id: string; full_name: string; email: string } | null;
+  recipient_id?: string | null;
+  action_url?: string | null;
 }
 
 /** Lightweight summary used in dashboard/recent and dashboard/critical-alerts */

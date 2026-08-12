@@ -60,7 +60,7 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
     filters
   );
 
-  const { data: chartsData, isLoading: isChartsLoading } = useReportCharts(reportType);
+  const { data: chartsData, isLoading: isChartsLoading } = useReportCharts(reportType, filters);
 
   // Dialog states
   const [isExportOpen, setIsExportOpen] = React.useState(false);
@@ -126,7 +126,7 @@ export function ReportDetailPage({ reportType }: ReportDetailPageProps) {
       <ReportSummaryCards summary={summary} loading={isSummaryLoading} />
 
       {/* Visual Analytics Charts */}
-      <ReportCharts reportType={reportType} data={chartsData} loading={isChartsLoading} />
+      <ReportCharts reportType={reportType} data={chartsData} loading={isChartsLoading} period={filters.period} />
 
       {/* Filter Controls */}
       <ReportFilters

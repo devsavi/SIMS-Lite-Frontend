@@ -41,7 +41,7 @@ interface NotificationRowProps {
 
 function NotificationRow({ item }: NotificationRowProps) {
   const Icon = getNotificationIcon(item.type);
-  const dotColor = PRIORITY_DOT[item.priority] ?? "bg-muted-foreground";
+  const dotColor = (item.priority && PRIORITY_DOT[item.priority]) ?? "bg-muted-foreground";
 
   return (
     <li className="flex items-start gap-3 py-3">

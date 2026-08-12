@@ -410,7 +410,7 @@ export const HorizontalBarChart = React.memo(function HorizontalBarChart({
               valueFormatter ? valueFormatter(value as number) : (value as number),
               label ?? dataKey,
             ]}
-            labelFormatter={(lbl: string) => lbl}
+            labelFormatter={(lbl) => lbl as string}
           />
           <Bar dataKey={dataKey} fill={color} radius={[0, 2, 2, 0]} />
         </ReBarChart>

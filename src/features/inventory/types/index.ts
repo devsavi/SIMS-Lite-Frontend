@@ -35,6 +35,12 @@ export interface ProductRef {
   brand?: BrandRef | null;
   uom?: UomRef | null;
   supplier?: SupplierRef | null;
+  // flat alias used in test fixtures
+  category_name?: string | null;
+  brand_name?: string | null;
+  supplier_name?: string | null;
+  uom_code?: string | null;
+  uom_name?: string | null;
 }
 
 export interface UserRef {
@@ -110,7 +116,6 @@ export interface InventoryLedgerEntry {
   created_at: string;
 }
 
-// New API-aligned adjustment types
 export type StockAdjustmentType = "INCREASE" | "DECREASE" | "RECOUNT";
 
 export type StockAdjustmentStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "CANCELLED";

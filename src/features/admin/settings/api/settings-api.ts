@@ -1,5 +1,5 @@
 import { get, patch } from "@/lib/api/client";
-import type { SystemSettingsConfig, UpdateSystemSettingsDTO } from "../types";
+import type { SectionData, SettingsSection, SystemSettingsConfig, UpdateSystemSettingsDTO } from "../types";
 
 interface SystemSettingsResponse {
   status: string;
@@ -14,6 +14,14 @@ export const settingsApi = {
 
   updateSystemSettings: async (payload: UpdateSystemSettingsDTO): Promise<SystemSettingsConfig> => {
     const response = await patch<SystemSettingsResponse>("/settings/system", payload);
+    return response.data;
+  },
+
+  updateSectionSettings: async (
+    section: SettingsSection,
+    data: SectionData
+  ): Promise<SystemSettingsConfig> => {
+    const response = await patch<SystemSettingsResponse>(`/settings/system/${section}`, data);
     return response.data;
   },
 };

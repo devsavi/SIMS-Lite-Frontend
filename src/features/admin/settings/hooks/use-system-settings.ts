@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { settingsApi } from "../api/settings-api";
-import type { UpdateSystemSettingsDTO } from "../types";
+import type { SectionData, SettingsSection, UpdateSystemSettingsDTO } from "../types";
 
 export const settingsKeys = {
   all: ["system-settings"] as const,
@@ -18,6 +18,22 @@ export function useUpdateSystemSettings() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: UpdateSystemSettingsDTO) => settingsApi.updateSystemSettings(payload),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(settingsKeys.all, updated);
+      queryClient.invalidateQueries({ queryKey: settingsKeys.all });
+    },
+  });
+}
+
+/**
+ * Mutation hook to update a single section of system settings.
+ * The test file imports this as `useUpdateSettingsSection`.
+ */
+export function useUpdateSettingsSection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ section, data }: { section: SettingsSection; data: SectionData }) =>
+      settingsApi.updateSectionSettings(section, data),
     onSuccess: (updated) => {
       queryClient.setQueryData(settingsKeys.all, updated);
       queryClient.invalidateQueries({ queryKey: settingsKeys.all });

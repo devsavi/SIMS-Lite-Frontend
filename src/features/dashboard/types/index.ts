@@ -72,6 +72,7 @@ export interface TopReleasedProduct {
   product_name: string;
   quantity: number;
   product_code?: string;
+  product_id?: string;
 }
 
 export interface LowStockCategory {
@@ -97,7 +98,7 @@ export interface ActivityItem {
   action: string;       // e.g. "created", "approved", "rejected"
   description: string;
   user_name: string;
-  resource_name: string | null;
+  resource_name?: string | null;
   created_at: string;
   reference?: string | null;
 }
@@ -107,16 +108,16 @@ export interface NotificationItem {
   title: string;
   message: string;
   type: string;           // e.g. "PURCHASE_ORDER", "STOCK_RELEASE"
-  priority: "HIGH" | "NORMAL" | "LOW";
-  recipient_type: "ROLE" | "USER";
-  recipient_role: string | null;
-  recipient_user_id: string | null;
-  sender_id: string;
   is_read: boolean;
-  read_at: string | null;
-  data: Record<string, unknown>;
   created_at: string;
-  updated_at: string;
+  priority?: "HIGH" | "NORMAL" | "LOW" | "CRITICAL";
+  recipient_type?: "ROLE" | "USER" | "BROADCAST";
+  recipient_role?: string | null;
+  recipient_user_id?: string | null;
+  sender_id?: string | null;
+  read_at?: string | null;
+  data?: Record<string, unknown>;
+  updated_at?: string;
 }
 
 export interface DashboardActivities {
@@ -302,6 +303,9 @@ export interface DashboardQueryParams {
 
 export interface ChartQueryParams {
   /** Year to fetch chart data for. Defaults to current year on the backend.
-   *  Must be > 2000 and ≤ current year. */
+   *  Must be > 2000 and <= current year. */
   year?: number;
+  period?: "today" | "week" | "month" | "custom";
+  from_date?: string;
+  to_date?: string;
 }

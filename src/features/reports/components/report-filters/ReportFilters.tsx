@@ -55,7 +55,22 @@ export function ReportFilters({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* Period Preset Filter */}
+        <div>
+          <select
+            aria-label="Filter by Period"
+            value={filters.period || "day"}
+            onChange={(e) => handleInputChange("period", e.target.value)}
+            className="w-full px-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-medium"
+          >
+            <option value="day">Today (Default)</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="custom">Custom Date Range</option>
+          </select>
+        </div>
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -67,6 +82,7 @@ export function ReportFilters({
             className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-input rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
+
 
         {/* Start Date */}
         <div className="relative">

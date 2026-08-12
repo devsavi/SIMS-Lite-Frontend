@@ -8,6 +8,7 @@ interface EmailConfigFormProps {
   config: EmailConfig;
   onSave: (data: UpdateEmailConfigDTO) => Promise<void>;
   isSubmitting: boolean;
+  onOpenTestModal?: () => void;
 }
 
 export function EmailConfigForm({ config, onSave, isSubmitting }: EmailConfigFormProps) {

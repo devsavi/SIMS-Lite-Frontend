@@ -38,13 +38,14 @@ export function getStockStatusLabel(status: StockStatus): string {
  */
 export function calculateNewQuantity(
   currentQty: number,
-  adjustmentType: StockAdjustmentType,
+  adjustmentType: StockAdjustmentType | string,
   adjustedQty: number
 ): number {
-  if (adjustmentType === "INCREASE") {
+  const type = String(adjustmentType).toUpperCase();
+  if (type === "INCREASE" || type === "FOUND" || type === "CYCLE_COUNT") {
     return currentQty + adjustedQty;
   }
-  if (adjustmentType === "DECREASE") {
+  if (type === "DECREASE" || type === "DAMAGE" || type === "LOSS" || type === "WRITE_OFF") {
     return currentQty - adjustedQty;
   }
   // RECOUNT — set to exact value
@@ -56,10 +57,11 @@ export function calculateNewQuantity(
  */
 export function isNegativeStockViolation(
   currentQty: number,
-  adjustmentType: StockAdjustmentType,
+  adjustmentType: StockAdjustmentType | string,
   adjustedQty: number
 ): boolean {
-  if (adjustmentType === "DECREASE" && currentQty - adjustedQty < 0) {
+  const type = String(adjustmentType).toUpperCase();
+  if ((type === "DECREASE" || type === "DAMAGE" || type === "LOSS" || type === "WRITE_OFF") && currentQty - adjustedQty < 0) {
     return true;
   }
   return false;

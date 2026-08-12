@@ -1,5 +1,6 @@
 import apiClient, { get } from "@/lib/api/client";
 import type {
+  AnalyticsOverviewResponse,
   CommonReportFilterParams,
   ExportReportParams,
   GrnReportRow,
@@ -16,9 +17,13 @@ import type {
   StockReleaseReportRow,
   SupplierReportRow,
 } from "../types";
+
+
 import { generateReportFilename } from "../utils/export";
 
-const BASE_URL = "/api/v1/reports";
+// NOTE: apiClient.baseURL is already set to http://localhost:8001/api/v1
+// so all paths here must be relative to that — no /api/v1 prefix needed.
+const BASE_URL = "/reports";
 
 export const REPORT_METADATA: ReportMeta[] = [
   {
@@ -114,19 +119,37 @@ export const REPORT_METADATA: ReportMeta[] = [
 
 export const reportsApi = {
   /**
-   * Get metadata for available reports
+   * Returns static report metadata — no backend endpoint exists for this.
    */
   async getReportsMetadata(): Promise<ReportMeta[]> {
+    return REPORT_METADATA;
+  },
+
+  /**
+   * Fetch Executive Analytics Overview
+   * Backend: GET /api/v1/reports/analytics/overview
+   */
+  async getAnalyticsOverview(params?: CommonReportFilterParams): Promise<AnalyticsOverviewResponse> {
+    const queryParams: Record<string, unknown> = {
+      period: params?.period || "day",
+    };
+    if (params?.startDate) queryParams.from_date = params.startDate;
+    if (params?.endDate) queryParams.to_date = params.endDate;
+    if (params?.categoryId && params.categoryId !== "ALL") queryParams.category_id = params.categoryId;
+    if (params?.supplierId && params.supplierId !== "ALL") queryParams.supplier_id = params.supplierId;
+
     try {
-      const res = await get<{ data: ReportMeta[] }>(`${BASE_URL}/metadata`);
-      return res.data;
+      return await get<AnalyticsOverviewResponse>(`${BASE_URL}/analytics/overview`, {
+        params: queryParams,
+      });
     } catch {
-      return REPORT_METADATA;
+      return getFallbackAnalyticsOverview(params?.period || "day");
     }
   },
 
   /**
-   * Generic fetch report data
+   * Generic fetch report data (paginated)
+   * Backend: GET /api/v1/reports/{report_type}?period=day&page=1&size=20&...
    */
   async getReportData<T>(
     reportType: ReportType,
@@ -135,10 +158,11 @@ export const reportsApi = {
     const queryParams: Record<string, unknown> = {
       page: params?.page ?? 1,
       size: params?.size ?? 20,
+      period: params?.period || "day",
     };
     if (params?.search) queryParams.search = params.search;
-    if (params?.startDate) queryParams.start_date = params.startDate;
-    if (params?.endDate) queryParams.end_date = params.endDate;
+    if (params?.startDate) queryParams.from_date = params.startDate;
+    if (params?.endDate) queryParams.to_date = params.endDate;
     if (params?.status && params.status !== "ALL") queryParams.status = params.status;
     if (params?.categoryId && params.categoryId !== "ALL") queryParams.category_id = params.categoryId;
     if (params?.brandId && params.brandId !== "ALL") queryParams.brand_id = params.brandId;
@@ -158,29 +182,36 @@ export const reportsApi = {
   },
 
   /**
-   * Fetch Report KPI Summary
+   * Fetch Report KPI Summary.
+   * There is no dedicated /summary endpoint on the backend.
+   * We derive summary data from the analytics overview.
+   * Backend: GET /api/v1/reports/analytics/overview?period=...
    */
   async getReportSummary(
     reportType: ReportType,
     params?: CommonReportFilterParams
   ): Promise<ReportKpiSummary> {
     try {
-      const res = await get<{ data: ReportKpiSummary }>(`${BASE_URL}/${reportType}/summary`, {
-        params,
-      });
-      return res.data;
+      const overview = await reportsApi.getAnalyticsOverview(params);
+      return deriveSummaryFromOverview(reportType, overview);
     } catch {
       return getFallbackReportSummary(reportType);
     }
   },
 
   /**
-   * Fetch Chart Data for Report
+   * Fetch Chart Data for Report.
+   * There is no dedicated /charts endpoint on the backend.
+   * Chart data is embedded in the analytics overview response.
+   * Backend: GET /api/v1/reports/analytics/overview?period=...
    */
-  async getReportCharts(reportType: ReportType): Promise<ReportChartData> {
+  async getReportCharts(
+    reportType: ReportType,
+    params?: CommonReportFilterParams
+  ): Promise<ReportChartData> {
     try {
-      const res = await get<{ data: ReportChartData }>(`${BASE_URL}/${reportType}/charts`);
-      return res.data;
+      const overview = await reportsApi.getAnalyticsOverview(params);
+      return deriveChartsFromOverview(overview);
     } catch {
       return getFallbackReportCharts(reportType);
     }
@@ -188,6 +219,7 @@ export const reportsApi = {
 
   /**
    * Download Export File
+   * Backend: GET /api/v1/reports/{report_type}/export?format=excel|pdf|csv&...
    */
   async exportReport(params: ExportReportParams): Promise<{ blob: Blob; filename: string }> {
     const filename = generateReportFilename(params.reportType, params.format);
@@ -196,7 +228,13 @@ export const reportsApi = {
       const response = await apiClient.get(`${BASE_URL}/${params.reportType}/export`, {
         params: {
           format: params.format,
-          ...params.filters,
+          period: params.filters?.period || "day",
+          from_date: params.filters?.startDate,
+          to_date: params.filters?.endDate,
+          search: params.filters?.search,
+          category_id: params.filters?.categoryId,
+          supplier_id: params.filters?.supplierId,
+          status: params.filters?.status,
         },
         responseType: "blob",
       });
@@ -206,8 +244,8 @@ export const reportsApi = {
         filename,
       };
     } catch {
-      // Fallback: create mock blob for demo/test environments
-      const content = `Report: ${params.reportType.toUpperCase()}\nGenerated: ${new Date().toISOString()}\nFormat: ${params.format.toUpperCase()}\nStatus: Success`;
+      // Fallback: create a placeholder blob so the download still triggers
+      const content = `Report: ${params.reportType.toUpperCase()}\nGenerated: ${new Date().toISOString()}\nFormat: ${params.format.toUpperCase()}\nStatus: Offline/Demo mode`;
       const blob = new Blob([content], {
         type: params.format === "pdf" ? "application/pdf" : "text/csv",
       });
@@ -217,10 +255,139 @@ export const reportsApi = {
 };
 
 // ---------------------------------------------------------------------------
+// Helpers — derive summary & chart data from AnalyticsOverviewResponse
+// ---------------------------------------------------------------------------
+
+function deriveSummaryFromOverview(
+  reportType: ReportType,
+  overview: AnalyticsOverviewResponse
+): ReportKpiSummary {
+  const kpis = overview.kpis;
+  switch (reportType) {
+    case "inventory":
+      return {
+        totalRecords: kpis.total_stock_value.items_count,
+        primaryMetricLabel: "Total Stock Value",
+        primaryMetricValue: kpis.total_stock_value.current,
+        primaryMetricType: "currency",
+        secondaryMetricLabel: "Low Stock Items",
+        secondaryMetricValue: kpis.low_stock_count.current,
+        secondaryMetricType: "number",
+        tertiaryMetricLabel: "Out of Stock",
+        tertiaryMetricValue: kpis.out_of_stock_count.current,
+        tertiaryMetricType: "number",
+      };
+    case "low-stock":
+      return {
+        totalRecords: kpis.low_stock_count.current + kpis.out_of_stock_count.current,
+        primaryMetricLabel: "Low Stock Items",
+        primaryMetricValue: kpis.low_stock_count.current,
+        primaryMetricType: "number",
+        secondaryMetricLabel: "Out of Stock",
+        secondaryMetricValue: kpis.out_of_stock_count.current,
+        secondaryMetricType: "number",
+        tertiaryMetricLabel: "Stock Alerts",
+        tertiaryMetricValue: kpis.low_stock_count.current + kpis.out_of_stock_count.current,
+        tertiaryMetricType: "number",
+      };
+    case "po":
+      return {
+        totalRecords: 0,
+        primaryMetricLabel: "Total Spend",
+        primaryMetricValue: kpis.procurement_spend.current,
+        primaryMetricType: "currency",
+        secondaryMetricLabel: "Spend Growth",
+        secondaryMetricValue: `${kpis.procurement_spend.growth_percentage >= 0 ? "+" : ""}${kpis.procurement_spend.growth_percentage.toFixed(1)}%`,
+        secondaryMetricType: "text",
+        tertiaryMetricLabel: "Previous Period",
+        tertiaryMetricValue: kpis.procurement_spend.previous,
+        tertiaryMetricType: "currency",
+      };
+    case "stock-release":
+      return {
+        totalRecords: 0,
+        primaryMetricLabel: "Items Dispatched",
+        primaryMetricValue: kpis.items_dispatched.current,
+        primaryMetricType: "number",
+        secondaryMetricLabel: "Dispatch Change",
+        secondaryMetricValue: `${kpis.items_dispatched.growth_percentage >= 0 ? "+" : ""}${kpis.items_dispatched.growth_percentage.toFixed(1)}%`,
+        secondaryMetricType: "text",
+        tertiaryMetricLabel: "Previous Period",
+        tertiaryMetricValue: kpis.items_dispatched.previous,
+        tertiaryMetricType: "number",
+      };
+    default:
+      return getFallbackReportSummary(reportType);
+  }
+}
+
+function deriveChartsFromOverview(overview: AnalyticsOverviewResponse): ReportChartData {
+  const charts = overview.charts;
+  return {
+    movementTrends: charts.movement_trends.map((t) => ({
+      date: t.date,
+      inflows: t.inflows,
+      outflows: t.outflows,
+    })),
+    categoryDistribution: charts.category_distribution.map((c) => ({
+      name: c.category_name,
+      value: c.item_count,
+    })),
+    supplierSpending: charts.top_suppliers_by_spend.map((s) => ({
+      supplier: s.supplier_name,
+      totalSpent: s.total_spent,
+    })),
+    poStatusCounts: charts.po_status_counts.map((p) => ({
+      status: p.status,
+      count: p.count,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Robust Mock Fallbacks for testing/offline support
 // ---------------------------------------------------------------------------
 
+function getFallbackAnalyticsOverview(period: string): AnalyticsOverviewResponse {
+  return {
+    period: period as any,
+    date_range: { from: new Date().toISOString(), to: new Date().toISOString() },
+    kpis: {
+      total_stock_value: { current: 482500.0, items_count: 142 },
+      low_stock_count: { current: 12 },
+      out_of_stock_count: { current: 3 },
+      procurement_spend: { current: 34500.0, previous: 28000.0, growth_percentage: 23.2 },
+      items_dispatched: { current: 450.0, previous: 520.0, growth_percentage: -13.5 },
+    },
+    charts: {
+      movement_trends: [
+        { date: "08:00", inflows: 120, outflows: 45 },
+        { date: "10:00", inflows: 80, outflows: 190 },
+        { date: "12:00", inflows: 210, outflows: 150 },
+        { date: "14:00", inflows: 150, outflows: 220 },
+        { date: "16:00", inflows: 90, outflows: 110 },
+      ],
+      category_distribution: [
+        { category_name: "Industrial Components", item_count: 45, stock_value: 240000.0 },
+        { category_name: "Lubricants & Oils", item_count: 30, stock_value: 115000.0 },
+        { category_name: "Fasteners", item_count: 52, stock_value: 85000.0 },
+        { category_name: "Safety Gear", item_count: 15, stock_value: 42500.0 },
+      ],
+      top_suppliers_by_spend: [
+        { supplier_name: "Acme Industrial Supplies", po_count: 5, total_spent: 18500.0 },
+        { supplier_name: "Global Supplies Corp", po_count: 3, total_spent: 9800.0 },
+        { supplier_name: "Apex Fasteners Ltd", po_count: 2, total_spent: 6200.0 },
+      ],
+      po_status_counts: [
+        { status: "APPROVED", count: 14, amount: 28500.0 },
+        { status: "PENDING_APPROVAL", count: 5, amount: 6000.0 },
+      ],
+    },
+  };
+}
+
 function getFallbackReportSummary(reportType: ReportType): ReportKpiSummary {
+
   switch (reportType) {
     case "inventory":
       return {

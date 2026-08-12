@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { emailApi } from "../api/email-api";
-import type { UpdateEmailConfigDTO } from "../types";
+import type { TestConnectionPayload, UpdateEmailConfigDTO } from "../types";
 
 export const emailKeys = {
   config: ["email-config"] as const,
@@ -22,5 +22,14 @@ export function useUpdateEmailConfig() {
       queryClient.setQueryData(emailKeys.config, updated);
       queryClient.invalidateQueries({ queryKey: emailKeys.config });
     },
+  });
+}
+
+/**
+ * Mutation hook to test the SMTP email connection by sending a test message.
+ */
+export function useTestEmailConnection() {
+  return useMutation({
+    mutationFn: (payload: TestConnectionPayload | string) => emailApi.testConnection(payload),
   });
 }

@@ -94,7 +94,7 @@ export const productsApi = {
       if (res.data instanceof Blob) {
         blob = res.data;
       } else {
-        const contentType = (res.headers && res.headers["content-type"]) || "image/jpeg";
+        const contentType = String((res.headers && (res.headers["content-type"] || (res.headers as any).get?.("content-type"))) || "image/jpeg");
         blob = new Blob([res.data], { type: contentType });
       }
       if (blob.size === 0) return null;

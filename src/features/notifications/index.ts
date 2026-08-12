@@ -46,7 +46,7 @@ export type {
   ComposeNotificationPayload,
   NotificationPreferences,
   WsEventType,
-  WsEvent,
+  WsServerEvent,
 } from "./types";
 
 // Schemas

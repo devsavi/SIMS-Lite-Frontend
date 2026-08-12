@@ -25,12 +25,15 @@ export interface ReportMeta {
   supportedFormats: ("excel" | "csv" | "pdf")[];
 }
 
+export type ReportPeriod = "day" | "week" | "month" | "custom";
+
 export interface DateRangeFilter {
   startDate?: string;
   endDate?: string;
 }
 
 export interface CommonReportFilterParams extends DateRangeFilter {
+  period?: ReportPeriod;
   search?: string;
   page?: number;
   size?: number;
@@ -43,6 +46,25 @@ export interface CommonReportFilterParams extends DateRangeFilter {
   productId?: string;
   actionType?: string;
 }
+
+export interface AnalyticsOverviewResponse {
+  period: ReportPeriod;
+  date_range: { from: string; to: string };
+  kpis: {
+    total_stock_value: { current: number; items_count: number };
+    low_stock_count: { current: number };
+    out_of_stock_count: { current: number };
+    procurement_spend: { current: number; previous: number; growth_percentage: number };
+    items_dispatched: { current: number; previous: number; growth_percentage: number };
+  };
+  charts: {
+    movement_trends: { date: string; inflows: number; outflows: number }[];
+    category_distribution: { category_name: string; item_count: number; stock_value: number }[];
+    top_suppliers_by_spend: { supplier_name: string; po_count: number; total_spent: number }[];
+    po_status_counts: { status: string; count: number; amount: number }[];
+  };
+}
+
 
 // 1. Inventory Report Item
 export interface InventoryReportRow {
@@ -148,15 +170,20 @@ export interface PaginatedReportResponse<T> {
 }
 
 // Report KPI Summaries
+export type ReportMetricType = "currency" | "number" | "text";
+
 export interface ReportKpiSummary {
   totalRecords: number;
   totalValue?: number;
   primaryMetricLabel: string;
   primaryMetricValue: number | string;
+  primaryMetricType?: ReportMetricType;
   secondaryMetricLabel?: string;
   secondaryMetricValue?: number | string;
+  secondaryMetricType?: ReportMetricType;
   tertiaryMetricLabel?: string;
   tertiaryMetricValue?: number | string;
+  tertiaryMetricType?: ReportMetricType;
 }
 
 // Chart dataset structures

@@ -40,7 +40,7 @@ export function ProductFormDialog({
       // always send null so the backend receives an explicit value.
       description: null,
       selling_price: null,
-    } as ProductFormValues;
+    } as unknown as ProductFormValues;
     if (isEditing) {
       await updateMutation.mutateAsync(payload);
     } else {

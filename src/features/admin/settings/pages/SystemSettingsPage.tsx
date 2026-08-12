@@ -137,7 +137,7 @@ export function SystemSettingsPage() {
                 />
               )}
 
-              {activeSection === "numbering" && (
+              {activeSection === "numbering" && config.numbering && (
                 <NumberingSettingsForm
                   settings={config.numbering}
                   onSave={handleSaveNumbering}
