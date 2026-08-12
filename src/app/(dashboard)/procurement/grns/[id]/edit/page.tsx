@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { PageHeader } from "@/components/common/page-header";
+import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { GRNForm } from "@/features/procurement/grns/components/GRNForm";
 import {
@@ -100,36 +101,40 @@ export default function EditGRNPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-5xl mx-auto">
+      <PageContainer className="space-y-4">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-64 w-full" />
-      </div>
+      </PageContainer>
     );
   }
 
   if (error || !grn) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-rose-600">GRN Not Found</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          The requested Goods Received Note could not be loaded.
-        </p>
-      </div>
+      <PageContainer>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-rose-600">GRN Not Found</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            The requested Goods Received Note could not be loaded.
+          </p>
+        </div>
+      </PageContainer>
     );
   }
 
   if (grn.status !== "DRAFT") {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-amber-600">
-          GRN Cannot Be Edited
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Only draft GRNs can be edited. This GRN is{" "}
-          <strong>{grn.status}</strong>.
-        </p>
-      </div>
+      <PageContainer>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-amber-600">
+            GRN Cannot Be Edited
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Only draft GRNs can be edited. This GRN is{" "}
+            <strong>{grn.status}</strong>.
+          </p>
+        </div>
+      </PageContainer>
     );
   }
 
@@ -170,21 +175,21 @@ export default function EditGRNPage() {
       };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Edit GRN — {grn.grn_number}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Update the draft Goods Received Note before submitting.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-          Back
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title={`Edit GRN — ${grn.grn_number}`}
+        description="Update the draft Goods Received Note before submitting."
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Procurement", href: "/procurement/grns" },
+              { label: "GRN", href: "/procurement/grns" },
+              { label: grn.grn_number, href: `/procurement/grns/${id}` },
+              { label: "Edit" },
+            ]}
+          />
+        }
+      />
 
       <GRNForm
         approvedPOs={[]}
@@ -195,6 +200,6 @@ export default function EditGRNPage() {
         onSubmit={handleSubmit}
         isLoading={updateMutation.isPending}
       />
-    </div>
+    </PageContainer>
   );
 }

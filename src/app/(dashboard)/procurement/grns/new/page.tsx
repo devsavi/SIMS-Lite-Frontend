@@ -1,78 +1,67 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/common/page-header";
+import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { GRNForm } from "@/features/procurement/grns/components/GRNForm";
 import { useCreateGRN } from "@/features/procurement/grns/hooks/use-grns";
-import {
-  usePurchaseOrders,
-  usePurchaseOrder,
-} from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
+import { usePurchaseOrders } from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
 import { useSuppliers } from "@/features/master-data/hooks/use-suppliers";
 import { useProducts } from "@/features/master-data/hooks/use-products";
 import type { GRNFormValues } from "@/features/procurement/grns/schemas/grn.schema";
+import type { PurchaseOrder } from "@/features/procurement/purchase-orders/types";
 
 export default function NewGRNPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const poIdParam = searchParams.get("poId");
-
-  const [selectedPOId, setSelectedPOId] = React.useState<string>(
-    poIdParam || ""
-  );
-
   const createMutation = useCreateGRN();
+  const [selectedPOId, setSelectedPOId] = React.useState<string>("");
 
-  // PO-based data
-  const { data: posData, refetch: refetchPOs } = usePurchaseOrders({
-    status: "APPROVED",
-    size: 100,
-  });
+  const { data: posData } = usePurchaseOrders();
+  const { data: suppliersData } = useSuppliers();
+  const { data: productsData } = useProducts();
 
-  // Refetch approved POs every time this page mounts so a recently-approved
-  // PO shows up immediately without waiting for the cache to expire.
-  React.useEffect(() => {
-    void refetchPOs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const approvedPOs = React.useMemo(() => {
+    const list: PurchaseOrder[] = Array.isArray(posData)
+      ? posData
+      : (posData as any)?.data || [];
+    return list.filter((po) => po.status === "APPROVED" || po.status === "PARTIALLY_RECEIVED");
+  }, [posData]);
 
-  const approvedPOs = React.useMemo(() => posData?.data || [], [posData]);
-
-  const { data: selectedPOResponse } = usePurchaseOrder(selectedPOId);
-  const selectedPO = selectedPOResponse?.data;
-
-  // Direct (PO-less) data
-  const { data: suppliersData } = useSuppliers({ page: 1, page_size: 100, is_active: true });
-  const { data: productsData } = useProducts({ page: 1, size: 100, active_only: true });
-
-  const suppliers = React.useMemo(
-    () =>
-      (suppliersData?.data ?? []).map((s) => ({
-        id: s.id,
-        name: s.company_name,
-      })),
-    [suppliersData]
+  const selectedPO = React.useMemo(
+    () => approvedPOs.find((po) => po.id === selectedPOId),
+    [approvedPOs, selectedPOId]
   );
 
-  const products = React.useMemo(
-    () =>
-      (productsData?.data ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        sku: p.sku,
-        cost_price: p.cost_price,
-      })),
-    [productsData]
-  );
+  const suppliers = React.useMemo(() => {
+    const list = Array.isArray(suppliersData)
+      ? suppliersData
+      : (suppliersData as any)?.data || [];
+    return list.map((s: any) => ({
+      id: s.id,
+      name: s.name || s.company_name || s.supplier_name || "",
+    }));
+  }, [suppliersData]);
+
+  const products = React.useMemo(() => {
+    const list = Array.isArray(productsData)
+      ? productsData
+      : (productsData as any)?.data || [];
+    return list.map((p: any) => ({
+      id: p.id,
+      name: p.name || p.product_name || "",
+      sku: p.sku || "",
+      cost_price: p.cost_price ?? p.costPrice,
+    }));
+  }, [productsData]);
 
   const handleSubmit = (values: GRNFormValues) => {
     if (values.mode === "po_based") {
       createMutation.mutate(
         {
           purchase_order_id: values.purchase_order_id,
-          received_date: values.received_date,
+          received_date: new Date(values.received_date).toISOString(),
           delivery_note_number: values.delivery_note_number || undefined,
           notes: values.notes || undefined,
           items: values.items.map((item) => ({
@@ -90,11 +79,10 @@ export default function NewGRNPage() {
         }
       );
     } else {
-      // PO-less: omit po_item_id entirely from items
       createMutation.mutate(
         {
           supplier_id: values.supplier_id,
-          received_date: values.received_date,
+          received_date: new Date(values.received_date).toISOString(),
           delivery_note_number: values.delivery_note_number || undefined,
           notes: values.notes || undefined,
           items: values.items.map((item) => ({
@@ -114,22 +102,20 @@ export default function NewGRNPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Create Goods Received Note
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Receive a delivery against a Purchase Order or directly from a
-            supplier.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-          Back
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Create Goods Received Note"
+        description="Receive a delivery against a Purchase Order or directly from a supplier."
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Procurement", href: "/procurement/grns" },
+              { label: "GRN", href: "/procurement/grns" },
+              { label: "New" },
+            ]}
+          />
+        }
+      />
 
       <GRNForm
         approvedPOs={approvedPOs}
@@ -140,6 +126,6 @@ export default function NewGRNPage() {
         onSubmit={handleSubmit}
         isLoading={createMutation.isPending}
       />
-    </div>
+    </PageContainer>
   );
 }

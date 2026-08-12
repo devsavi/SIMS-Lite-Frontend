@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { PageHeader } from "@/components/common/page-header";
+import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { PurchaseOrderForm } from "@/features/procurement/purchase-orders/components/PurchaseOrderForm";
 import {
@@ -71,52 +72,56 @@ export default function EditPurchaseOrderPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-5xl mx-auto">
+      <PageContainer className="space-y-4">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full" />
-      </div>
+      </PageContainer>
     );
   }
 
   if (error || !po) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-rose-600">
-          Purchase Order Not Found
-        </h2>
-      </div>
+      <PageContainer>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-rose-600">
+            Purchase Order Not Found
+          </h2>
+        </div>
+      </PageContainer>
     );
   }
 
   if (po.status !== "DRAFT") {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-amber-600">
-          Cannot Edit Purchase Order
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Only draft purchase orders can be edited.
-        </p>
-      </div>
+      <PageContainer>
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-amber-600">
+            Cannot Edit Purchase Order
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Only draft purchase orders can be edited.
+          </p>
+        </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Edit Purchase Order
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {po.po_number} — Draft
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-          Back
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Edit Purchase Order"
+        description={`${po.po_number} — Draft`}
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Procurement", href: "/procurement/purchase-orders" },
+              { label: "Purchase Orders", href: "/procurement/purchase-orders" },
+              { label: po.po_number, href: `/procurement/purchase-orders/${id}` },
+              { label: "Edit" },
+            ]}
+          />
+        }
+      />
 
       <PurchaseOrderForm
         initialData={po}
@@ -133,6 +138,6 @@ export default function EditPurchaseOrderPage() {
         onSubmit={handleSubmit}
         isLoading={updateMutation.isPending}
       />
-    </div>
+    </PageContainer>
   );
 }

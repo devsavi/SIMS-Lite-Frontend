@@ -3,8 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { PageHeader } from "@/components/common/page-header";
+import { PageContainer } from "@/components/common/page-container";
+import { Breadcrumb } from "@/components/common";
 import { PurchaseOrderForm } from "@/features/procurement/purchase-orders/components/PurchaseOrderForm";
 import { useCreatePurchaseOrder } from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
 import type { PurchaseOrderFormValues } from "@/features/procurement/purchase-orders/schemas/po.schema";
@@ -59,21 +60,20 @@ export default function NewPurchaseOrderPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Create Purchase Order
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Issue a new purchase order to a supplier.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-          Back
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Create Purchase Order"
+        description="Issue a new purchase order to a supplier."
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Procurement", href: "/procurement/purchase-orders" },
+              { label: "Purchase Orders", href: "/procurement/purchase-orders" },
+              { label: "New" },
+            ]}
+          />
+        }
+      />
 
       <PurchaseOrderForm
         suppliers={suppliersList.map((s: any) => ({
@@ -89,6 +89,6 @@ export default function NewPurchaseOrderPage() {
         onSubmit={handleSubmit}
         isLoading={createMutation.isPending}
       />
-    </div>
+    </PageContainer>
   );
 }

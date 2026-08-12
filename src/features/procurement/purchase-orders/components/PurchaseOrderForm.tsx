@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/components/ui/table";
+import { MessageSquarePlus, X } from "lucide-react";
 import {
   purchaseOrderSchema,
   type PurchaseOrderFormValues,
@@ -167,6 +168,26 @@ export function PurchaseOrderForm({
     }))
   );
 
+  // ── Expandable notes per row ──
+  const [openNotes, setOpenNotes] = React.useState<Record<number, boolean>>(() => {
+    const initial: Record<number, boolean> = {};
+    defaultItemsForms.forEach((item, idx) => {
+      if (item.notes && item.notes.trim().length > 0) {
+        initial[idx] = true;
+      }
+    });
+    return initial;
+  });
+
+  const toggleNoteRow = (index: number) => {
+    setOpenNotes((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  const handleRemoveNote = (index: number) => {
+    setValue(`items.${index}.notes`, "", { shouldDirty: true });
+    setOpenNotes((prev) => ({ ...prev, [index]: false }));
+  };
+
   // Keep rowValues in sync when rows are added / removed
   const appendRow = () => {
     const blank = {
@@ -187,6 +208,18 @@ export function PurchaseOrderForm({
   const removeRow = (index: number) => {
     remove(index);
     setRowValues((prev) => prev.filter((_, i) => i !== index));
+    setOpenNotes((prev) => {
+      const next: Record<number, boolean> = {};
+      Object.keys(prev).forEach((k) => {
+        const keyIdx = Number(k);
+        if (keyIdx < index) {
+          next[keyIdx] = prev[keyIdx];
+        } else if (keyIdx > index) {
+          next[keyIdx - 1] = prev[keyIdx];
+        }
+      });
+      return next;
+    });
   };
 
   // Update a single numeric field in both RHF and local state simultaneously
@@ -326,9 +359,9 @@ export function PurchaseOrderForm({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[28%]">Product *</TableHead>
+                <TableHead className="w-[30%]">Product *</TableHead>
                 <TableHead className="w-[12%] text-right">Qty *</TableHead>
-                <TableHead className="w-[14%] text-right">
+                <TableHead className="w-[16%] text-right">
                   Unit Price ({baseCurrency}) *
                 </TableHead>
                 <TableHead className="w-[10%] text-right">Disc %</TableHead>
@@ -336,8 +369,7 @@ export function PurchaseOrderForm({
                 <TableHead className="w-[14%] text-right">
                   Line Total ({baseCurrency})
                 </TableHead>
-                <TableHead className="w-[7%]">Notes</TableHead>
-                <TableHead className="w-[5%]" />
+                <TableHead className="w-[8%] text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -349,128 +381,172 @@ export function PurchaseOrderForm({
                   tax_percent: 0,
                 };
                 const lineTotal = calcLineTotal(row);
+                const hasNote = openNotes[index];
 
                 return (
-                  <TableRow key={field.id}>
-                    {/* Product */}
-                    <TableCell>
-                      <Select
-                        defaultValue={field.product_id}
-                        onValueChange={(val) => handleProductSelect(index, val)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select product" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {products.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.name} ({p.sku})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.items?.[index]?.product_id && (
-                        <p className="mt-1 text-xs text-rose-500">
-                          {errors.items[index]?.product_id?.message}
-                        </p>
-                      )}
-                    </TableCell>
+                  <React.Fragment key={field.id}>
+                    <TableRow>
+                      {/* Product */}
+                      <TableCell>
+                        <Select
+                          defaultValue={field.product_id}
+                          onValueChange={(val) => handleProductSelect(index, val)}
+                        >
+                          <SelectTrigger aria-label={`Select product for row ${index + 1}`}>
+                            <SelectValue placeholder="Select product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.name} ({p.sku})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.items?.[index]?.product_id && (
+                          <p className="mt-1 text-xs text-rose-500">
+                            {errors.items[index]?.product_id?.message}
+                          </p>
+                        )}
+                        {!hasNote && (
+                          <button
+                            type="button"
+                            onClick={() => toggleNoteRow(index)}
+                            className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors mt-1.5"
+                            aria-label={`Add note for item ${index + 1}`}
+                          >
+                            <MessageSquarePlus className="h-3.5 w-3.5" />
+                            <span>Add note</span>
+                          </button>
+                        )}
+                      </TableCell>
 
-                    {/* Quantity */}
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="1"
-                        step="1"
-                        className="text-right"
-                        value={row.quantity_ordered}
-                        onChange={(e) =>
-                          handleNumericChange(index, "quantity_ordered", e.target.value)
-                        }
-                      />
-                      {errors.items?.[index]?.quantity_ordered && (
-                        <p className="mt-1 text-xs text-rose-500">
-                          {errors.items[index]?.quantity_ordered?.message}
-                        </p>
-                      )}
-                    </TableCell>
+                      {/* Quantity */}
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="1"
+                          step="1"
+                          className="text-right"
+                          value={row.quantity_ordered}
+                          onChange={(e) =>
+                            handleNumericChange(index, "quantity_ordered", e.target.value)
+                          }
+                        />
+                        {errors.items?.[index]?.quantity_ordered && (
+                          <p className="mt-1 text-xs text-rose-500">
+                            {errors.items[index]?.quantity_ordered?.message}
+                          </p>
+                        )}
+                      </TableCell>
 
-                    {/* Unit Price */}
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="text-right"
-                        value={row.unit_price}
-                        onChange={(e) =>
-                          handleNumericChange(index, "unit_price", e.target.value)
-                        }
-                      />
-                      {errors.items?.[index]?.unit_price && (
-                        <p className="mt-1 text-xs text-rose-500">
-                          {errors.items[index]?.unit_price?.message}
-                        </p>
-                      )}
-                    </TableCell>
+                      {/* Unit Price */}
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className="text-right"
+                          value={row.unit_price}
+                          onChange={(e) =>
+                            handleNumericChange(index, "unit_price", e.target.value)
+                          }
+                        />
+                        {errors.items?.[index]?.unit_price && (
+                          <p className="mt-1 text-xs text-rose-500">
+                            {errors.items[index]?.unit_price?.message}
+                          </p>
+                        )}
+                      </TableCell>
 
-                    {/* Discount % */}
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        className="text-right"
-                        value={row.discount_percent}
-                        onChange={(e) =>
-                          handleNumericChange(index, "discount_percent", e.target.value)
-                        }
-                      />
-                    </TableCell>
+                      {/* Discount % */}
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          className="text-right"
+                          value={row.discount_percent}
+                          onChange={(e) =>
+                            handleNumericChange(index, "discount_percent", e.target.value)
+                          }
+                        />
+                      </TableCell>
 
-                    {/* Tax % */}
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        className="text-right"
-                        value={row.tax_percent}
-                        onChange={(e) =>
-                          handleNumericChange(index, "tax_percent", e.target.value)
-                        }
-                      />
-                    </TableCell>
+                      {/* Tax % */}
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          className="text-right"
+                          value={row.tax_percent}
+                          onChange={(e) =>
+                            handleNumericChange(index, "tax_percent", e.target.value)
+                          }
+                        />
+                      </TableCell>
 
-                    {/* Line Total — reads from rowValues, updates instantly */}
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(lineTotal)}
-                    </TableCell>
+                      {/* Line Total — reads from rowValues, updates instantly */}
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(lineTotal)}
+                      </TableCell>
 
-                    {/* Notes */}
-                    <TableCell>
-                      <Input
-                        placeholder="Note"
-                        {...register(`items.${index}.notes`)}
-                      />
-                    </TableCell>
+                      {/* Actions: Remove row */}
+                      <TableCell className="text-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={fields.length === 1}
+                          onClick={() => removeRow(index)}
+                          className="h-8 w-8 p-0 text-rose-500 hover:text-rose-700"
+                          title="Remove row"
+                          aria-label={`Remove row ${index + 1}`}
+                        >
+                          ✕
+                        </Button>
+                      </TableCell>
+                    </TableRow>
 
-                    {/* Remove */}
-                    <TableCell className="text-center">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={fields.length === 1}
-                        onClick={() => removeRow(index)}
-                        className="text-rose-500 hover:text-rose-700"
-                      >
-                        ✕
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                    {/* Expandable Line Item Note Row — matches Stock Release UI */}
+                    {hasNote && (
+                      <TableRow className="bg-muted/20 hover:bg-muted/20 border-t-0">
+                        <TableCell colSpan={7} className="pt-1 pb-3 px-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-semibold text-muted-foreground">
+                                Item Note
+                                <span className="font-normal text-muted-foreground/70">
+                                  {" "}
+                                  (optional)
+                                </span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveNote(index)}
+                                className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                                aria-label={`Remove note for row ${index + 1}`}
+                              >
+                                <X className="h-3 w-3" />
+                                Remove
+                              </button>
+                            </div>
+                            <Input
+                              type="text"
+                              placeholder="Add a note for this item..."
+                              aria-label={`Notes for row ${index + 1}`}
+                              {...register(`items.${index}.notes`)}
+                              className="text-xs"
+                              autoFocus
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </TableBody>
