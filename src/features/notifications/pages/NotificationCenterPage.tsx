@@ -117,7 +117,7 @@ export function NotificationCenterPage() {
   const { data: unreadCount = 0 } = useUnreadCount();
   const { mutate: markAllAsRead, isPending: isMarkingAll } = useMarkAllAsRead();
   const { can } = useAuthStore();
-  const isAdmin = can("settings.edit");
+  const canCompose = can("notifications.send");
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   return (
@@ -184,8 +184,8 @@ export function NotificationCenterPage() {
               </Button>
             )}
 
-            {/* Admin compose */}
-            {isAdmin && (
+            {/* Compose notification */}
+            {canCompose && (
               <ComposeNotification
                 trigger={
                   <Button size="sm">

@@ -67,6 +67,22 @@ function isDuplicate(id: string): boolean {
   return false;
 }
 
+/**
+ * Register service worker for system push & mobile notifications.
+ */
+export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    return registration;
+  } catch (err) {
+    console.warn("ServiceWorker registration failed:", err);
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Show notification
 // ---------------------------------------------------------------------------
@@ -84,28 +100,51 @@ export interface BrowserNotificationOptions {
 }
 
 /**
- * Show a browser (desktop) notification.
+ * Show a browser (desktop/mobile) notification.
  * - Silently skips if permission is not granted.
  * - Silently skips if the document is focused and forceShowWhenFocused is false.
  * - Deduplicates by `id` within a 5-second window.
+ * - Uses ServiceWorker registration if available (required on Mobile Chrome), falling back to Notification constructor.
  */
-export function showBrowserNotification(opts: BrowserNotificationOptions): void {
+export async function showBrowserNotification(opts: BrowserNotificationOptions): Promise<void> {
   if (!isBrowserNotificationsSupported()) return;
   if (Notification.permission !== "granted") return;
   if (!opts.forceShowWhenFocused && document.visibilityState === "visible") return;
   if (isDuplicate(opts.id)) return;
 
-  const n = new Notification(opts.title, {
+  const title = opts.title;
+  const options: NotificationOptions = {
     body: opts.body,
     icon: opts.icon ?? "/favicon.ico",
     tag: opts.tag ?? opts.id,
-  });
+    data: { url: "/notifications" },
+  };
 
-  if (opts.onClick) {
-    n.addEventListener("click", () => {
-      window.focus();
-      opts.onClick!();
-      n.close();
-    });
+  // Try ServiceWorker showNotification first (required on Android Chrome / Mobile browsers)
+  if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg && typeof reg.showNotification === "function") {
+        await reg.showNotification(title, options);
+        return;
+      }
+    } catch {
+      // Fall through to standard Notification constructor
+    }
+  }
+
+  // Fallback to Notification constructor for Desktop browsers
+  try {
+    const n = new Notification(title, options);
+    if (opts.onClick) {
+      n.addEventListener("click", () => {
+        if (typeof window !== "undefined") window.focus();
+        opts.onClick!();
+        n.close();
+      });
+    }
+  } catch (err) {
+    console.warn("Browser notification display failed:", err);
   }
 }
+

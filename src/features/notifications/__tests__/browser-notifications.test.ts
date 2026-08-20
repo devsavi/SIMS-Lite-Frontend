@@ -8,6 +8,7 @@ import {
   getCurrentPermission,
   requestPermission,
   showBrowserNotification,
+  registerServiceWorker,
 } from "../utils/browser-notifications";
 
 // ---------------------------------------------------------------------------
@@ -109,6 +110,23 @@ describe("requestPermission", () => {
 });
 
 // ---------------------------------------------------------------------------
+// registerServiceWorker
+// ---------------------------------------------------------------------------
+
+describe("registerServiceWorker", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("registers service worker when navigator.serviceWorker exists", async () => {
+    const mockRegister = vi.fn().mockResolvedValue({ scope: "/" });
+    vi.stubGlobal("navigator", { serviceWorker: { register: mockRegister } });
+
+    const reg = await registerServiceWorker();
+    expect(mockRegister).toHaveBeenCalledWith("/sw.js", { scope: "/" });
+    expect(reg).toEqual({ scope: "/" });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // showBrowserNotification
 // ---------------------------------------------------------------------------
 
@@ -118,14 +136,14 @@ describe("showBrowserNotification", () => {
     vi.restoreAllMocks();
   });
 
-  it("does not throw when permission is not granted", () => {
+  it("does not throw when permission is not granted", async () => {
     vi.stubGlobal("Notification", makeNotifClass("denied"));
-    expect(() =>
+    await expect(
       showBrowserNotification({ id: "no-perm-1", title: "Test" })
-    ).not.toThrow();
+    ).resolves.not.toThrow();
   });
 
-  it("does not show notification when document is focused", () => {
+  it("does not show notification when document is focused and forceShowWhenFocused is false", async () => {
     vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
 
     const constructorSpy = vi.fn();
@@ -140,11 +158,36 @@ describe("showBrowserNotification", () => {
     }
     vi.stubGlobal("Notification", FakeNotif);
 
-    showBrowserNotification({ id: "visible-1", title: "Should not show" });
+    await showBrowserNotification({ id: "visible-1", title: "Should not show" });
     expect(constructorSpy).not.toHaveBeenCalled();
   });
 
-  it("shows notification when document is hidden", () => {
+  it("shows notification when forceShowWhenFocused is true even if focused", async () => {
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+
+    const constructorSpy = vi.fn();
+    class FakeNotif {
+      static permission = "granted";
+      static requestPermission = vi.fn();
+      addEventListener = vi.fn();
+      close = vi.fn();
+      constructor(title: string, opts?: object) {
+        constructorSpy(title, opts);
+      }
+    }
+    vi.stubGlobal("Notification", FakeNotif);
+
+    await showBrowserNotification({
+      id: "force-visible-1",
+      title: "Forced Alert",
+      forceShowWhenFocused: true,
+    });
+    expect(constructorSpy).toHaveBeenCalledWith("Forced Alert", expect.objectContaining({
+      tag: "force-visible-1",
+    }));
+  });
+
+  it("shows notification when document is hidden", async () => {
     vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
 
     const constructorSpy = vi.fn();
@@ -159,7 +202,7 @@ describe("showBrowserNotification", () => {
     }
     vi.stubGlobal("Notification", FakeNotif);
 
-    showBrowserNotification({
+    await showBrowserNotification({
       id: "show-hidden-1",
       title: "Alert",
       body: "Message body",
@@ -168,10 +211,11 @@ describe("showBrowserNotification", () => {
       body: "Message body",
       icon: "/favicon.ico",
       tag: "show-hidden-1",
+      data: { url: "/notifications" },
     });
   });
 
-  it("deduplicates notifications with the same id within the window", () => {
+  it("deduplicates notifications with the same id within the window", async () => {
     vi.useFakeTimers();
     vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
 
@@ -188,10 +232,11 @@ describe("showBrowserNotification", () => {
     vi.stubGlobal("Notification", FakeNotif);
 
     const UNIQUE_ID = `dedup-test-${Math.random()}`;
-    showBrowserNotification({ id: UNIQUE_ID, title: "First" });
-    showBrowserNotification({ id: UNIQUE_ID, title: "Duplicate - same id" });
+    await showBrowserNotification({ id: UNIQUE_ID, title: "First" });
+    await showBrowserNotification({ id: UNIQUE_ID, title: "Duplicate - same id" });
     expect(constructorSpy).toHaveBeenCalledTimes(1);
 
     vi.useRealTimers();
   });
 });
+

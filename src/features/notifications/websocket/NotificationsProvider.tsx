@@ -26,7 +26,7 @@ import { accessToken, refreshToken } from "@/lib/auth/token";
 import { authApi } from "@/features/auth/api/auth-api";
 import { notificationKeys } from "../hooks/use-notifications";
 import { toast } from "@/app/components/ui/use-toast";
-import { showBrowserNotification } from "../utils/browser-notifications";
+import { showBrowserNotification, registerServiceWorker } from "../utils/browser-notifications";
 import type {
   Notification,
   NotificationSummary,
@@ -85,10 +85,11 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
   );
 
   // -------------------------------------------------------------------------
-  // Wire token getter once
+  // Wire token getter once & register Service Worker for notifications
   // -------------------------------------------------------------------------
   React.useEffect(() => {
     configureWsClient({ getToken: () => accessToken.get() });
+    registerServiceWorker();
   }, []);
 
   // -------------------------------------------------------------------------
@@ -104,6 +105,23 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
 
     const unsubStatus = ws.onStatus(setStatus);
     ws.connect();
+
+    // -----------------------------------------------------------------------
+    // Toast deduplication — prevents showing two toasts when the backend sends
+    // both notification.new and notification.broadcast for the same notification.
+    // -----------------------------------------------------------------------
+    const _toastedIds = new Set<string>();
+    function toastOnce(id: string, title: string, message: string | undefined, isUrgent: boolean) {
+      if (_toastedIds.has(id)) return;
+      _toastedIds.add(id);
+      // Auto-clean after 5 s so repeated distinct notifications aren't suppressed
+      setTimeout(() => _toastedIds.delete(id), 5_000);
+      toast({
+        title,
+        description: message,
+        variant: isUrgent ? "destructive" : "default",
+      });
+    }
 
     // -----------------------------------------------------------------------
     // Helpers
@@ -248,11 +266,7 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
         const isUrgent =
           notification.priority === "HIGH" || notification.priority === "CRITICAL";
 
-        toast({
-          title: notification.title,
-          description: notification.message,
-          variant: isUrgent ? "destructive" : "default",
-        });
+        toastOnce(notification.id, notification.title, notification.message, isUrgent);
 
         maybeShowBrowserNotification({
           id: notification.id,
@@ -292,11 +306,7 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
         const isUrgent =
           notification.priority === "HIGH" || notification.priority === "CRITICAL";
 
-        toast({
-          title: notification.title,
-          description: notification.message,
-          variant: isUrgent ? "destructive" : "default",
-        });
+        toastOnce(notification.id, notification.title, notification.message, isUrgent);
 
         maybeShowBrowserNotification({
           id: notification.id,
