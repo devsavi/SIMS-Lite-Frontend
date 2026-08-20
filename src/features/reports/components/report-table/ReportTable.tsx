@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { StatusBadge, type StatusVariant } from "@/components/common/status-badge";
+import { StockReleaseStatusBadge } from "@/features/stock-release/components/release-status/StockReleaseStatusBadge";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { formatCurrency } from "@/utils/format";
@@ -24,6 +25,29 @@ interface ReportTableProps {
   page?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+}
+
+function formatStatusLabel(status: string): string {
+  if (!status) return "";
+  const labelMap: Record<string, string> = {
+    SUBMITTED: "Submitted",
+    PENDING_APPROVAL: "Pending Approval",
+    PARTIALLY_RECEIVED: "Partially Received",
+    IN_STOCK: "In Stock",
+    LOW_STOCK: "Low Stock",
+    OUT_OF_STOCK: "Out of Stock",
+    APPROVED: "Approved",
+    CANCELLED: "Cancelled",
+    DRAFT: "Draft",
+    COMPLETED: "Completed",
+    ACTIVE: "Active",
+    INACTIVE: "Inactive",
+  };
+  if (labelMap[status]) return labelMap[status];
+  return status
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
 }
 
 function getBadgeVariant(status: string): StatusVariant {
@@ -223,7 +247,7 @@ export function ReportTable({
                   <td className="px-4 py-3 text-muted-foreground">{row.createdBy}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">{row.createdDate}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge variant={getBadgeVariant(row.status)} />
+                    <StatusBadge variant={getBadgeVariant(row.status)} label={formatStatusLabel(row.status)} />
                   </td>
                   <td className="px-4 py-3 text-right font-semibold">{formatCurrency(row.totalAmount)}</td>
                 </tr>
@@ -239,7 +263,7 @@ export function ReportTable({
                   <td className="px-4 py-3 text-muted-foreground text-xs">{row.receivedDate}</td>
                   <td className="px-4 py-3 text-right font-semibold">{row.totalItemsReceived}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge variant={getBadgeVariant(row.status)} />
+                    <StatusBadge variant={getBadgeVariant(row.status)} label={formatStatusLabel(row.status)} />
                   </td>
                 </tr>
               ))}
@@ -253,7 +277,7 @@ export function ReportTable({
                   <td className="px-4 py-3 text-right">{row.totalItems}</td>
                   <td className="px-4 py-3 text-right font-semibold">{row.totalQuantity}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge variant={getBadgeVariant(row.status)} />
+                    <StockReleaseStatusBadge status={row.status} />
                   </td>
                 </tr>
               ))}
@@ -291,7 +315,7 @@ export function ReportTable({
                   <td className="px-4 py-3 text-right font-medium">{row.grnCount}</td>
                   <td className="px-4 py-3 text-right font-semibold">{formatCurrency(row.totalPurchaseValue)}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge variant={getBadgeVariant(row.status)} />
+                    <StatusBadge variant={getBadgeVariant(row.status)} label={formatStatusLabel(row.status)} />
                   </td>
                 </tr>
               ))}

@@ -13,6 +13,7 @@ import type {
   ReportChartData,
   ReportKpiSummary,
   ReportMeta,
+  ReportMetricType,
   ReportType,
   StockReleaseReportRow,
   SupplierReportRow,
@@ -192,6 +193,21 @@ export const reportsApi = {
     params?: CommonReportFilterParams
   ): Promise<ReportKpiSummary> {
     try {
+      const dataResp = await reportsApi.getReportData(reportType, params);
+      if (dataResp && dataResp.summary) {
+        return {
+          totalRecords: Number(dataResp.summary.totalRecords ?? dataResp.pagination.total ?? 0),
+          primaryMetricLabel: String(dataResp.summary.primaryMetricLabel ?? "Total Records"),
+          primaryMetricValue: (dataResp.summary.primaryMetricValue as number | string) ?? 0,
+          primaryMetricType: (dataResp.summary.primaryMetricType as ReportMetricType) ?? "text",
+          secondaryMetricLabel: dataResp.summary.secondaryMetricLabel ? String(dataResp.summary.secondaryMetricLabel) : undefined,
+          secondaryMetricValue: dataResp.summary.secondaryMetricValue as number | string | undefined,
+          secondaryMetricType: (dataResp.summary.secondaryMetricType as ReportMetricType) ?? "text",
+          tertiaryMetricLabel: dataResp.summary.tertiaryMetricLabel ? String(dataResp.summary.tertiaryMetricLabel) : undefined,
+          tertiaryMetricValue: dataResp.summary.tertiaryMetricValue as number | string | undefined,
+          tertiaryMetricType: (dataResp.summary.tertiaryMetricType as ReportMetricType) ?? "text",
+        };
+      }
       const overview = await reportsApi.getAnalyticsOverview(params);
       return deriveSummaryFromOverview(reportType, overview);
     } catch {
@@ -234,6 +250,7 @@ export const reportsApi = {
           search: params.filters?.search,
           category_id: params.filters?.categoryId,
           supplier_id: params.filters?.supplierId,
+          brand_id: params.filters?.brandId,
           status: params.filters?.status,
         },
         responseType: "blob",
@@ -315,6 +332,40 @@ function deriveSummaryFromOverview(
         tertiaryMetricLabel: "Previous Period",
         tertiaryMetricValue: kpis.items_dispatched.previous,
         tertiaryMetricType: "number",
+      };
+    case "product":
+      return {
+        totalRecords: kpis.total_stock_value.items_count,
+        primaryMetricLabel: "Total Catalog Products",
+        primaryMetricValue: kpis.total_stock_value.items_count,
+        primaryMetricType: "number",
+        secondaryMetricLabel: "Categories Distribution",
+        secondaryMetricValue: `${overview.charts.category_distribution.length} Categories`,
+        secondaryMetricType: "text",
+      };
+    case "supplier":
+      return {
+        totalRecords: overview.charts.top_suppliers_by_spend.length,
+        primaryMetricLabel: "Top Suppliers Spend",
+        primaryMetricValue: kpis.procurement_spend.current,
+        primaryMetricType: "currency",
+        secondaryMetricLabel: "Top Suppliers Count",
+        secondaryMetricValue: overview.charts.top_suppliers_by_spend.length,
+        secondaryMetricType: "number",
+      };
+    case "grn":
+      return {
+        totalRecords: 0,
+        primaryMetricLabel: "Items Dispatched",
+        primaryMetricValue: kpis.items_dispatched.current,
+        primaryMetricType: "number",
+      };
+    case "movement":
+      return {
+        totalRecords: overview.charts.movement_trends.length,
+        primaryMetricLabel: "Ledger Movement Trends",
+        primaryMetricValue: overview.charts.movement_trends.length,
+        primaryMetricType: "number",
       };
     default:
       return getFallbackReportSummary(reportType);
