@@ -47,7 +47,7 @@ export function LedgerFilters({
             <SearchInput
               value={filters.search ?? ""}
               onChange={(val) => onFilterChange({ search: val, page: 1 })}
-              placeholder="Search reference or notes..."
+              placeholder="Search batch ref, reference or notes..."
             />
           </div>
         )}

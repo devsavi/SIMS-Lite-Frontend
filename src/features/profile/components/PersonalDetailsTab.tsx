@@ -143,7 +143,7 @@ export function PersonalDetailsTab({ profile }: PersonalDetailsTabProps) {
                   id="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+94 77 000 0000"
                   className="rounded-none border-border focus:ring-1 focus:ring-ring"
                 />
               </div>
@@ -157,7 +157,7 @@ export function PersonalDetailsTab({ profile }: PersonalDetailsTabProps) {
                 id="department"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                placeholder="e.g. Executive Management, Warehouse, Procurement"
+                placeholder="e.g. Production, Office, Store"
                 className="rounded-none border-border focus:ring-1 focus:ring-ring"
               />
             </div>
@@ -211,7 +211,7 @@ export function PersonalDetailsTab({ profile }: PersonalDetailsTabProps) {
                 rows={3}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Brief summary of your role or background..."
+                placeholder="Brief summary of your role at the company..."
                 className="rounded-none border-border focus:ring-1 focus:ring-ring resize-none"
               />
             </div>

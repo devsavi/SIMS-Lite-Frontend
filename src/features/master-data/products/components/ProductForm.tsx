@@ -135,7 +135,7 @@ export function ProductForm({
             control={form.control}
             name="name"
             label="Product Name"
-            placeholder="e.g. USB-C Cable 2m"
+            placeholder="e.g. Cake Board"
             required
             autoComplete="off"
           />

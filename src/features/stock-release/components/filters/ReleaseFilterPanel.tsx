@@ -50,7 +50,7 @@ export function ReleaseFilterPanel({
           <SearchInput
             value={filters.search ?? ""}
             onChange={(search) => onFilterChange({ search, page: 1 })}
-            placeholder="Search release #, notes..."
+            placeholder="Search release , batch or notes..."
           />
         </div>
 

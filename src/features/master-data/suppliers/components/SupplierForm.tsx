@@ -65,7 +65,7 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
             control={form.control}
             name="company_name"
             label="Company Name"
-            placeholder="e.g. Acme Supplies Ltd."
+            placeholder="e.g. Golden Flour Mills Ltd."
             required
             autoComplete="organization"
           />
@@ -73,7 +73,7 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
             control={form.control}
             name="company_phone"
             label="Company Phone"
-            placeholder="+1 555 000 0000"
+            placeholder="+94 77 000 0000"
             type="tel"
             autoComplete="tel"
           />
@@ -85,14 +85,14 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
             control={form.control}
             name="contact_person"
             label="Contact Person"
-            placeholder="e.g. Jane Smith"
+            placeholder="e.g. Amara Perera"
             autoComplete="name"
           />
           <TextField
             control={form.control}
             name="phone"
             label="Contact Phone"
-            placeholder="+1 555 000 0000"
+            placeholder="+94 77 000 0000"
             type="tel"
             autoComplete="tel"
           />
@@ -102,7 +102,7 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
           control={form.control}
           name="email"
           label="Email"
-          placeholder="contact@example.com"
+          placeholder="contact@goldenflourmills.lk"
           type="email"
           autoComplete="email"
         />
@@ -116,15 +116,15 @@ export function SupplierForm({ defaultValues, editingId, onSubmit, onCancel, err
           rows={2}
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <TextField control={form.control} name="city" label="City" placeholder="e.g. New York" />
-          <TextField control={form.control} name="country" label="Country" placeholder="e.g. United States" />
+          <TextField control={form.control} name="city" label="City" placeholder="e.g. Colombo" />
+          <TextField control={form.control} name="country" label="Country" placeholder="e.g. Sri Lanka" />
         </div>
 
         <TextareaField
           control={form.control}
           name="notes"
           label="Notes"
-          placeholder="Internal notes (not visible to supplier)"
+          placeholder="Internal notes (not visible to supplier, e.g. delivery schedule, quality notes)"
           rows={3}
         />
 

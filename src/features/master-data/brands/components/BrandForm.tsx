@@ -54,7 +54,7 @@ export function BrandForm({ defaultValues, editingId, onSubmit, onCancel, error,
           </div>
         )}
 
-        <TextField control={form.control} name="name" label="Name" placeholder="e.g. Samsung" required autoComplete="off" />
+        <TextField control={form.control} name="name" label="Name" placeholder="e.g. Prima" required autoComplete="off" />
         <TextareaField control={form.control} name="description" label="Description" placeholder="Optional brand description" rows={3} />
         <TextField control={form.control} name="website_url" label="Website" placeholder="https://example.com" type="url" />
         <TextField control={form.control} name="logo_url" label="Logo URL" placeholder="https://example.com/logo.png" type="url" />

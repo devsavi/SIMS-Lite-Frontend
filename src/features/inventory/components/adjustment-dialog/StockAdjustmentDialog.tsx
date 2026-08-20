@@ -304,7 +304,7 @@ export function StockAdjustmentDialog({
             <Input
               id="reason"
               {...register("reason")}
-              placeholder="e.g. Physical count discrepancy, damaged during handling"
+              placeholder="e.g. Physical count discrepancy, spoilage or expiry"
             />
             {errors.reason && (
               <p className="text-xs text-destructive">{errors.reason.message}</p>
@@ -320,7 +320,7 @@ export function StockAdjustmentDialog({
               id="notes"
               rows={2}
               {...register("notes")}
-              placeholder="Additional internal details or audit remarks..."
+              placeholder="Additional internal details, batch number or audit remarks..."
             />
           </div>
 

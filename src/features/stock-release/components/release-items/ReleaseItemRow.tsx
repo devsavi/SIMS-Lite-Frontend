@@ -229,7 +229,7 @@ export function ReleaseItemRow({
           </div>
           <Input
             type="text"
-            placeholder="Add a note for this item..."
+            placeholder="e.g. For morning batch / oven 2 usage"
             aria-label={`Notes for row ${index + 1}`}
             {...form.register(`items.${index}.notes`)}
             className="text-xs"

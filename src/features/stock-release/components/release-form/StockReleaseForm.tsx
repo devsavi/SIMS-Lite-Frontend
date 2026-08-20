@@ -210,7 +210,7 @@ export function StockReleaseForm({
               </label>
               <Input
                 type="text"
-                placeholder="e.g. WO-2026-001"
+                placeholder="e.g. BO-2026-001"
                 aria-label="Reference document"
                 {...form.register("reference_document")}
                 className="text-xs"

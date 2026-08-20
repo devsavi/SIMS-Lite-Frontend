@@ -72,7 +72,7 @@ export function CategoryForm({
           control={form.control}
           name="name"
           label="Name"
-          placeholder="e.g. Electronics"
+          placeholder="e.g. Paper"
           required
           autoComplete="off"
         />

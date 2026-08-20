@@ -314,7 +314,7 @@ export function PurchaseOrderForm({
           <Label htmlFor="shipping_address">Shipping Address</Label>
           <Input
             id="shipping_address"
-            placeholder="Delivery address..."
+            placeholder="e.g. 42 Main Street, Colombo 03"
             {...register("shipping_address")}
           />
         </div>
@@ -335,7 +335,7 @@ export function PurchaseOrderForm({
           <Label htmlFor="terms_conditions">Terms & Conditions</Label>
           <Textarea
             id="terms_conditions"
-            placeholder="Payment terms, delivery conditions..."
+            placeholder="e.g. Payment net 30 days, deliver before 7AM, maintain cold chain..."
             rows={2}
             {...register("terms_conditions")}
           />

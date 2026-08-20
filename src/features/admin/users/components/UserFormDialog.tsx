@@ -161,7 +161,7 @@ export function UserFormDialog({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="e.g. Sarah Jenkins"
+              placeholder="e.g. Kamal Perera"
             />
             {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
           </div>
@@ -174,7 +174,7 @@ export function UserFormDialog({
               disabled={isEdit}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-              placeholder="e.g. sarah.j@company.com"
+              placeholder="e.g. kamal.p@company.lk"
             />
             {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
           </div>
@@ -236,7 +236,7 @@ export function UserFormDialog({
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full rounded-none border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                placeholder="e.g. +1 555-0199"
+                placeholder="e.g. +94 77 000 0199"
               />
             </div>
           </div>

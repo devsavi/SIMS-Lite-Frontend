@@ -173,7 +173,7 @@ export function StockAdjustmentForm({
             </Label>
             <Input
               {...form.register("reason")}
-              placeholder="e.g. Physical count discrepancy, damaged goods found..."
+              placeholder="e.g. Physical count discrepancy, spoilage or expiry..."
               className={form.formState.errors.reason ? "border-destructive" : ""}
             />
             {form.formState.errors.reason && (

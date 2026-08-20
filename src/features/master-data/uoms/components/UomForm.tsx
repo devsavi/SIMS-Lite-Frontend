@@ -52,11 +52,11 @@ export function UomForm({ defaultValues, editingId, onSubmit, onCancel, error, i
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          <TextField control={form.control} name="name" label="Name" placeholder="e.g. Kilogram" required autoComplete="off" />
-          <TextField control={form.control} name="symbol" label="Symbol" placeholder="e.g. kg" required autoComplete="off" />
+          <TextField control={form.control} name="name" label="Name" placeholder="e.g. Gram" required autoComplete="off" />
+          <TextField control={form.control} name="symbol" label="Symbol" placeholder="e.g. g" required autoComplete="off" />
         </div>
 
-        <TextareaField control={form.control} name="description" label="Description" placeholder="Optional description" rows={2} />
+        <TextareaField control={form.control} name="description" label="Description" placeholder="e.g. Base unit for weighing" rows={2} />
 
         <FormField
           control={form.control}
