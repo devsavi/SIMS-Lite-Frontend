@@ -46,7 +46,7 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: (data: CreateCategoryRequest) => categoriesApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists(), refetchType: "all" });
       toast({ title: "Category created", variant: "success" });
     },
     onError: () => {
@@ -65,7 +65,7 @@ export function useUpdateCategory(id: string) {
   return useMutation({
     mutationFn: (data: UpdateCategoryRequest) => categoriesApi.update(id, data),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists(), refetchType: "all" });
       queryClient.setQueryData(categoryKeys.detail(id), updated);
       toast({ title: "Category updated", variant: "success" });
     },
@@ -85,7 +85,7 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: (id: string) => categoriesApi.delete(id),
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists(), refetchType: "all" });
       queryClient.removeQueries({ queryKey: categoryKeys.detail(id) });
       toast({ title: "Category deleted", variant: "success" });
     },
@@ -105,7 +105,7 @@ export function useRestoreCategory() {
   return useMutation({
     mutationFn: (id: string) => categoriesApi.restore(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists(), refetchType: "all" });
       toast({ title: "Category restored", variant: "success" });
     },
     onError: () => {

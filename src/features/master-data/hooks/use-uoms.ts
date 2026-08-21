@@ -34,7 +34,7 @@ export function useCreateUom() {
   return useMutation({
     mutationFn: (data: CreateUomRequest) => uomsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: uomKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: uomKeys.lists(), refetchType: "all" });
       toast({ title: "Unit of measure created", variant: "success" });
     },
     onError: () => {
@@ -49,7 +49,7 @@ export function useUpdateUom(id: string) {
   return useMutation({
     mutationFn: (data: UpdateUomRequest) => uomsApi.update(id, data),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: uomKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: uomKeys.lists(), refetchType: "all" });
       queryClient.setQueryData(uomKeys.detail(id), updated);
       toast({ title: "Unit of measure updated", variant: "success" });
     },
@@ -65,7 +65,7 @@ export function useDeleteUom() {
   return useMutation({
     mutationFn: (id: string) => uomsApi.delete(id),
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: uomKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: uomKeys.lists(), refetchType: "all" });
       queryClient.removeQueries({ queryKey: uomKeys.detail(id) });
       toast({ title: "Unit of measure deleted", variant: "success" });
     },
@@ -81,7 +81,7 @@ export function useRestoreUom() {
   return useMutation({
     mutationFn: (id: string) => uomsApi.restore(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: uomKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: uomKeys.lists(), refetchType: "all" });
       toast({ title: "Unit of measure restored", variant: "success" });
     },
     onError: () => {

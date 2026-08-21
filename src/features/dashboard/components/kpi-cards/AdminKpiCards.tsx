@@ -4,12 +4,12 @@ import * as React from "react";
 import {
   Package,
   Truck,
-  Users,
   DollarSign,
   ShoppingCart,
   ClipboardList,
   ArrowUpFromLine,
   AlertTriangle,
+  PackageX,
 } from "lucide-react";
 import { StatCard } from "@/components/common/stat-card";
 import { formatCurrency, formatNumber } from "@/utils/format";
@@ -22,6 +22,8 @@ interface AdminKpiCardsProps {
 
 /**
  * AdminKpiCards — 8 KPI tiles for the Admin dashboard.
+ * Row 1: Inventory Value, Total Products, Low Stock Items, Out of Stock Items
+ * Row 2: Total Suppliers, Pending POs, Pending GRNs, Pending Releases
  */
 export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
   return (
@@ -29,6 +31,7 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
       aria-label="Key performance indicators"
     >
+      {/* Row 1 */}
       <StatCard
         label="Inventory Value"
         value={loading ? "—" : formatCurrency(stats?.inventory_value)}
@@ -52,6 +55,22 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
         loading={loading}
       />
       <StatCard
+        label="Low Stock Items"
+        value={loading ? "—" : formatNumber(stats?.low_stock_count)}
+        description="Below reorder level"
+        icon={<AlertTriangle className="h-5 w-5" aria-hidden="true" />}
+        loading={loading}
+      />
+      <StatCard
+        label="Out of Stock Items"
+        value={loading ? "—" : formatNumber(stats?.out_of_stock_count)}
+        description="Zero quantity available"
+        icon={<PackageX className="h-5 w-5" aria-hidden="true" />}
+        loading={loading}
+      />
+
+      {/* Row 2 */}
+      <StatCard
         label="Total Suppliers"
         value={loading ? "—" : formatNumber(stats?.total_suppliers)}
         icon={<Truck className="h-5 w-5" aria-hidden="true" />}
@@ -60,12 +79,6 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
             ? { value: stats.trends.suppliers.value, label: "vs last month" }
             : undefined
         }
-        loading={loading}
-      />
-      <StatCard
-        label="Active Users"
-        value={loading ? "—" : formatNumber(stats?.total_active_users)}
-        icon={<Users className="h-5 w-5" aria-hidden="true" />}
         loading={loading}
       />
       <StatCard
@@ -92,13 +105,6 @@ export function AdminKpiCards({ stats, loading = false }: AdminKpiCardsProps) {
         value={loading ? "—" : formatNumber(stats?.pending_stock_releases)}
         description="Stock releases pending"
         icon={<ArrowUpFromLine className="h-5 w-5" aria-hidden="true" />}
-        loading={loading}
-      />
-      <StatCard
-        label="Low Stock Items"
-        value={loading ? "—" : formatNumber(stats?.low_stock_count)}
-        description="Below reorder level"
-        icon={<AlertTriangle className="h-5 w-5" aria-hidden="true" />}
         loading={loading}
       />
     </div>

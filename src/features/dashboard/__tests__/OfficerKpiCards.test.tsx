@@ -13,16 +13,18 @@ const mockStats = {
   pending_purchase_orders: 8,
   pending_grns: 3,
   low_stock_count: 12,
+  out_of_stock_count: 4,
 };
 
 describe("OfficerKpiCards", () => {
-  it("renders all 5 KPI cards", () => {
+  it("renders all 6 KPI cards", () => {
     render(<OfficerKpiCards stats={mockStats} />);
     expect(screen.getByText("Total Products")).toBeInTheDocument();
     expect(screen.getByText("Total Suppliers")).toBeInTheDocument();
     expect(screen.getByText("Pending POs")).toBeInTheDocument();
     expect(screen.getByText("Pending GRNs")).toBeInTheDocument();
     expect(screen.getByText("Low Stock Items")).toBeInTheDocument();
+    expect(screen.getByText("Out of Stock Items")).toBeInTheDocument();
   });
 
   it("renders skeleton when loading", () => {

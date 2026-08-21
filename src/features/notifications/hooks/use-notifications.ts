@@ -85,9 +85,7 @@ export function useUnreadCount() {
   return useQuery({
     queryKey: notificationKeys.unreadCount(),
     queryFn: () => notificationsApi.getUnreadCount(),
-    staleTime: 0,
-    refetchInterval: 1000 * 60,
-    refetchIntervalInBackground: false,
+    staleTime: 1000 * 60 * 5,
     refetchOnMount: true,
     select: (data) => data.unread_count,
   });
@@ -101,9 +99,7 @@ export function useUnreadCountFull() {
   return useQuery({
     queryKey: notificationKeys.unreadCount(),
     queryFn: () => notificationsApi.getUnreadCount(),
-    staleTime: 0,
-    refetchInterval: 1000 * 60,
-    refetchIntervalInBackground: false,
+    staleTime: 1000 * 60 * 5,
     refetchOnMount: true,
   });
 }

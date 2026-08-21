@@ -25,6 +25,18 @@ import { useAuthStore } from "@/stores/auth.store";
 import { accessToken, refreshToken } from "@/lib/auth/token";
 import { authApi } from "@/features/auth/api/auth-api";
 import { notificationKeys } from "../hooks/use-notifications";
+import {
+  categoryKeys,
+  brandKeys,
+  uomKeys,
+  supplierKeys,
+  productKeys,
+} from "@/features/master-data/hooks/query-keys";
+import { adminUsersKeys } from "@/features/admin/users/hooks/use-admin-users";
+import { PO_QUERY_KEYS } from "@/features/procurement/purchase-orders/hooks/use-purchase-orders";
+import { GRN_QUERY_KEYS } from "@/features/procurement/grns/hooks/use-grns";
+import { stockReleaseKeys } from "@/features/stock-release/hooks/use-stock-release";
+import { inventoryKeys } from "@/features/inventory/hooks/use-inventory";
 import { toast } from "@/app/components/ui/use-toast";
 import { showBrowserNotification, registerServiceWorker } from "../utils/browser-notifications";
 import type {
@@ -440,6 +452,52 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
     );
 
     // -----------------------------------------------------------------------
+    // Domain Events — system-wide real-time invalidation
+    // -----------------------------------------------------------------------
+    const unsubDomainEvents = ws.on("*", (msg: unknown) => {
+      const message = msg as { event?: string };
+      const event = message?.event;
+      if (!event || typeof event !== "string") return;
+
+      // Master Data signals -> update dropdowns, lists & forms instantly for all users
+      if (event === "master_data.category_changed") {
+        queryClient.invalidateQueries({ queryKey: categoryKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: productKeys.all, refetchType: "all" });
+      } else if (event === "master_data.brand_changed") {
+        queryClient.invalidateQueries({ queryKey: brandKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: productKeys.all, refetchType: "all" });
+      } else if (event === "master_data.uom_changed") {
+        queryClient.invalidateQueries({ queryKey: uomKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: productKeys.all, refetchType: "all" });
+      } else if (event === "master_data.supplier_changed") {
+        queryClient.invalidateQueries({ queryKey: supplierKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: productKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
+      } else if (event === "master_data.product_changed") {
+        queryClient.invalidateQueries({ queryKey: productKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
+      } else if (event === "user.changed") {
+        queryClient.invalidateQueries({ queryKey: adminUsersKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["users"], refetchType: "all" });
+      }
+
+      // Workflow & Operational signals -> update live lists & dashboards instantly
+      else if (event.startsWith("procurement.")) {
+        queryClient.invalidateQueries({ queryKey: PO_QUERY_KEYS.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: GRN_QUERY_KEYS.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
+      } else if (event.startsWith("inventory.")) {
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
+      } else if (event.startsWith("stock_release.")) {
+        queryClient.invalidateQueries({ queryKey: stockReleaseKeys.all, refetchType: "all" });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"], refetchType: "all" });
+      }
+    });
+
+    // -----------------------------------------------------------------------
     // Page visibility — request fresh count when tab regains focus
     // -----------------------------------------------------------------------
     function handleVisibilityChange() {
@@ -465,6 +523,7 @@ export function NotificationsProvider({ children }: NotificationsProviderProps) 
       unsubRead();
       unsubAllRead();
       unsubDeleted();
+      unsubDomainEvents();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isAuthenticated, queryClient, maybeShowBrowserNotification]);

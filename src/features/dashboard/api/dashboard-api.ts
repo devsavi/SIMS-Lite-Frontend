@@ -62,9 +62,9 @@ export const dashboardApi = {
     return {
       total_products: raw.master_data?.total_products ?? 0,
       total_suppliers: raw.master_data?.total_suppliers ?? 0,
-      total_active_users: raw.master_data?.total_active_users ?? 0,
       inventory_value: raw.inventory?.total_inventory_value ?? 0,
       low_stock_count: raw.inventory?.low_stock_items ?? 0,
+      out_of_stock_count: raw.inventory?.total_out_of_stock ?? 0,
       pending_purchase_orders: raw.procurement?.pending_pos ?? 0,
       pending_grns: raw.procurement?.pending_grns ?? 0,
       pending_stock_releases: raw.stock_releases?.pending_releases ?? 0,

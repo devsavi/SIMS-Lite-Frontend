@@ -54,7 +54,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (data: CreateProductRequest) => productsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: "all" });
       toast({ title: "Product created", variant: "success" });
     },
     onError: () => {
@@ -69,7 +69,7 @@ export function useUpdateProduct(id: string) {
   return useMutation({
     mutationFn: (data: UpdateProductRequest) => productsApi.update(id, data),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: "all" });
       queryClient.setQueryData(productKeys.detail(id), updated);
       toast({ title: "Product updated", variant: "success" });
     },
@@ -85,7 +85,7 @@ export function useDeleteProduct() {
   return useMutation({
     mutationFn: (id: string) => productsApi.delete(id),
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: "all" });
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
       toast({ title: "Product deleted", variant: "success" });
     },
@@ -102,7 +102,7 @@ export function useUploadProductImage(id: string) {
     mutationFn: (file: File) => productsApi.uploadImage(id, file),
     onSuccess: (updated) => {
       queryClient.setQueryData(productKeys.detail(id), updated);
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: "all" });
       queryClient.invalidateQueries({ queryKey: productKeys.image(id) });
       toast({ title: "Image uploaded", variant: "success" });
     },
@@ -123,7 +123,7 @@ export function useDeleteProductImage(id: string) {
     mutationFn: () => productsApi.deleteImage(id),
     onSuccess: (updated) => {
       queryClient.setQueryData(productKeys.detail(id), updated);
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: "all" });
       queryClient.invalidateQueries({ queryKey: productKeys.image(id) });
       toast({ title: "Image removed", variant: "success" });
     },
@@ -157,7 +157,7 @@ export function useBulkImportProducts() {
   return useMutation({
     mutationFn: (file: File) => productsApi.bulkImport(file),
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: "all" });
       toast({
         title: `Import complete — ${result.imported} imported, ${result.failed} failed`,
         variant: result.failed > 0 ? "destructive" : "success",

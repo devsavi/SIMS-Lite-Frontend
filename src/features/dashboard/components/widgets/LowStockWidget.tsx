@@ -13,7 +13,9 @@ interface LowStockRowProps {
 }
 
 function LowStockRow({ item }: LowStockRowProps) {
-  const stockPercentage = Math.round((item.current_quantity / item.reorder_level) * 100);
+  const stockPercentage = item.reorder_level > 0
+    ? Math.round((item.current_quantity / item.reorder_level) * 100)
+    : 0;
   const isCritical = item.current_quantity === 0;
   const isVeryLow = stockPercentage <= 50;
 
@@ -27,7 +29,9 @@ function LowStockRow({ item }: LowStockRowProps) {
         <div
           className={cn(
             "flex h-7 w-7 shrink-0 items-center justify-center",
-            isCritical ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
+            isCritical
+              ? "bg-destructive/10 text-destructive"
+              : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
           )}
         >
           <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
@@ -38,10 +42,14 @@ function LowStockRow({ item }: LowStockRowProps) {
             <div className="flex-1 h-1.5 bg-muted overflow-hidden">
               <div
                 className={cn(
-                  "h-full",
-                  isCritical ? "bg-destructive" : isVeryLow ? "bg-warning" : "bg-yellow-400"
+                  "h-full transition-all duration-300",
+                  isCritical
+                    ? "bg-destructive"
+                    : isVeryLow
+                    ? "bg-amber-500"
+                    : "bg-amber-400"
                 )}
-                style={{ width: `${Math.min(stockPercentage, 100)}%` }}
+                style={{ width: `${Math.max(0, Math.min(stockPercentage, 100))}%` }}
                 aria-hidden="true"
               />
             </div>
@@ -92,7 +100,7 @@ export function LowStockWidget({
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             Low Stock Alert
             {items && items.length > 0 && (
-              <span className="inline-flex h-5 min-w-[20px] items-center justify-center bg-warning px-1.5 text-xs font-bold text-warning-foreground">
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center bg-amber-500 px-1.5 text-xs font-bold text-white">
                 {items.length}
               </span>
             )}

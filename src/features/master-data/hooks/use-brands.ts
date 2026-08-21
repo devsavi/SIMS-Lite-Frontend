@@ -34,7 +34,7 @@ export function useCreateBrand() {
   return useMutation({
     mutationFn: (data: CreateBrandRequest) => brandsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: brandKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists(), refetchType: "all" });
       toast({ title: "Brand created", variant: "success" });
     },
     onError: () => {
@@ -49,7 +49,7 @@ export function useUpdateBrand(id: string) {
   return useMutation({
     mutationFn: (data: UpdateBrandRequest) => brandsApi.update(id, data),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: brandKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists(), refetchType: "all" });
       queryClient.setQueryData(brandKeys.detail(id), updated);
       toast({ title: "Brand updated", variant: "success" });
     },
@@ -65,7 +65,7 @@ export function useDeleteBrand() {
   return useMutation({
     mutationFn: (id: string) => brandsApi.delete(id),
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: brandKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists(), refetchType: "all" });
       queryClient.removeQueries({ queryKey: brandKeys.detail(id) });
       toast({ title: "Brand deleted", variant: "success" });
     },
@@ -81,7 +81,7 @@ export function useRestoreBrand() {
   return useMutation({
     mutationFn: (id: string) => brandsApi.restore(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: brandKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: brandKeys.lists(), refetchType: "all" });
       toast({ title: "Brand restored", variant: "success" });
     },
     onError: () => {

@@ -25,7 +25,7 @@ export interface DashboardStats {
   // Products / Inventory
   total_products: number;
   total_suppliers: number;
-  total_active_users: number;
+  out_of_stock_count: number;
   inventory_value: number;
   low_stock_count: number;
 
@@ -258,6 +258,7 @@ export interface OfficerDashboardData {
     | "pending_purchase_orders"
     | "pending_grns"
     | "low_stock_count"
+    | "out_of_stock_count"
   >;
   charts: Pick<DashboardCharts,
     | "monthly_purchase_orders"
@@ -277,6 +278,7 @@ export interface StoreKeeperDashboardData {
     | "pending_grns"
     | "pending_stock_releases"
     | "low_stock_count"
+    | "out_of_stock_count"
   >;
   charts: Pick<DashboardCharts,
     | "monthly_stock_releases"

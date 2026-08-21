@@ -51,7 +51,6 @@ export const dashboardKeys = {
 
 const DASHBOARD_STALE_TIME = QUERY_CACHE_TIMES.DASHBOARD.staleTime;
 const DASHBOARD_GC_TIME = QUERY_CACHE_TIMES.DASHBOARD.gcTime;
-const DASHBOARD_REFETCH_INTERVAL = 1000 * 60 * 5; // background refetch every 5 min
 
 // ---------------------------------------------------------------------------
 // useDashboard — full admin overview bundle
@@ -63,7 +62,6 @@ export function useDashboard(params?: DashboardQueryParams) {
     queryFn: () => dashboardApi.getOverview(params),
     staleTime: DASHBOARD_STALE_TIME,
     gcTime: DASHBOARD_GC_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
     refetchOnWindowFocus: true,
   });
 }
@@ -78,7 +76,6 @@ export function useDashboardStats(params?: DashboardQueryParams) {
     queryFn: () => dashboardApi.getStats(params),
     staleTime: DASHBOARD_STALE_TIME,
     gcTime: DASHBOARD_GC_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
     refetchOnWindowFocus: true,
   });
 }
@@ -93,7 +90,6 @@ export function useDashboardCharts(params?: ChartQueryParams) {
     queryFn: () => dashboardApi.getCharts(params),
     staleTime: DASHBOARD_STALE_TIME,
     gcTime: DASHBOARD_GC_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -106,7 +102,6 @@ export function useRecentActivities(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.activities(params),
     queryFn: () => dashboardApi.getActivities(params),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -119,7 +114,6 @@ export function useDashboardNotifications(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.notifications(params),
     queryFn: () => dashboardApi.getNotifications(params),
     staleTime: 1000 * 60, // 1 minute — notifications should refresh quickly
-    refetchInterval: 1000 * 60 * 2,
     refetchOnWindowFocus: true,
   });
 }
@@ -133,7 +127,6 @@ export function usePendingApprovals(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.pendingApprovals(params),
     queryFn: () => dashboardApi.getPendingApprovals(params),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -147,7 +140,6 @@ export function useRecentPurchaseOrders(limit = 5, params?: DashboardQueryParams
     queryKey: dashboardKeys.recentPurchaseOrders(queryParams),
     queryFn: () => dashboardApi.getRecentPurchaseOrders(queryParams),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -161,7 +153,6 @@ export function useRecentGRNs(limit = 5, params?: DashboardQueryParams) {
     queryKey: dashboardKeys.recentGRNs(queryParams),
     queryFn: () => dashboardApi.getRecentGRNs(queryParams),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -174,7 +165,6 @@ export function useLowStockItems() {
     queryKey: dashboardKeys.lowStock(),
     queryFn: () => dashboardApi.getLowStockItems(),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -187,7 +177,6 @@ export function useInventoryAlerts() {
     queryKey: dashboardKeys.inventoryAlerts(),
     queryFn: dashboardApi.getInventoryAlerts,
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -200,7 +189,6 @@ export function useRecentAdjustments(limit = 5) {
     queryKey: dashboardKeys.recentAdjustments(limit),
     queryFn: () => dashboardApi.getRecentAdjustments({ limit }),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -213,7 +201,6 @@ export function usePendingStockReleases() {
     queryKey: dashboardKeys.pendingStockReleases(),
     queryFn: dashboardApi.getPendingStockReleases,
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
   });
 }
 
@@ -226,7 +213,6 @@ export function useOfficerDashboard(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.officerDashboard(params),
     queryFn: () => dashboardApi.getOfficerDashboard(params),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
     refetchOnWindowFocus: true,
   });
 }
@@ -240,7 +226,6 @@ export function useStoreKeeperDashboard(params?: DashboardQueryParams) {
     queryKey: dashboardKeys.storeKeeperDashboard(params),
     queryFn: () => dashboardApi.getStoreKeeperDashboard(params),
     staleTime: DASHBOARD_STALE_TIME,
-    refetchInterval: DASHBOARD_REFETCH_INTERVAL,
     refetchOnWindowFocus: true,
   });
 }

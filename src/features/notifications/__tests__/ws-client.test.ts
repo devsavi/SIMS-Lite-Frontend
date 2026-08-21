@@ -192,7 +192,7 @@ describe("WsClient", () => {
     client.connect();
     lastSocket()._open();
     vi.advanceTimersByTime(1_100);
-    expect(lastSocket().send).toHaveBeenCalledWith(JSON.stringify({ type: "ping" }));
+    expect(lastSocket().send).toHaveBeenCalledWith(JSON.stringify({ event: "system.ping" }));
   });
 
   it("stops heartbeat on disconnect", () => {

@@ -26,18 +26,25 @@ export const QUERY_CACHE_TIMES = {
   MASTER_DATA: {
     staleTime: 1000 * 60 * 15, // 15 minutes
     gcTime: 1000 * 60 * 30,    // 30 minutes
+    refetchOnMount: "always",   // Refetch on mount ONLY IF stale/invalidated
+    refetchOnWindowFocus: true, // Refetch when tab regains focus if stale
   },
   DASHBOARD: {
     staleTime: 1000 * 60 * 5,  // 5 minutes
     gcTime: 1000 * 60 * 15,    // 15 minutes
+    refetchOnMount: true,      // Refetch on mount if invalidated/stale
+    refetchOnWindowFocus: true,
   },
   LIVE_DATA: {
     staleTime: 1000 * 60 * 2,  // 2 minutes
     gcTime: 1000 * 60 * 10,    // 10 minutes
+    refetchOnMount: true,      // Refetch on mount if invalidated/stale
+    refetchOnWindowFocus: true,
   },
   USER_PROFILE: {
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 30,    // 30 minutes
+    refetchOnMount: true,
   },
 } as const;
 
@@ -53,7 +60,7 @@ const queryClientConfig: QueryClientConfig = {
       retry: shouldRetry,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
-      refetchOnMount: false,
+      refetchOnMount: true,     // Let stale/invalidated queries refetch on mount
     },
     mutations: {
       retry: false,

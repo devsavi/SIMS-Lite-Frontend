@@ -34,7 +34,7 @@ export function useCreateSupplier() {
   return useMutation({
     mutationFn: (data: CreateSupplierRequest) => suppliersApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: supplierKeys.lists(), refetchType: "all" });
       toast({ title: "Supplier created", variant: "success" });
     },
     onError: () => {
@@ -49,7 +49,7 @@ export function useUpdateSupplier(id: string) {
   return useMutation({
     mutationFn: (data: UpdateSupplierRequest) => suppliersApi.update(id, data),
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: supplierKeys.lists(), refetchType: "all" });
       queryClient.setQueryData(supplierKeys.detail(id), updated);
       toast({ title: "Supplier updated", variant: "success" });
     },
@@ -65,7 +65,7 @@ export function useDeleteSupplier() {
   return useMutation({
     mutationFn: (id: string) => suppliersApi.delete(id),
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: supplierKeys.lists(), refetchType: "all" });
       queryClient.removeQueries({ queryKey: supplierKeys.detail(id) });
       toast({ title: "Supplier deleted", variant: "success" });
     },
@@ -81,7 +81,7 @@ export function useRestoreSupplier() {
   return useMutation({
     mutationFn: (id: string) => suppliersApi.restore(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: supplierKeys.lists(), refetchType: "all" });
       toast({ title: "Supplier restored", variant: "success" });
     },
     onError: () => {
