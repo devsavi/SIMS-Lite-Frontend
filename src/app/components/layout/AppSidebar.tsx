@@ -29,6 +29,7 @@ import {
   Activity,
   ChevronDown,
   ChevronUp,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { useAuthStore } from "@/stores/auth.store";
@@ -140,6 +141,12 @@ const NAV_ITEMS: NavItem[] = [
     href: "/reports",
     icon: BarChart2,
     permissions: ["reports.view"],
+  },
+  {
+    label: "Tools & Utilities",
+    href: "/tools",
+    icon: Wrench,
+    permissions: ["tools.view"],
   },
 ];
 

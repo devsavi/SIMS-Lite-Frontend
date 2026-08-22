@@ -241,3 +241,32 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+/* --------------------------------------------------------------------------
+   Print media styles — Print ONLY the printable sheet container
+   -------------------------------------------------------------------------- */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .printable-sheet,
+  .printable-sheet * {
+    visibility: visible !important;
+  }
+  .printable-sheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+

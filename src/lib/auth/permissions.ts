@@ -99,7 +99,9 @@ export type Permission =
   | "settings.edit"
   // Notifications
   | "notifications.view"
-  | "notifications.send";
+  | "notifications.send"
+  // Tools & Office Utilities
+  | "tools.view";
 
 // ---------------------------------------------------------------------------
 // Role → permissions map
@@ -186,6 +188,8 @@ const ADMIN_PERMISSIONS: Permission[] = [
   // Notifications
   "notifications.view",
   "notifications.send",
+  // Tools & Office Utilities
+  "tools.view",
 ];
 
 const OFFICER_PERMISSIONS: Permission[] = [
@@ -219,6 +223,8 @@ const OFFICER_PERMISSIONS: Permission[] = [
   // Notifications
   "notifications.view",
   "notifications.send",
+  // Tools & Office Utilities
+  "tools.view",
 ];
 
 const STORE_KEEPER_PERMISSIONS: Permission[] = [
@@ -250,6 +256,8 @@ const STORE_KEEPER_PERMISSIONS: Permission[] = [
   // Notifications
   "notifications.view",
   "notifications.send",
+  // Tools & Office Utilities
+  "tools.view",
 ];
 
 // Map each role to its permission set
